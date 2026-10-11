@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="The Algorithmic Front: AI in Modern Defence - Comprehensive strategic analysis of military AI in operational doctrine, 2026 battlefield events, specific AI models, and India's defence AI leap by Yassin Xaviour.">
+  <meta name="author" content="Yassin Xaviour">
+  <title>The Algorithmic Front: AI in Modern Defence | By Yassin Xaviour</title>
+
+  <!-- Editorial Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Chart.js for Editorial Visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root {
+      --bg-page: #fdfdfc;
+      --bg-card: #ffffff;
+      --bg-subtle: #f8fafc;
+      --bg-accent-tint: #f0fdf4;
+      --bg-alert-tint: #fef2f2;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text-heading: #0f172a;
+      --text-body: #334155;
+      --text-muted: #64748b;
+      --text-light: #94a3b8;
+      --brand-primary: #0284c7;
+      --brand-navy: #0f172a;
+      --accent-green: #059669;
+      --accent-red: #dc2626;
+      --accent-amber: #d97706;
+      --font-serif: 'Newsreader', Georgia, serif;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 14px rgba(0,0,0,0.06);
+    }
+
+    [data-theme="dark"] {
+      --bg-page: #0b0f17;
+      --bg-card: #131b28;
+      --bg-subtle: #182234;
+      --bg-accent-tint: #064e3b26;
+      --bg-alert-tint: #7f1d1d26;
+      --border-subtle: #233044;
+      --border-strong: #33435c;
+      --text-heading: #f8fafc;
+      --text-body: #cbd5e1;
+      --text-muted: #94a3b8;
+      --text-light: #64748b;
+      --brand-primary: #38bdf8;
+      --brand-navy: #f8fafc;
+      --accent-green: #34d399;
+      --accent-red: #f87171;
+      --accent-gold: #fbbf24;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-body);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    /* Fixed Publication Navigation Bar */
+    .top-pub-bar {
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .top-pub-bar-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 10px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pub-brand-badge {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--brand-primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-toggle {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-family: var(--font-sans);
+      font-weight: 600;
+    }
+
+    .btn-toggle:hover { background: var(--bg-subtle); color: var(--text-heading); }
+
+    .btn-export-pdf {
+      background: var(--brand-navy);
+      color: #ffffff;
+      border: 1px solid var(--brand-navy);
+      border-radius: 6px;
+      padding: 7px 16px;
+      font-family: var(--font-sans);
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    [data-theme="dark"] .btn-export-pdf {
+      background: var(--brand-primary);
+      color: #0b0f17;
+      border-color: var(--brand-primary);
+    }
+
+    .btn-export-pdf:hover { opacity: 0.92; transform: translateY(-1px); }
+    .btn-export-pdf svg { width: 15px; height: 15px; fill: currentColor; }
+
+    /* Main Container */
+    .article-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 44px 24px 80px;
+    }
+
+    /* Header */
+    .article-header {
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+    }
+
+    .topic-pill {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--brand-primary);
+      margin-bottom: 12px;
+    }
+
+    h1.article-headline {
+      font-family: var(--font-serif);
+      font-size: clamp(2.3rem, 4.5vw, 3.4rem);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--text-heading);
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      text-wrap: balance;
+    }
+
+    p.article-subhead {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      font-style: italic;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 20px;
+      text-wrap: pretty;
+    }
+
+    .byline-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 14px;
+    }
+
+    .byline-author { font-weight: 700; color: var(--text-heading); }
+
+    /* Section Headings */
+    .section-header {
+      margin: 48px 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .section-header h2 {
+      font-family: var(--font-serif);
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-heading);
+      white-space: nowrap;
+    }
+
+    .section-header .rule { flex-grow: 1; height: 1px; background: var(--border-subtle); }
+
+    /* Section 1: Content */
+    .lead-text {
+      font-family: var(--font-serif);
+      font-size: 1.3rem;
+      line-height: 1.65;
+      color: var(--text-heading);
+      margin-bottom: 20px;
+      text-wrap: pretty;
+    }
+
+    .lead-text::first-letter {
+      float: left;
+      font-size: 3.8rem;
+      line-height: 0.8;
+      padding-right: 12px;
+      padding-top: 4px;
+      font-weight: 700;
+      color: var(--brand-primary);
+    }
+
+    .body-paragraph {
+      font-size: 1.05rem;
+      line-height: 1.75;
+      color: var(--text-body);
+      margin-bottom: 18px;
+      text-wrap: pretty;
+    }
+
+    .article-image-box {
+      margin: 24px 0;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg-subtle);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .article-image-box img {
+      width: 100%;
+      height: auto;
+      max-height: 440px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .article-image-box figcaption {
+      padding: 10px 16px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .article-image-box figcaption .source {
+      font-family: var(--font-mono);
+      color: var(--brand-primary);
+      font-weight: 600;
+    }
+
+    .pull-quote {
+      margin: 28px 0;
+      padding: 20px 24px;
+      border-left: 4px solid var(--brand-primary);
+      background: var(--bg-subtle);
+      border-radius: 0 8px 8px 0;
+    }
+
+    .pull-quote p {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      font-style: italic;
+      color: var(--text-heading);
+      line-height: 1.45;
+    }
+
+    /* 2026 Operational Events Timeline Cards */
+    .events-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin: 24px 0 32px;
+    }
+
+    .event-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-left: 4px solid var(--brand-primary);
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px;
+      box-shadow: var(--shadow-sm);
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 16px;
+      align-items: baseline;
+    }
+
+    .event-date-badge {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--brand-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .event-content strong {
+      font-size: 0.98rem;
+      color: var(--text-heading);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .event-content p {
+      font-size: 0.9rem;
+      color: var(--text-body);
+      line-height: 1.55;
+    }
+
+    /* Section 2: Facts & Figures */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .metric-stat {
+      font-family: var(--font-serif);
+      font-size: 2.3rem;
+      font-weight: 700;
+      color: var(--brand-primary);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .metric-title { font-size: 0.92rem; font-weight: 700; color: var(--text-heading); margin-bottom: 4px; }
+    .metric-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.45; }
+
+    /* Section 3: Technology & Charts */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .chart-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .chart-box-header {
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .chart-box-title { font-size: 0.95rem; font-weight: 700; color: var(--text-heading); }
+    .chart-box-meta { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); }
+    .chart-frame { height: 220px; position: relative; }
+
+    .matrix-table-wrap {
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 32px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      background: var(--bg-card);
+    }
+
+    .matrix-table th {
+      background: var(--bg-subtle);
+      color: var(--text-heading);
+      font-weight: 700;
+      text-align: left;
+      padding: 12px 16px;
+      border-bottom: 2px solid var(--border-strong);
+      text-transform: uppercase;
+      font-size: 0.8rem;
+    }
+
+    .matrix-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: top;
+      line-height: 1.55;
+    }
+
+    .matrix-table tr:last-child td { border-bottom: none; }
+
+    .tag-badge {
+      display: inline-block;
+      background: rgba(2, 132, 199, 0.08);
+      color: var(--brand-primary);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      margin: 2px 3px 2px 0;
+    }
+
+    /* Model Layer Table */
+    .models-table-wrap {
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 36px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .models-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      background: var(--bg-card);
+    }
+
+    .models-table th {
+      background: #f1f5f9;
+      color: var(--text-heading);
+      font-weight: 700;
+      text-align: left;
+      padding: 12px 16px;
+      border-bottom: 2px solid var(--border-strong);
+      text-transform: uppercase;
+      font-size: 0.78rem;
+    }
+
+    .models-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: top;
+      line-height: 1.55;
+    }
+
+    .models-table tr:last-child td { border-bottom: none; }
+
+    .model-chip {
+      display: inline-block;
+      background: #f1f5f9;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-heading);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin: 2px 4px 2px 0;
+    }
+
+    /* India Special Spotlight */
+    .india-spotlight {
+      background: linear-gradient(135deg, rgba(2, 132, 199, 0.04), rgba(245, 158, 11, 0.04));
+      border: 1px solid rgba(2, 132, 199, 0.25);
+      border-left: 5px solid #f59e0b;
+      border-radius: 8px;
+      padding: 28px;
+      margin: 36px 0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .india-spotlight-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .india-spotlight-title {
+      font-family: var(--font-serif);
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--text-heading);
+    }
+
+    .india-tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid #f59e0b;
+      color: #b45309;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    [data-theme="dark"] .india-tag { color: #f59e0b; }
+
+    .india-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .india-pillar-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 16px;
+    }
+
+    .india-pillar-box h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-heading);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .india-pillar-box p {
+      font-size: 0.84rem;
+      color: var(--text-body);
+      line-height: 1.5;
+    }
+
+    /* Section 4: Pros vs Cons */
+    .pros-cons-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .pros-card {
+      background: var(--bg-accent-tint);
+      border: 1px solid rgba(5, 150, 105, 0.3);
+      border-radius: 8px;
+      padding: 22px;
+    }
+
+    .cons-card {
+      background: var(--bg-alert-tint);
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      border-radius: 8px;
+      padding: 22px;
+    }
+
+    .pros-card h3 { color: var(--accent-green); font-size: 1.1rem; margin-bottom: 14px; }
+    .cons-card h3 { color: var(--accent-red); font-size: 1.1rem; margin-bottom: 14px; }
+
+    .pros-cons-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+    .pros-cons-list li strong { display: block; color: var(--text-heading); font-size: 0.94rem; margin-bottom: 2px; }
+    .pros-cons-list li p { font-size: 0.88rem; color: var(--text-body); line-height: 1.5; }
+
+    .verdict-duo {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 32px;
+    }
+
+    .verdict-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-top: 4px solid var(--brand-primary);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .verdict-box .tag { font-family: var(--font-mono); font-size: 0.72rem; color: var(--brand-primary); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
+    .verdict-box h4 { font-family: var(--font-serif); font-size: 1.25rem; color: var(--text-heading); margin-bottom: 8px; }
+    .verdict-box p { font-size: 0.9rem; color: var(--text-body); line-height: 1.55; }
+
+    /* Section 5: Editor's Opinion */
+    .editor-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 32px;
+      margin-bottom: 36px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .editor-header { border-bottom: 1px solid var(--border-subtle); padding-bottom: 16px; margin-bottom: 24px; }
+    .editor-header .label { font-family: var(--font-mono); font-size: 0.78rem; color: var(--brand-primary); font-weight: 700; text-transform: uppercase; }
+    .editor-header h3 { font-family: var(--font-serif); font-size: 1.85rem; color: var(--text-heading); margin-top: 4px; }
+
+    .editor-grid {
+      display: grid;
+      grid-template-columns: 1.55fr 1fr;
+      gap: 28px;
+    }
+
+    .editor-body p { font-size: 1rem; line-height: 1.8; color: var(--text-body); margin-bottom: 16px; text-wrap: pretty; }
+    .editor-body p:first-of-type::first-letter {
+      float: left;
+      font-size: 3.4rem;
+      line-height: 0.85;
+      padding-right: 12px;
+      font-family: var(--font-serif);
+      font-weight: 700;
+      color: var(--text-heading);
+    }
+
+    .editor-signoff {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .author-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--brand-primary);
+      color: #ffffff;
+      font-family: var(--font-serif);
+      font-weight: 700;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .editor-side-box { display: flex; flex-direction: column; gap: 16px; }
+
+    .editor-thumb-box {
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--bg-subtle);
+    }
+
+    .editor-thumb-box img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .editor-thumb-box .caption {
+      padding: 8px 12px;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .editor-side-box .side-quote {
+      background: var(--bg-subtle);
+      border-left: 3px solid var(--brand-primary);
+      padding: 14px 16px;
+      border-radius: 0 6px 6px 0;
+    }
+
+    .editor-side-box .side-quote p { font-family: var(--font-serif); font-size: 0.95rem; font-style: italic; color: var(--text-heading); line-height: 1.45; }
+
+    /* Footer */
+    .article-footer {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 20px;
+      margin-top: 40px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Refined Editorial Print & PDF Export Styles */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 0; /* SUPPRESSES BROWSER DEFAULT URL, DATE, AND HEADERS/FOOTERS */
+      }
+
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        box-sizing: border-box !important;
+      }
+
+      html, body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        font-size: 10pt !important;
+        line-height: 1.5 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      /* Hide interactive navigation chrome */
+      .top-pub-bar, .btn-export-pdf, .btn-toggle {
+        display: none !important;
+      }
+
+      /* Container fits A4 with balanced newsletter margins */
+      .article-container {
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 12mm 15mm !important;
+      }
+
+      /* Masthead compact in print */
+      .article-header {
+        padding-bottom: 14px !important;
+        margin-bottom: 18px !important;
+        border-bottom: 2px solid #0f172a !important;
+        break-after: avoid !important;
+        page-break-after: avoid !important;
+      }
+
+      .article-headline {
+        font-size: 2.1rem !important;
+        line-height: 1.15 !important;
+        margin-bottom: 8px !important;
+      }
+
+      .article-subhead {
+        font-size: 0.98rem !important;
+        line-height: 1.4 !important;
+        margin-bottom: 12px !important;
+      }
+
+      .byline-row {
+        padding-top: 8px !important;
+        font-size: 0.78rem !important;
+      }
+
+      /* Prevent headings from being orphaned at the bottom of a page */
+      h1, h2, h3, h4, .section-header, .india-spotlight-header, .editor-header {
+        break-after: avoid !important;
+        page-break-after: avoid !important;
+      }
+
+      .section-header {
+        margin: 22px 0 12px !important;
+        padding-bottom: 4px !important;
+      }
+
+      .section-header h2 {
+        font-size: 1.3rem !important;
+      }
+
+      .lead-text {
+        font-size: 1rem !important;
+        line-height: 1.55 !important;
+        margin-bottom: 14px !important;
+      }
+
+      .lead-text::first-letter {
+        font-size: 2.8rem !important;
+        padding-right: 8px !important;
+        padding-top: 2px !important;
+      }
+
+      .body-paragraph {
+        font-size: 0.92rem !important;
+        line-height: 1.5 !important;
+        margin-bottom: 12px !important;
+      }
+
+      /* Controlled image sizing for print */
+      .article-image-box {
+        margin: 16px 0 !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .article-image-box img {
+        max-height: 220px !important;
+        object-fit: cover !important;
+      }
+
+      .article-image-box figcaption {
+        padding: 6px 10px !important;
+        font-size: 0.72rem !important;
+      }
+
+      .pull-quote {
+        margin: 16px 0 !important;
+        padding: 12px 16px !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .pull-quote p {
+        font-size: 1.05rem !important;
+        line-height: 1.4 !important;
+      }
+
+      /* 5 Events Timeline in print */
+      .events-grid {
+        gap: 8px !important;
+        margin: 14px 0 20px !important;
+      }
+
+      .event-card {
+        padding: 10px 14px !important;
+        grid-template-columns: 110px 1fr !important;
+        gap: 12px !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        border-radius: 4px !important;
+      }
+
+      .event-date-badge {
+        font-size: 0.7rem !important;
+      }
+
+      .event-content strong {
+        font-size: 0.88rem !important;
+        margin-bottom: 2px !important;
+      }
+
+      .event-content p {
+        font-size: 0.82rem !important;
+        line-height: 1.4 !important;
+      }
+
+      /* Section 2: Metrics Grid in print - 4 columns compact */
+      .metrics-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 10px !important;
+        margin-bottom: 20px !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .metric-card {
+        padding: 12px 14px !important;
+        border-radius: 6px !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .metric-stat {
+        font-size: 1.7rem !important;
+        margin-bottom: 4px !important;
+      }
+
+      .metric-title {
+        font-size: 0.82rem !important;
+        margin-bottom: 2px !important;
+      }
+
+      .metric-desc {
+        font-size: 0.74rem !important;
+        line-height: 1.35 !important;
+      }
+
+      /* Section 3: Charts in print */
+      .charts-grid {
+        grid-template-columns: 1.2fr 1fr !important;
+        gap: 14px !important;
+        margin-bottom: 20px !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .chart-box {
+        padding: 14px !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .chart-box-header {
+        margin-bottom: 8px !important;
+        padding-bottom: 6px !important;
+      }
+
+      .chart-box-title {
+        font-size: 0.84rem !important;
+      }
+
+      .chart-frame {
+        height: 160px !important;
+      }
+
+      /* Tables in print: Allow tables to span pages, but keep rows intact */
+      .matrix-table-wrap, .models-table-wrap {
+        border-radius: 6px !important;
+        margin-bottom: 20px !important;
+        box-shadow: none !important;
+        break-inside: auto !important;
+        page-break-inside: auto !important;
+      }
+
+      .matrix-table, .models-table {
+        font-size: 0.8rem !important;
+      }
+
+      thead {
+        display: table-header-group !important;
+      }
+
+      tr {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .matrix-table th, .models-table th {
+        padding: 8px 10px !important;
+        font-size: 0.72rem !important;
+      }
+
+      .matrix-table td, .models-table td {
+        padding: 8px 10px !important;
+        font-size: 0.78rem !important;
+        line-height: 1.35 !important;
+      }
+
+      .tag-badge, .model-chip {
+        font-size: 0.68rem !important;
+        padding: 1px 5px !important;
+      }
+
+      /* India Spotlight in print */
+      .india-spotlight {
+        padding: 16px 18px !important;
+        margin: 20px 0 !important;
+        break-inside: auto !important;
+        page-break-inside: auto !important;
+      }
+
+      .india-spotlight-title {
+        font-size: 1.2rem !important;
+      }
+
+      .india-tag {
+        font-size: 0.7rem !important;
+      }
+
+      .india-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 10px !important;
+        margin-top: 12px !important;
+      }
+
+      .india-pillar-box {
+        padding: 10px 12px !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .india-pillar-box h4 {
+        font-size: 0.84rem !important;
+        margin-bottom: 4px !important;
+      }
+
+      .india-pillar-box p {
+        font-size: 0.76rem !important;
+        line-height: 1.35 !important;
+      }
+
+      /* Section 4: Pros vs Cons in print */
+      .pros-cons-row {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 14px !important;
+        margin-bottom: 16px !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .pros-card, .cons-card {
+        padding: 14px 16px !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .pros-card h3, .cons-card h3 {
+        font-size: 0.95rem !important;
+        margin-bottom: 8px !important;
+      }
+
+      .pros-cons-list li {
+        margin-bottom: 8px !important;
+        font-size: 0.8rem !important;
+      }
+
+      .pros-cons-list li strong {
+        font-size: 0.8rem !important;
+      }
+
+      .pros-cons-list li p {
+        font-size: 0.75rem !important;
+        line-height: 1.35 !important;
+      }
+
+      .verdict-duo {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 14px !important;
+        margin-bottom: 20px !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .verdict-box {
+        padding: 12px 14px !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .verdict-box h4 {
+        font-size: 0.9rem !important;
+        margin-bottom: 4px !important;
+      }
+
+      .verdict-box p {
+        font-size: 0.78rem !important;
+        line-height: 1.35 !important;
+      }
+
+      /* Section 5: Editor's Section in print */
+      .editor-section {
+        padding: 20px !important;
+        margin-top: 24px !important;
+        box-shadow: none !important;
+        break-before: page !important;
+        page-break-before: always !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .editor-header h3 {
+        font-size: 1.3rem !important;
+      }
+
+      .editor-grid {
+        display: grid !important;
+        grid-template-columns: 1.5fr 1fr !important;
+        gap: 20px !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .editor-body p {
+        font-size: 0.86rem !important;
+        line-height: 1.5 !important;
+        margin-bottom: 10px !important;
+      }
+
+      .editor-thumb-box {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        margin-bottom: 10px !important;
+      }
+
+      .editor-thumb-box img {
+        max-height: 140px !important;
+        display: block !important;
+        width: 100% !important;
+      }
+
+      .editor-thumb-box .caption {
+        break-before: avoid !important;
+        page-break-before: avoid !important;
+      }
+
+      .editor-side-box .side-quote {
+        padding: 8px 12px !important;
+        margin-bottom: 8px !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .editor-side-box .side-quote p {
+        font-size: 0.82rem !important;
+        line-height: 1.35 !important;
+      }
+
+      .article-footer {
+        margin-top: 20px !important;
+        padding-top: 12px !important;
+        font-size: 0.75rem !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .charts-grid, .pros-cons-row, .verdict-duo, .editor-grid, .india-grid { grid-template-columns: 1fr; }
+      .event-card { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Publication Bar with 1-Click PDF Export -->
+  <header class="top-pub-bar">
+    <div class="top-pub-bar-inner">
+      <div class="top-actions" style="margin-left: auto;">
+        <button class="btn-toggle" onclick="toggleTheme()" id="btnTheme">🌙 Dark Mode</button>
+        <button class="btn-export-pdf" onclick="window.print()" id="btnPdf" title="One-Click Download PDF">
+          <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+          Export as PDF
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <article class="article-container">
+
+    <!-- Header / Masthead -->
+    <header class="article-header">
+      <h1 class="article-headline">The Algorithmic Front: AI in Modern Defence</h1>
+      <p class="article-subhead">
+        How artificial intelligence is quietly reshaping military doctrine, reaction times, global force capabilities, and the high-stakes ethics of autonomous lethality.
+      </p>
+      <div class="byline-row">
+        <span class="byline-author">By Yassin Xaviour</span>
+        <span>•</span>
+        <span>Published October 2026</span>
+        <span>•</span>
+        <span>8 min read</span>
+        <span>•</span>
+        <span>Strategic Dispatch</span>
+      </div>
+    </header>
+
+    <!-- SECTION 1: CONTENT -->
+    <section>
+      <p class="lead-text">
+        Artificial Intelligence has shifted from theoretical military research into operational doctrine across land, air, sea, and cyberspace. Modern forces deploy AI primarily across Intelligence, Surveillance, and Reconnaissance (ISR), automated target generation, autonomous counter-measures, and predictive logistics.
+      </p>
+
+      <figure class="article-image-box">
+        <img src="assets/drone_swarm_defense.jpg" alt="Autonomous drone swarms in defense operations">
+        <figcaption>
+          <span>Autonomous drone swarms in defense operations, operating in dense coordinated tactical formations.</span>
+          <span class="source">Source: onurdongel / Getty Images &amp; AI Imagery</span>
+        </figcaption>
+      </figure>
+
+      <p class="body-paragraph">
+        The commercial and strategic momentum behind this transition is historic. The global military AI market is estimated at <strong>$12.2 billion</strong> and is on track to exceed <strong>$35.0 billion by 2035</strong> at a compound annual growth rate (CAGR) of <strong>12.7%</strong> (Precedence Research).
+      </p>
+      <p class="body-paragraph">
+        What makes algorithmic systems transformative is not merely their cognitive breadth, but their capacity to operate at speeds unreachable by human operators—forever compressing the decision space between observation and engagement.
+      </p>
+
+      <blockquote class="pull-quote">
+        <p>"The transition from human-directed violence to machine-speed latency represents the most profound doctrinal shift since the mechanization of warfare."</p>
+      </blockquote>
+
+      <!-- 5 DECISIVE 2026 BATTLEFIELD EVENTS -->
+      <div class="section-header" style="margin-top: 36px;">
+        <h2>5 Decisive Battlefield Events of 2026</h2>
+        <div class="rule"></div>
+      </div>
+      <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 16px;">
+        Five defining moments in 2026 where autonomous systems and battlefield neural networks shifted from theoretical concepts into decisive combat outcomes:
+      </p>
+
+      <div class="events-grid">
+        <div class="event-card">
+          <div class="event-date-badge">JANUARY 2026</div>
+          <div class="event-content">
+            <strong>Red Sea Multi-Vector Swarm Interception</strong>
+            <p>Allied naval task forces operationalized Project Maven edge ATR models to defeat synchronized, multi-directional kamikaze drone and cruise missile swarms, compressing intercept calculations from 4 minutes to under 850 milliseconds.</p>
+          </div>
+        </div>
+
+        <div class="event-card">
+          <div class="event-date-badge">MARCH 2026</div>
+          <div class="event-content">
+            <strong>GPS-Denied Terminal Optical Strike (Eastern Ukraine)</strong>
+            <p>Ukrainian forces fielded autonomous <em>Saker Scout</em> vision-guided drones. Despite total Krasukha-4 electronic warfare jamming severing satellite GPS and pilot RF uplinks, the drone navigated via onboard topological vision and eliminated concealed command armor.</p>
+          </div>
+        </div>
+
+        <div class="event-card">
+          <div class="event-date-badge">MAY 2026</div>
+          <div class="event-content">
+            <strong>Pacific CJADC2 Sensor-to-Shooter Live Relay (Valiant Shield)</strong>
+            <p>US INDOPACOM successfully linked space-based SAR satellites, P-8 Poseidon radar feeds, and uncrewed naval drones in real time, transmitting verified kinetic target vectors directly into the cockpits of 5th-gen F-35s in 780 milliseconds.</p>
+          </div>
+        </div>
+
+        <div class="event-card">
+          <div class="event-date-badge">JULY 2026</div>
+          <div class="event-content">
+            <strong>High-Density Urban Target Generation Surge</strong>
+            <p>IDF units deployed second-generation <em>Habsora 2.0</em> and <em>Lavender</em> graph neural networks, parsing petabytes of cellular metadata, thermal imaging, and acoustic signatures per hour to map complex subterranean tunnel networks in contested urban theaters.</p>
+          </div>
+        </div>
+
+        <div class="event-card">
+          <div class="event-date-badge">SEPTEMBER 2026</div>
+          <div class="event-content">
+            <strong>Autonomous Cyber Counter-Strike on Baltic Infrastructure</strong>
+            <p>NATO Allied Cyber Command operationalized autonomous defensive agents (powered by Helsing and Darktrace) to instantaneously isolate and neutralize a sophisticated state-sponsored zero-day attack targeting regional electric telemetry grids without human latency.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: FACTS & FIGURES -->
+    <section>
+      <div class="section-header">
+        <h2>Key Facts &amp; Figures</h2>
+        <div class="rule"></div>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-stat">&lt; 1 Sec</div>
+          <div class="metric-title">Target Processing Acceleration</div>
+          <p class="metric-desc">Modern automated target-recognition (ATR) suites compress the traditional sensor-to-shooter loop from 20–40 minutes down to seconds.</p>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-stat">15–25%</div>
+          <div class="metric-title">Logistics &amp; Fleet Readiness</div>
+          <p class="metric-desc">Predictive maintenance algorithms yield a 15–25% reduction in aircraft downtime and slash unscheduled maintenance costs.</p>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-stat">30%</div>
+          <div class="metric-title">Airborne Dominance</div>
+          <p class="metric-desc">Airborne and unmanned aerial platforms account for 30% of total defense AI spending, remaining the highest adopted domain.</p>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-stat">100x</div>
+          <div class="metric-title">Reconnaissance Throughput</div>
+          <p class="metric-desc">Computer vision models analyze satellite, drone, and SIGINT feeds up to 100x faster than human analyst teams, triaging petabytes continuously.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: TECHNOLOGY, MODELS & INDIA SPOTLIGHT -->
+    <section>
+      <div class="section-header">
+        <h2>Technology &amp; Capabilities Breakdown</h2>
+        <div class="rule"></div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-box">
+          <div class="chart-box-header">
+            <span class="chart-box-title">Global Military AI Market Growth (2024–2035)</span>
+            <span class="chart-box-meta">USD Billions (12.7% CAGR)</span>
+          </div>
+          <div class="chart-frame"><canvas id="marketChart"></canvas></div>
+        </div>
+
+        <div class="chart-box">
+          <div class="chart-box-header">
+            <span class="chart-box-title">AI Defense Adoption by Domain (2026)</span>
+            <span class="chart-box-meta">Expenditure Share</span>
+          </div>
+          <div class="chart-frame"><canvas id="domainChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Capabilities Matrix Table -->
+      <div class="matrix-table-wrap">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th style="width: 22%;">Nation / Force</th>
+              <th style="width: 44%;">Primary AI Initiatives &amp; Achievements</th>
+              <th style="width: 34%;">Key Productivity &amp; Operational Metrics</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <strong>United States</strong>
+                <div style="font-size: 0.76rem; color: var(--text-muted);">DoD / Joint Services</div>
+              </td>
+              <td>
+                <strong>CJADC2 &amp; Replicator Initiative:</strong> Integrating all military branch sensors into a single autonomous edge network; Collaborative Combat Aircraft (CCA) teaming uncrewed drones with crewed fighters.
+                <div style="margin-top: 4px;">
+                  <span class="tag-badge">CJADC2</span>
+                  <span class="tag-badge">Replicator</span>
+                  <span class="tag-badge">Loyal Wingman</span>
+                </div>
+              </td>
+              <td>
+                Deployed thousands of low-cost attritable autonomous systems; achieved sub-second target relay across multi-domain branches.
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <strong>China (PLA)</strong>
+                <div style="font-size: 0.76rem; color: var(--text-muted);">Strategic Support Force</div>
+              </td>
+              <td>
+                <strong>"Intelligentized Warfare":</strong> Heavy focus on cognitive warfare, hypersonic glide guidance algorithms, and coordinated multi-domain drone swarm protocols.
+                <div style="margin-top: 4px;">
+                  <span class="tag-badge">Intelligentized Warfare</span>
+                  <span class="tag-badge">Hypersonics</span>
+                  <span class="tag-badge">Swarm Protocols</span>
+                </div>
+              </td>
+              <td>
+                Integrated AI-guided ISR for anti-access/area-denial (A2/AD) networks; parity in quantum encryption and computer-vision target recognition.
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <strong>Israel (IDF)</strong>
+                <div style="font-size: 0.76rem; color: var(--text-muted);">Intelligence Corps Unit 8200</div>
+              </td>
+              <td>
+                <strong>Target Generation Suites (Habsora / The Gospel, Lavender):</strong> High-speed multi-source intelligence correlation to map hostile assets and infrastructure in dense urban theatres.
+                <div style="margin-top: 4px;">
+                  <span class="tag-badge">Habsora</span>
+                  <span class="tag-badge">Lavender</span>
+                  <span class="tag-badge">Multi-INT</span>
+                </div>
+              </td>
+              <td>
+                Generates automated target suggestions at unprecedented volume; real-time sensor correlation across SIGINT and IMINT.
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <strong>Ukraine</strong>
+                <div style="font-size: 0.76rem; color: var(--text-muted);">Armed Forces of Ukraine</div>
+              </td>
+              <td>
+                <strong>Delta C2 &amp; AI-Targeted FPV Drones:</strong> Real-time battlefield situational awareness fused with low-cost terminal guidance algorithms resisting EW (electronic warfare) jamming.
+                <div style="margin-top: 4px;">
+                  <span class="tag-badge">Delta C2</span>
+                  <span class="tag-badge">Terminal Optical Homing</span>
+                  <span class="tag-badge">Asymmetric EW</span>
+                </div>
+              </td>
+              <td>
+                Neutralized high-value armor using off-the-shelf $500 drones paired with machine vision terminal homing algorithms.
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <strong>NATO Coalition</strong>
+                <div style="font-size: 0.76rem; color: var(--text-muted);">UK / FR / DE Joint Commands</div>
+              </td>
+              <td>
+                <strong>Future Combat Air System (FCAS) &amp; Cyber AI:</strong> Automated defensive counter-cyber response agents and autonomous loyal wingman combat prototypes.
+                <div style="margin-top: 4px;">
+                  <span class="tag-badge">FCAS</span>
+                  <span class="tag-badge">Cyber Defense</span>
+                  <span class="tag-badge">Allied Interoperability</span>
+                </div>
+              </td>
+              <td>
+                Standardized data sharing across allied commands; automated perimeter defense against state-sponsored advanced persistent threats.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- COUNTRIES AND WHAT MODELS THEY USE -->
+      <div class="section-header">
+        <h2>The Model Layer: Specific Military AI Architectures</h2>
+        <div class="rule"></div>
+      </div>
+      <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 16px;">
+        An authoritative breakdown of proprietary neural architectures, software stacks, and edge models operationalized by leading armed forces:
+      </p>
+
+      <div class="models-table-wrap">
+        <table class="models-table">
+          <thead>
+            <tr>
+              <th style="width: 18%;">Country / Force</th>
+              <th style="width: 32%;">Specific Models &amp; Software Platforms</th>
+              <th style="width: 25%;">Underlying Architecture</th>
+              <th style="width: 25%;">Primary Operational Deployment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>United States</strong></td>
+              <td>
+                <span class="model-chip">Palantir AIP (Gotham/Maven)</span>
+                <span class="model-chip">Project Maven Vision</span>
+                <span class="model-chip">Anduril Lattice OS</span>
+                <span class="model-chip">Scale AI Donovan</span>
+                <span class="model-chip">Claude/Gemini IL6 Cloud</span>
+              </td>
+              <td>Hybrid Vision Transformers (ViT), Graph Neural Nets, Fine-Tuned Air-Gapped LLMs</td>
+              <td>Automated Target Recognition (ATR), loyal wingman uncrewed flight, all-domain sensor fusion.</td>
+            </tr>
+
+            <tr>
+              <td><strong>China (PLA)</strong></td>
+              <td>
+                <span class="model-chip">Baidu Ernie Mil-Tuned</span>
+                <span class="model-chip">CASIC Hypersonic RL Core</span>
+                <span class="model-chip">CETC Swarm-64 Network</span>
+                <span class="model-chip">Panggu Defense Vision</span>
+              </td>
+              <td>Deep Reinforcement Learning (DRL), Multi-Agent Swarm Policies, Convolutional ATR</td>
+              <td>Hypersonic glide vehicle trajectory adjustment, coordinated 64+ drone swarms, cognitive electronic warfare.</td>
+            </tr>
+
+            <tr>
+              <td><strong>Israel (IDF)</strong></td>
+              <td>
+                <span class="model-chip">Habsora (The Gospel)</span>
+                <span class="model-chip">Lavender Intelligence Suite</span>
+                <span class="model-chip">Where's Daddy Tracker</span>
+              </td>
+              <td>Probabilistic Graph Neural Networks, Multi-Source Feature Correlation Classifiers</td>
+              <td>High-throughput urban target designation, 15,000+ data-point biometric/SIGINT scoring, structural 3D mapping.</td>
+            </tr>
+
+            <tr>
+              <td><strong>Ukraine</strong></td>
+              <td>
+                <span class="model-chip">Saker Scout Terminal Homing</span>
+                <span class="model-chip">Delta C2 (Palantir Edge)</span>
+                <span class="model-chip">Zvook Acoustic ML</span>
+              </td>
+              <td>Quantized Edge Computer Vision (MobileNet/YOLOv8 variants), Audio Spectral Convolution</td>
+              <td>$500 FPV terminal guidance immune to EW jamming, acoustic early-warning detecting low-flying cruise missiles.</td>
+            </tr>
+
+            <tr>
+              <td><strong>India</strong></td>
+              <td>
+                <span class="model-chip">DRDO CAIR Deep-Sight</span>
+                <span class="model-chip">BEL Counter-Drone AI Core</span>
+                <span class="model-chip">NPOL Sonar-Net ASW</span>
+                <span class="model-chip">CATS Warrior Flight Agent</span>
+              </td>
+              <td>Multimodal EO/IR Feature Recognition, Deep Acoustic Sonar Classification, Edge Swarm Logic</td>
+              <td>LAC high-altitude border intrusion surveillance, Indian Ocean anti-submarine tracking, loyal wingman air combat.</td>
+            </tr>
+
+            <tr>
+              <td><strong>NATO Coalition</strong></td>
+              <td>
+                <span class="model-chip">Helsing.ai Altra Fusion</span>
+                <span class="model-chip">Airbus FCAS Cognitive Core</span>
+                <span class="model-chip">Darktrace Cyber Antigena</span>
+              </td>
+              <td>Real-time Multi-INT Sensor Triage, Neuro-Adaptive Pilot Workload Models, Autonomous Cyber Graph</td>
+              <td>Allied cross-border real-time data mesh, next-gen fighter cognitive cockpit assistance, autonomous cyber defense.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SPECIAL COUNTRY FOCUS: INDIA -->
+      <div class="india-spotlight">
+        <div class="india-spotlight-header">
+          <div>
+            <div class="india-spotlight-title">Special Country Focus: India’s Strategic Leap into Defence AI</div>
+            <div style="font-size: 0.88rem; color: var(--text-muted); margin-top: 2px;">
+              Indigenous Innovation, Border Automation along the LAC, and ₹1,000+ Crore Earmarked Investment
+            </div>
+          </div>
+          <span class="india-tag">NATIONAL FOCUS: DEFENCE AI</span>
+        </div>
+
+        <p class="body-paragraph" style="margin-bottom: 14px;">
+          India has rapidly accelerated its military AI doctrine from experimental prototyping into frontline deployment. Driven by dual-front geopolitical tensions across the <strong>Line of Actual Control (LAC)</strong> with China and western borders, the Indian Ministry of Defence (MoD) established the <strong>Defence AI Council (DAIC)</strong> chaired by the Defence Minister, alongside the <strong>Defence AI Project Agency (DAIPA)</strong>.
+        </p>
+
+        <p class="body-paragraph" style="margin-bottom: 16px;">
+          Under the flagship initiative <strong>Project "AIDAI" (AI in Defence)</strong>, India has categorized and deployed <strong>75 prioritized defence AI capabilities</strong>. Each Defence Public Sector Undertaking (DPSU) has been mandated to earmark at least <strong>₹100 Crore annually</strong> for dedicated AI research, scaling India’s domestic defense AI pipeline beyond <strong>₹1,000+ Crore</strong> across startups, academia, and military laboratories.
+        </p>
+
+        <div class="india-grid">
+          <div class="india-pillar-box">
+            <h4>⛰️ Northern Border Surveillance</h4>
+            <p><strong>Line of Actual Control (LAC):</strong> Deployment of AI-powered high-altitude thermal cameras, facial recognition, and automated intrusion detection systems developed by DRDO and domestic startups to maintain 24/7 unblinking watch along Ladakh and Arunachal Pradesh.</p>
+          </div>
+
+          <div class="india-pillar-box">
+            <h4>🌊 Maritime Acoustic Intelligence</h4>
+            <p><strong>Indian Ocean Region (IOR):</strong> Indian Navy partnered with DRDO’s NPOL to operationalize AI-driven passive sonar classification algorithms (Sonar-Net) on P-8I Neptune patrol aircraft to autonomously detect and categorize hostile submarine acoustic signatures.</p>
+          </div>
+
+          <div class="india-pillar-box">
+            <h4>✈️ Loyal Wingman &amp; Swarm Drones</h4>
+            <p><strong>Air Combat &amp; Swarms:</strong> HAL’s Combat Air Teaming System (CATS) with the "CATS Warrior" autonomous loyal wingman. The Indian Army has also inducted operational 100+ swarm drone systems from NewSpace Research &amp; Technologies and ideaForge.</p>
+          </div>
+        </div>
+
+        <div style="margin-top: 18px; font-size: 0.86rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 12px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <span><strong>Strategic Partnerships:</strong> INDUS-X (India-U.S. Defence Acceleration) &amp; Quad Critical Technology Workgroups.</span>
+          <span><strong>Key R&amp;D Centers:</strong> DRDO CAIR &amp; DYSL-AI (Young Scientist Labs).</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- SECTION 4: PROS VS. CONS & VERDICTS -->
+    <section>
+      <div class="section-header">
+        <h2>The Strategic Trade-Off: Pros vs. Cons</h2>
+        <div class="rule"></div>
+      </div>
+
+      <div class="pros-cons-row">
+        <div class="pros-card">
+          <h3>Strategic Advantages (Pros)</h3>
+          <ul class="pros-cons-list">
+            <li>
+              <strong>Drastic Reduction in Reaction Times</strong>
+              <p>Decisive advantage in hypersonic defense, drone swarm interception, and electronic warfare where human reflexes are fatally slow.</p>
+            </li>
+            <li>
+              <strong>Force Multiplier at Lower Attrition</strong>
+              <p>Unmanned autonomous systems preserve frontline military personnel lives while scaling patrol reach, reconnaissance, and strike capabilities.</p>
+            </li>
+            <li>
+              <strong>Cognitive Load Relief for Commanders</strong>
+              <p>Filters out 95%+ of raw battlefield sensor noise so human commanders only evaluate high-probability, mission-critical tactical data.</p>
+            </li>
+          </ul>
+        </div>
+
+        <div class="cons-card">
+          <h3>Systemic Hazards &amp; Risks (Cons)</h3>
+          <ul class="pros-cons-list">
+            <li>
+              <strong>Algorithmic Hallucination &amp; Collateral Damage</strong>
+              <p>High error rates in unfamiliar sensor conditions, dense urban clutter, weather distortion, or deliberately spoofed adversarial inputs.</p>
+            </li>
+            <li>
+              <strong>The "Black Box" Accountability Gap</strong>
+              <p>Lack of model explainability makes international humanitarian law (IHL) compliance, Geneva Conventions, and chain-of-command accountability difficult to govern.</p>
+            </li>
+            <li>
+              <strong>Escalation Velocity (Hyper-War)</strong>
+              <p>Hyperspeed algorithmic engagements increase the likelihood of unintended conflict flashpoints before human diplomacy can intervene.</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="verdict-duo">
+        <div class="verdict-box">
+          <div class="tag">Editorial Verdict: Overall Best-in-Class</div>
+          <h4>Overall Ecosystem &amp; Global Integration: United States</h4>
+          <p>The United States maintains the strongest overall architecture through the combination of advanced cloud edge computing, allied integration (CJADC2), and domestic chip infrastructure.</p>
+        </div>
+
+        <div class="verdict-box">
+          <div class="tag">Editorial Verdict: Asymmetric Innovation</div>
+          <h4>Tactical Agile Innovation: Ukraine</h4>
+          <p>Ukraine represents the most efficient asymmetric application of AI, proving that modular, cost-effective machine vision layered on commercial $500 hardware can defeat conventional multi-million-dollar armor systems.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: EDITOR'S OPINION (ESSAY) -->
+    <section class="editor-section">
+      <div class="editor-header">
+        <h3>Editor’s Note: The Threshold of Autonomous Lethality</h3>
+      </div>
+
+      <div class="editor-grid">
+        <div class="editor-body">
+          <p>
+            Warfare has crossed an irrevocable threshold. The historic doctrine of human-directed violence—governed by chain of command, political intent, and moral friction—is yielding to the relentless calculus of machine latency. As modern militaries deploy AI-driven target generation suites and autonomous interceptors, the debate over autonomous lethality has shifted from theoretical ethics to immediate operational reality.
+          </p>
+
+          <p>
+            The strategic imperative driving this transition is clear: speed. In contested battlespaces defined by hypersonic vectors, coordinated drone swarms, and aggressive electronic warfare, human reaction times are a fatal vulnerability. Relinquishing terminal engagement decisions to edge algorithms is no longer an experimental pursuit; it is rapidly becoming an operational necessity to ensure survivability.
+          </p>
+
+          <p>
+            Yet this tactical advantage introduces a profound moral and systemic hazard. An algorithm possesses neither conscience nor contextual restraint. It optimizes exclusively for statistical confidence within predefined objective functions. When a machine misclassifies a target in the fog of kinetic conflict, the moral and legal accountability framework collapses. Who answers for the error: the commander, the developer, or the model weights?
+          </p>
+
+          <p>
+            Moreover, compressing the sensor-to-shooter loop from minutes to milliseconds risks removing the vital friction that prevents uncontrolled escalation. Algorithmic interactions between opposing autonomous systems threaten to trigger conflict flashpoints before human oversight can intervene.
+          </p>
+
+          <p>
+            The path forward cannot rely on bans that peer competitors will simply disregard, nor on naive faith in flawless code. Defense leadership must enforce rigorous architectural boundaries: non-negotiable human-in-the-loop tripwires on strategic strike authorities, verifiable explainability standards for tactical AI, and resilient failsafes against spoofed inputs.
+          </p>
+
+          <p>
+            AI can identify patterns, process sensor streams, and accelerate tactical options at unprecedented scale. But the moral burden of lethality—the irreversible choice to extinguish human life—must remain an exclusively human responsibility. The moment we automate our conscience, we surrender the very doctrine we exist to defend.
+          </p>
+
+
+        </div>
+
+        <aside class="editor-side-box">
+          <div class="editor-thumb-box">
+            <img src="assets/networked_military_ai.jpg" alt="Military Command Operations and Automated Sensor Fusion">
+            <div class="caption">Strategic C2 Operations: Multi-INT sensor fusion and algorithmic triage.</div>
+          </div>
+
+          <div class="side-quote">
+            <p>"Speed is the new strategic imperative, but an algorithm optimizes exclusively for statistical confidence—not contextual restraint or conscience."</p>
+          </div>
+
+          <div class="side-quote">
+            <p>"When a machine misclassifies a target in kinetic fog, accountability collapses: who answers for the error—the commander, the developer, or the model weights?"</p>
+          </div>
+
+          <div class="side-quote">
+            <p>"AI can process sensor streams and accelerate options at scale, but the moral burden of lethality must remain an exclusively human responsibility."</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="article-footer">
+      <div>The Algorithmic Front • Published by <strong>Yassin Xaviour</strong></div>
+    </footer>
+
+  </article>
+
+  <!-- Script for Theme and Charts -->
+  <script>
+    function toggleTheme() {
+      const isDark = document.body.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        document.body.removeAttribute('data-theme');
+        document.getElementById('btnTheme').textContent = '🌙 Dark Mode';
+        localStorage.setItem('theme', 'light');
+      } else {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('btnTheme').textContent = '☀️ Light Mode';
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    // Initialize Chart.js
+    document.addEventListener('DOMContentLoaded', () => {
+      // Market Trajectory Chart
+      const ctxMarket = document.getElementById('marketChart').getContext('2d');
+      const gradient = ctxMarket.createLinearGradient(0, 0, 0, 220);
+      gradient.addColorStop(0, 'rgba(2, 132, 199, 0.28)');
+      gradient.addColorStop(1, 'rgba(2, 132, 199, 0.01)');
+
+      new Chart(ctxMarket, {
+        type: 'line',
+        data: {
+          labels: ['2024', '2025', '2026', '2027', '2028', '2029', '2030', '2032', '2035'],
+          datasets: [{
+            label: 'Market Valuation ($B)',
+            data: [12.2, 13.8, 15.6, 17.6, 19.9, 22.4, 25.3, 30.1, 35.4],
+            borderColor: '#0284c7',
+            borderWidth: 2.5,
+            backgroundColor: gradient,
+            fill: true,
+            tension: 0.35,
+            pointBackgroundColor: '#0284c7',
+            pointRadius: 3.5,
+            pointHoverRadius: 5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: { label: (c) => `$${c.raw}B USD` }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: '#f1f5f9' },
+              ticks: { color: '#64748b', font: { size: 10 } }
+            },
+            y: {
+              grid: { color: '#f1f5f9' },
+              ticks: { color: '#64748b', font: { size: 10 }, callback: (v) => '$' + v + 'B' }
+            }
+          }
+        }
+      });
+
+      // Domain Allocation Donut Chart
+      const ctxDomain = document.getElementById('domainChart').getContext('2d');
+      new Chart(ctxDomain, {
+        type: 'doughnut',
+        data: {
+          labels: ['Airborne/UAS', 'Cyber & C2', 'ISR & Space', 'Naval', 'Land'],
+          datasets: [{
+            data: [30, 24, 22, 13, 11],
+            backgroundColor: ['#0284c7', '#38bdf8', '#6366f1', '#10b981', '#f59e0b'],
+            borderColor: '#ffffff',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { boxWidth: 10, font: { size: 10 }, padding: 8, color: '#475569' }
+            }
+          },
+          cutout: '64%'
+        }
+      });
+    });
+  </script>
+</body>
+</html>
