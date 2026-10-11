@@ -1,1 +1,1 @@
-Read
+Read out the articles..
