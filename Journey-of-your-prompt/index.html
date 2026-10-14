@@ -1,0 +1,2882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="The Prompt Journey — How LLMs Process a Prompt. An interactive, animated 3D educational exhibit by Yassin Xaviour.">
+  <title>The Prompt Journey — How LLMs Process a Prompt | By Yassin Xaviour</title>
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* =====================================================================
+       DESIGN SYSTEM: WARM IVORY & SOPHISTICATED EDITORIAL PALETTE
+       ===================================================================== */
+    :root {
+      --bg-ivory: #FAF8F4;
+      --bg-surface: #FFFFFF;
+      --bg-card: #F5F1EB;
+      --bg-card-hover: #EFE9E0;
+      
+      --border-subtle: #E8E2D8;
+      --border-strong: #D5CBBD;
+
+      --text-main: #24232B;
+      --text-sub: #716D79;
+      --text-muted: #9E99A6;
+
+      --lavender: #8877E8;
+      --deep-purple: #6554C8;
+      --mint: #63C9AC;
+      --soft-teal: #2DD4BF;
+      --warm-amber: #E7A35A;
+      --coral: #E98B8B;
+
+      --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-title: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --shadow-sm: 0 2px 8px rgba(36, 35, 43, 0.04);
+      --shadow-md: 0 8px 24px rgba(36, 35, 43, 0.07);
+      --shadow-float: 0 16px 36px rgba(36, 35, 43, 0.1);
+    }
+
+    /* STRICT ONE-PAGE NO-SCROLL LAYOUT (100% FITS ANY SCREEN: 600px - 1440px) */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      max-height: 100vh;
+      max-height: 100dvh;
+      overflow: hidden;
+      background-color: var(--bg-ivory);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      inset: 0;
+    }
+
+    /* Ambient background gradient */
+    body::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      left: 15%;
+      width: 70vw;
+      height: 70vw;
+      background: radial-gradient(circle, rgba(136, 119, 232, 0.04) 0%, rgba(231, 163, 90, 0.03) 45%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* COMPACT HEADER (40px) */
+    .top-header {
+      flex-shrink: 0;
+      height: 40px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(250, 248, 244, 0.95);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-mark {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--deep-purple), var(--lavender));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      box-shadow: 0 2px 6px rgba(101, 84, 200, 0.25);
+    }
+
+    .brand-title {
+      font-family: var(--font-title);
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+    }
+
+    .brand-author {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      border-left: 1px solid var(--border-subtle);
+      padding-left: 8px;
+      margin-left: 4px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-action-pill {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-sub);
+      padding: 3px 10px;
+      border-radius: 14px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-action-pill:hover {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+
+    /* CENTRAL STAGE VIEWPORT & HORIZONTAL CONVEYOR */
+    .stage-viewport {
+      flex: 1;
+      height: calc(100dvh - 78px);
+      max-height: calc(100dvh - 78px);
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      z-index: 10;
+    }
+
+    .conveyor-belt {
+      display: flex;
+      width: 600vw;
+      height: 100%;
+      min-height: 0;
+      transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .stage-section {
+      width: 100vw;
+      height: 100%;
+      min-height: 0;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 14px;
+      overflow: hidden;
+    }
+
+    .stage-canvas-card {
+      width: 100%;
+      max-width: 900px;
+      height: 100%;
+      max-height: 100%;
+      min-height: 0;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 10px 18px;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      justify-content: space-between;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Stage Header Info */
+    .stage-header-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .stage-index-badge {
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: #F0EAFF;
+      color: var(--deep-purple);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .stage-main-title {
+      font-family: var(--font-title);
+      font-size: clamp(1.05rem, 1.45vw, 1.35rem);
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+
+    .stage-subtitle-text {
+      font-size: 0.76rem;
+      color: var(--text-sub);
+      max-width: 680px;
+      line-height: 1.25;
+    }
+
+    /* =====================================================================
+       STAGE 1: 3 PRESET CARDS & BIG LOAD BOX (USER INPUT REMOVED)
+       ===================================================================== */
+    .stage1-arena {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      gap: 8px;
+      overflow: hidden;
+    }
+
+    .prompt-presets-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    .preset-prompt-card {
+      background: var(--bg-ivory);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 10px 12px;
+      text-align: left;
+      cursor: grab;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .preset-prompt-card:hover {
+      border-color: var(--lavender);
+      transform: translateY(-2px) rotate(-0.5deg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .preset-prompt-card.selected {
+      border-color: var(--deep-purple);
+      background: #FFFFFF;
+      box-shadow: 0 0 0 2px rgba(101, 84, 200, 0.2), var(--shadow-md);
+    }
+
+    .card-svg-icon {
+      width: 32px;
+      height: 32px;
+      display: block;
+    }
+
+    .card-prompt-quote {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.3;
+    }
+
+    /* BIG DEDICATED PROMPT LOAD BOX */
+    .big-load-drop-box {
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      max-height: 135px;
+      background: linear-gradient(135deg, #F8F5FF 0%, #FAF8F4 100%);
+      border: 2.5px dashed #C8BBE8;
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: inset 0 2px 8px rgba(101, 84, 200, 0.04);
+    }
+
+    .big-load-drop-box.drag-hover {
+      border-color: var(--deep-purple);
+      background: #EDE6FF;
+      transform: scale(1.02);
+      box-shadow: 0 8px 24px rgba(101, 84, 200, 0.2);
+    }
+
+    .big-load-drop-box.loaded-docked {
+      border-style: solid;
+      border-color: var(--mint);
+      background: #E8F8F2;
+      animation: dockConfirm 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes dockConfirm {
+      0% { transform: scale(0.96); }
+      50% { transform: scale(1.03); }
+      100% { transform: scale(1); }
+    }
+
+    .load-box-icon {
+      font-size: 1.5rem;
+      transition: transform 0.3s ease;
+    }
+
+    .big-load-drop-box:hover .load-box-icon {
+      transform: translateY(-2px) scale(1.1);
+    }
+
+    .load-box-heading {
+      font-family: var(--font-title);
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--deep-purple);
+    }
+
+    .load-box-caption {
+      font-size: 0.74rem;
+      color: var(--text-sub);
+    }
+
+    /* TUTORIAL HAND POINTER */
+    .tutorial-hand-guide {
+      position: absolute;
+      width: 38px;
+      height: 38px;
+      pointer-events: none;
+      z-index: 50;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.15));
+      animation: guideHandMotion 2.4s ease-in-out infinite;
+    }
+
+    @keyframes guideHandMotion {
+      0% { transform: translate(-80px, -45px) scale(1); opacity: 0; }
+      20% { transform: translate(-80px, -45px) scale(1); opacity: 1; }
+      50% { transform: translate(0px, 10px) scale(0.95); opacity: 1; }
+      75% { transform: translate(0px, 10px) scale(0.95); opacity: 1; }
+      90% { transform: translate(0px, 10px) scale(1); opacity: 0; }
+      100% { opacity: 0; }
+    }
+
+    /* =====================================================================
+       STAGE 2: TOKENIZATION & VISUAL DICTIONARY LOOKUP
+       ===================================================================== */
+    .tokenization-machine-arena {
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .splitting-track-panel {
+      background: var(--bg-ivory);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: left;
+      overflow-y: auto;
+    }
+
+    .panel-section-tag {
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      font-weight: 700;
+      color: var(--deep-purple);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .token-chips-flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .stamped-token-pill {
+      background: #FFFFFF;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 7px;
+      padding: 3px 7px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: var(--shadow-sm);
+      animation: popStamp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+    }
+
+    @keyframes popStamp {
+      0% { transform: scale(0.6) translateY(8px); }
+      100% { transform: scale(1) translateY(0); }
+    }
+
+    .token-word-piece {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .token-vocab-id {
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      font-weight: 700;
+      color: var(--deep-purple);
+      background: #F0EAFF;
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+
+    /* DICTIONARY LOOKUP STATION */
+    .vocab-station-drawer {
+      background: #FFFFFF;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      text-align: left;
+      position: relative;
+    }
+
+    .dict-search-radar {
+      padding: 5px 10px;
+      background: #F4F0FF;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      font-weight: 700;
+      color: var(--deep-purple);
+    }
+
+    .dict-scanner-beam {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--deep-purple), var(--lavender), transparent);
+      width: 100%;
+      animation: scanSweep 1s infinite alternate;
+    }
+
+    @keyframes scanSweep {
+      0% { transform: scaleX(0.2) translateX(-50%); opacity: 0.3; }
+      100% { transform: scaleX(1) translateX(0); opacity: 1; }
+    }
+
+    .vocab-table-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .vocab-entry-row {
+      display: grid;
+      grid-template-columns: 1fr 20px 1fr;
+      align-items: center;
+      padding: 2px 6px;
+      font-size: 0.74rem;
+      border-radius: 5px;
+      transition: all 0.2s;
+    }
+
+    .vocab-entry-row.active-lookup {
+      background: #FFF8EB;
+      border: 1px solid var(--warm-amber);
+      transform: translateX(4px);
+    }
+
+    /* =====================================================================
+       STAGE 3: 3D VECTOR EMBEDDINGS (BLINK ARRIVAL, INTERACTIVE, ATTACHED IMAGE MATCH)
+       ===================================================================== */
+    .space-3d-wrapper {
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      background: radial-gradient(ellipse at 50% 55%, #FFFFFF 0%, #F5F0FF 55%, #FAF8F4 100%);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+      cursor: grab;
+    }
+
+    .space-3d-wrapper:active {
+      cursor: grabbing;
+    }
+
+    .space-3d-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .axis-hud-tag {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: var(--deep-purple);
+      background: rgba(255, 255, 255, 0.9);
+      padding: 2px 6px;
+      border-radius: 4px;
+      pointer-events: none;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .tag-x { bottom: 8px; right: 12px; border-left: 2px solid var(--lavender); }
+    .tag-y { top: 8px; left: 12px; border-left: 2px solid var(--soft-teal); }
+    .tag-z { top: 8px; right: 12px; border-left: 2px solid var(--warm-amber); }
+
+    /* Floating Interactive Canvas Controls Bar */
+    .space-3d-toolbar {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid var(--border-subtle);
+      padding: 3px 8px;
+      border-radius: 20px;
+      box-shadow: var(--shadow-sm);
+      z-index: 20;
+    }
+
+    .canvas-tool-btn {
+      background: transparent;
+      border: none;
+      font-size: 0.68rem;
+      font-family: var(--font-body);
+      font-weight: 600;
+      color: var(--text-sub);
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 10px;
+      transition: all 0.2s;
+    }
+
+    .canvas-tool-btn:hover {
+      background: var(--bg-card);
+      color: var(--text-main);
+    }
+
+    .canvas-tool-btn.active {
+      background: var(--deep-purple);
+      color: #FFFFFF;
+    }
+
+    /* FLOATING INTERACTIVE 3D HUD BADGE */
+    .token-3d-inspector-hud {
+      position: absolute;
+      bottom: 8px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 0.72rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow-sm);
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    .hud-blink-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--deep-purple);
+      animation: hudBlink 0.9s infinite alternate;
+    }
+
+    @keyframes hudBlink {
+      from { transform: scale(0.8); opacity: 0.3; }
+      to { transform: scale(1.4); opacity: 1; box-shadow: 0 0 10px var(--lavender); }
+    }
+
+    /* =====================================================================
+       STAGE 4: SELF-ATTENTION (RAINBOW SWEEP & Q-K-V ATTENTION SCHEMATIC)
+       ===================================================================== */
+    .attention-control-deck {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .attention-token-nodes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      justify-content: center;
+    }
+
+    .query-node-btn {
+      background: var(--bg-ivory);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-sub);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .query-node-btn:hover {
+      border-color: var(--lavender);
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
+
+    .query-node-btn.active-query {
+      background: var(--deep-purple);
+      border-color: var(--deep-purple);
+      color: #FFFFFF;
+      box-shadow: 0 3px 10px rgba(101, 84, 200, 0.35);
+      transform: scale(1.06);
+    }
+
+    .attention-arcs-viewport {
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      background: var(--bg-ivory);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 12px;
+      position: relative;
+    }
+
+    /* =====================================================================
+       STAGE 5: TRANSFORMER PROCESSING STUDIO (CLEAR, INTUITIVE & HIGH VISIBILITY)
+       ===================================================================== */
+    .transformer-studio-deck {
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 6px;
+      overflow: hidden;
+    }
+
+    /* 3 Main Step Navigation Pills */
+    .studio-step-pills {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    .studio-step-btn {
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 9px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .studio-step-btn:hover {
+      border-color: var(--lavender);
+      transform: translateY(-1px);
+    }
+
+    .studio-step-btn.active {
+      border-color: var(--deep-purple);
+      background: #F8F5FF;
+      box-shadow: 0 3px 12px rgba(101, 84, 200, 0.18);
+    }
+
+    .studio-step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #EDE6FF;
+      color: var(--deep-purple);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .studio-step-btn.active .studio-step-num {
+      background: var(--deep-purple);
+      color: #FFFFFF;
+    }
+
+    .studio-step-label-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .studio-step-title {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .studio-step-sub {
+      font-size: 0.64rem;
+      color: var(--text-sub);
+    }
+
+    /* Central Visual Display Area */
+    .studio-display-area {
+      flex: 1;
+      min-height: 0;
+      background: #FFFFFF;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 8px 12px;
+      position: relative;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .studio-step-view {
+      display: none;
+      width: 100%;
+      height: 100%;
+      flex-direction: column;
+      justify-content: center;
+      gap: 8px;
+      animation: fadeInStep 0.3s ease;
+    }
+
+    .studio-step-view.active-view {
+      display: flex;
+    }
+
+    @keyframes fadeInStep {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* VIEW 1: Words Connect Cards */
+    .connections-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      width: 100%;
+    }
+
+    .connection-visual-card {
+      background: var(--bg-ivory);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-align: left;
+      transition: all 0.25s;
+    }
+
+    .connection-visual-card:hover {
+      border-color: var(--lavender);
+      background: #FFFFFF;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .conn-tag-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 700;
+      color: var(--deep-purple);
+      background: #F0EAFF;
+      padding: 2px 6px;
+      border-radius: 5px;
+      width: fit-content;
+    }
+
+    .conn-pair-title {
+      font-size: 0.84rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .conn-desc-text {
+      font-size: 0.72rem;
+      color: var(--text-sub);
+      line-height: 1.25;
+    }
+
+    /* VIEW 2: Memory Recall Cards */
+    .memories-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      width: 100%;
+    }
+
+    .memory-visual-card {
+      background: #FFFBF5;
+      border: 1.5px solid #FDE68A;
+      border-radius: 10px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-align: left;
+      transition: all 0.25s;
+    }
+
+    .memory-visual-card:hover {
+      border-color: var(--warm-amber);
+      background: #FFFFFF;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
+    }
+
+    .mem-icon-badge {
+      font-size: 1.15rem;
+    }
+
+    .mem-card-title {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #92400E;
+    }
+
+    .mem-card-desc {
+      font-size: 0.72rem;
+      color: var(--text-sub);
+      line-height: 1.25;
+    }
+
+    /* VIEW 3: Before vs After Enriched Meaning */
+    .enriched-comparison-layout {
+      display: grid;
+      grid-template-columns: 1fr 40px 1.25fr;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .before-card, .after-card {
+      background: var(--bg-ivory);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 10px 14px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .after-card {
+      background: #F0FDF4;
+      border-color: #86EFAC;
+      box-shadow: 0 4px 16px rgba(34, 197, 94, 0.12);
+    }
+
+    .comp-header {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .comp-token-highlight {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .comp-body-text {
+      font-size: 0.74rem;
+      color: var(--text-sub);
+      line-height: 1.3;
+    }
+
+    .comp-arrow-divider {
+      font-size: 1.3rem;
+      color: var(--deep-purple);
+      text-align: center;
+      font-weight: 800;
+    }
+
+    /* Active Prompt Tokens Deck */
+    .tokens-holding-deck {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: center;
+      z-index: 2;
+      flex-shrink: 0;
+    }
+
+    .reactor-token-capsule {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      background: #FFFFFF;
+      border: 1.5px solid #D5C8F0;
+      border-radius: 6px;
+      padding: 2px 6px;
+      color: var(--deep-purple);
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reactor-token-capsule:hover {
+      border-color: var(--warm-amber);
+      transform: translateY(-1px);
+    }
+
+    .reactor-token-capsule.enriched-gold {
+      background: #E8F8F2;
+      border-color: var(--mint);
+      color: #065F46;
+      box-shadow: 0 2px 8px rgba(99, 201, 172, 0.3);
+    }
+
+    .emerged-hidden-state-bar {
+      z-index: 2;
+      width: 100%;
+      background: #E8F8F2;
+      color: #127552;
+      border: 1.5px solid #BAEBD7;
+      border-radius: 7px;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-align: center;
+      transition: all 0.35s ease;
+      flex-shrink: 0;
+    }
+
+    /* =====================================================================
+       STAGE 6: AUTO-STARTING REPLY GENERATION & FINAL CELEBRATION BANNER
+       ===================================================================== */
+    .generation-showcase-grid {
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 1.35fr;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .candidates-scoring-deck {
+      background: var(--bg-ivory);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-align: left;
+      overflow-y: auto;
+    }
+
+    .deck-headline {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--deep-purple);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .candidate-score-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.74rem;
+    }
+
+    .cand-token-txt {
+      width: 65px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-main);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .cand-bar-rail {
+      flex: 1;
+      height: 8px;
+      background: var(--border-subtle);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .cand-bar-fill-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--deep-purple), var(--lavender));
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .cand-pct-tag {
+      width: 32px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--deep-purple);
+      text-align: right;
+    }
+
+    /* Beautiful Typeset Final Answer Console */
+    .answer-typeset-card {
+      background: var(--bg-ivory);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      text-align: left;
+    }
+
+    .typeset-header {
+      padding: 5px 12px;
+      background: #F3EFE9;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 600;
+      color: var(--text-sub);
+    }
+
+    .typeset-body {
+      padding: 10px 14px;
+      font-size: 0.86rem;
+      line-height: 1.5;
+      color: var(--text-main);
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .streaming-caret {
+      display: inline-block;
+      width: 4px;
+      height: 1.1em;
+      background: var(--warm-amber);
+      margin-left: 2px;
+      vertical-align: middle;
+      animation: blinkCursor 0.8s infinite;
+    }
+
+    @keyframes blinkCursor {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* CELEBRATION FINAL BANNER ("Yes, now you know how a prompt works!") */
+    .celebration-final-banner {
+      width: 100%;
+      background: linear-gradient(135deg, #FFF9EB 0%, #FFFFFF 100%);
+      border: 2px solid #F59E0B;
+      border-radius: 12px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15);
+      animation: popCelebrate 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-align: left;
+    }
+
+    @keyframes popCelebrate {
+      0% { transform: scale(0.9) translateY(10px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .celebration-medal-icon {
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+    }
+
+    .celebration-text-cluster {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .celebration-headline {
+      font-family: var(--font-title);
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #92400E;
+    }
+
+    .celebration-subline {
+      font-size: 0.72rem;
+      color: var(--text-sub);
+      line-height: 1.2;
+    }
+
+    /* =====================================================================
+       CONTEXTUAL USER-ACTION CALLOUT
+       ===================================================================== */
+    .stage-action-callout {
+      width: 100%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      border-radius: 9px;
+      background: var(--bg-ivory);
+      border: 1.5px solid var(--border-subtle);
+      transition: all 0.3s ease;
+    }
+
+    .stage-action-callout.ready {
+      background: #FDFCF9;
+      border-color: var(--warm-amber);
+      box-shadow: 0 2px 10px rgba(231, 163, 90, 0.1);
+    }
+
+    .action-instruction-text {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-align: left;
+    }
+
+    .btn-advance-stage {
+      background: var(--text-main);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 16px;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+    }
+
+    .btn-advance-stage:hover:not(:disabled) {
+      background: #000000;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-advance-stage:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* BOTTOM MINIMAL TRACKER BAR (38px) */
+    .bottom-stepper-track {
+      flex-shrink: 0;
+      height: 38px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-subtle);
+      background: rgba(250, 248, 244, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+    }
+
+    .stepper-pills-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .step-nav-pill {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 7px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .step-nav-pill.current {
+      background: var(--text-main);
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+
+    .step-nav-pill.completed {
+      color: var(--mint);
+      background: #E8F8F2;
+    }
+
+    .step-counter-tag {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    /* TIGHT MEDIA QUERIES FOR COMPACT SCREENS (Height <= 720px, Width <= 1024px) */
+    @media (max-height: 720px) {
+      .top-header { height: 36px; padding: 0 12px; }
+      .bottom-stepper-track { height: 34px; padding: 0 12px; }
+      .stage-viewport { height: calc(100dvh - 70px); max-height: calc(100dvh - 70px); }
+      .stage-section { padding: 4px 10px; }
+      .stage-canvas-card { padding: 8px 14px; gap: 4px; }
+      .stage-main-title { font-size: 1.1rem; }
+      .stage-subtitle-text { font-size: 0.72rem; }
+      .stage-action-callout { padding: 5px 10px; }
+      .btn-advance-stage { padding: 5px 12px; font-size: 0.74rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP COMPACT HEADER (40px) -->
+  <header class="top-header">
+    <div class="brand-cluster">
+      <div class="brand-mark">⚡</div>
+      <span class="brand-title">The Prompt Journey</span>
+      <span class="brand-author">By Yassin Xaviour</span>
+    </div>
+    <div class="header-actions">
+      <button id="btnSound" class="btn-action-pill" aria-label="Toggle Sound Effects">
+        <span id="soundIcon">🔔</span> <span id="soundLabel">Sound: ON</span>
+      </button>
+      <button id="btnRestartAll" class="btn-action-pill" aria-label="Restart Entire Journey">
+        <span>↺</span> Restart
+      </button>
+    </div>
+  </header>
+
+  <!-- STRICT SINGLE-PAGE CONVEYOR VIEWPORT -->
+  <main class="stage-viewport">
+    <div class="conveyor-belt" id="conveyorBelt">
+
+      <!-- ======================================================== -->
+      <!-- STAGE 1: 3 PRESET CARDS & LOAD BOX (USER INPUT REMOVED) -->
+      <!-- ======================================================== -->
+      <section class="stage-section" id="stageSection1">
+        <div class="stage-canvas-card">
+          <div class="stage-header-block">
+            <span class="stage-index-badge">Stage 01 · Prompt Loading</span>
+            <h1 class="stage-main-title">01 · Choose and load a prompt</h1>
+            <p class="stage-subtitle-text">
+              Select one of the 3 prompts below, then drag and drop it into the <strong>LOAD BOX</strong>. Once dropped, it will automatically launch into the journey!
+            </p>
+          </div>
+
+          <div class="stage1-arena">
+            <!-- Exactly 3 Preset Cards with Rich Vector SVG Illustrations -->
+            <div class="prompt-presets-grid">
+              <div class="preset-prompt-card selected" data-id="cat" id="card_cat" draggable="true">
+                <img src="assets/cat-prompt.svg" class="card-svg-icon" alt="Cat Icon">
+                <div class="card-prompt-quote">"Why did my cat stare at the wall at 3 AM?"</div>
+              </div>
+              <div class="preset-prompt-card" data-id="spoon" id="card_spoon" draggable="true">
+                <img src="assets/spoon-prompt.svg" class="card-svg-icon" alt="Microwave Spoon Icon">
+                <div class="card-prompt-quote">"Can I microwave a metal spoon if I apologize first?"</div>
+              </div>
+              <div class="preset-prompt-card" data-id="coffee" id="card_coffee" draggable="true">
+                <img src="assets/coffee-prompt.svg" class="card-svg-icon" alt="Coffee Code Icon">
+                <div class="card-prompt-quote">"Why does coffee make debugging feel faster?"</div>
+              </div>
+            </div>
+
+            <!-- BIG INVITING DROP / LOAD BOX -->
+            <div class="big-load-drop-box" id="bigLoadDropBox">
+              <img src="assets/cursor-hand.svg" class="tutorial-hand-guide" id="tutorialHand" alt="Drag Tutorial Pointer">
+              <div class="load-box-icon" id="loadBoxIcon">📥</div>
+              <div class="load-box-heading" id="loadBoxHeading">DROP PROMPT HERE TO LOAD</div>
+              <div class="load-box-caption" id="loadBoxCaption">Drag any of the 3 prompt cards above into this box to auto-advance!</div>
+            </div>
+          </div>
+
+          <!-- Status Bar -->
+          <div class="stage-action-callout ready" id="callout1">
+            <div class="action-instruction-text">
+              <span>💡</span>
+              <span id="calloutText1">Drag any card into the big box above to start the transformation.</span>
+            </div>
+            <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--deep-purple); font-weight:700;">
+              AUTO-TRANSITIONS ON DROP ➔
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- STAGE 2: TOKENIZATION & VISUAL DICTIONARY LOOKUP -->
+      <!-- ======================================================== -->
+      <section class="stage-section" id="stageSection2">
+        <div class="stage-canvas-card">
+          <div class="stage-header-block">
+            <span class="stage-index-badge">Stage 02 · Tokenization</span>
+            <h2 class="stage-main-title">02 · From text pieces to vocabulary IDs</h2>
+            <p class="stage-subtitle-text">
+              Text splits into subword pieces. Each piece searches through the model's vocabulary dictionary until its matching integer ID is stamped.
+            </p>
+          </div>
+
+          <div class="tokenization-machine-arena">
+            <!-- Left: Splitting Mechanism -->
+            <div class="splitting-track-panel">
+              <span class="panel-section-tag">
+                <img src="assets/token-chip.svg" style="width:14px; height:14px;" alt="Chip"> Token Splitting Tray
+              </span>
+              <div class="token-chips-flow" id="tokenChipsTray">
+                <!-- Stamped tokens appear sequentially -->
+              </div>
+            </div>
+
+            <!-- Right: Visual Dictionary Lookup Station -->
+            <div class="vocab-station-drawer">
+              <div class="dict-search-radar">
+                <span id="dictSearchStatus">DICTIONARY SCANNER: IDLE</span>
+                <span style="color:var(--text-muted);">50,000+ ENTRIES</span>
+              </div>
+              <div class="dict-scanner-beam" id="scannerBeam" style="display:none;"></div>
+              <div class="vocab-table-body" id="vocabRowsContainer">
+                <!-- Dynamic lookup rows -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Contextual User Action Callout with EMBEDDINGS BUTTON -->
+          <div class="stage-action-callout ready" id="callout2">
+            <div class="action-instruction-text">
+              <span>✂️</span>
+              <span id="calloutText2">Searching vocabulary entries for prompt tokens...</span>
+            </div>
+            <button id="btnAction2" class="btn-advance-stage" onclick="goToStage(3)">
+              Embeddings ➔
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- STAGE 3: 3D VECTOR EMBEDDINGS (BLINK ARRIVAL, INTERACTIVE, ATTACHED IMAGE MATCH) -->
+      <!-- ======================================================== -->
+      <section class="stage-section" id="stageSection3">
+        <div class="stage-canvas-card">
+          <div class="stage-header-block">
+            <span class="stage-index-badge">Stage 03 · Vector Embeddings</span>
+            <h2 class="stage-main-title">03 · Tokens become points in 3D learned space</h2>
+            <p class="stage-subtitle-text">
+              Every token arrives into the 3D manifold blinking with a radar halo. Click or hover any point to inspect its 3D coordinate vector!
+            </p>
+          </div>
+
+          <!-- Rotatable Perspective 3D Canvas with Interactive Toolbar -->
+          <div class="space-3d-wrapper" id="space3dFrame" title="Click and drag to rotate the 3D space, wheel to zoom!">
+            <canvas id="space3dCanvas" class="space-3d-canvas"></canvas>
+            
+            <!-- Dimension Tag Indicators -->
+            <span class="axis-hud-tag tag-x">DIMENSION X</span>
+            <span class="axis-hud-tag tag-y">DIMENSION Y</span>
+            <span class="axis-hud-tag tag-z">DIMENSION Z</span>
+            
+            <!-- Interactive Floating Controls Toolbar -->
+            <div class="space-3d-toolbar">
+              <button class="canvas-tool-btn" onclick="animateTokensOneByOne3D()" title="Replay Blink Arrival">✨ Replay Blink</button>
+              <span style="color:var(--border-strong);">|</span>
+              <button class="canvas-tool-btn active" id="btnToggleCoords" onclick="toggle3DCoordinatesFormat()" title="Toggle Full [X, Y, Z] Labels">🏷️ Labels: Full [X,Y,Z]</button>
+            </div>
+
+            <!-- Clean Interactive 3D HUD Inspector -->
+            <div class="token-3d-inspector-hud" id="token3dInspectorHud">
+              <span class="hud-blink-dot"></span>
+              <strong id="hudTokenName">"cat"</strong>
+              <span style="font-family:var(--font-mono); font-size:0.68rem; color:var(--deep-purple);" id="hudTokenCoords">[1.9, -1.0, -0.6]</span>
+            </div>
+          </div>
+
+          <div style="font-size:0.72rem; color:var(--text-sub); display:flex; gap:12px; justify-content:center;">
+            <span>🖱️ Drag to rotate 3D view</span>
+            <span>🔍 Mouse wheel to zoom</span>
+            <span>✨ Click any sphere to lock coordinate drop-lines</span>
+          </div>
+
+          <!-- Contextual User Action Callout with SELF-ATTENTION BUTTON -->
+          <div class="stage-action-callout ready" id="callout3">
+            <div class="action-instruction-text">
+              <span>🌌</span>
+              <span id="calloutText3">All tokens projected with 3D coordinate vectors!</span>
+            </div>
+            <button id="btnAction3" class="btn-advance-stage" onclick="goToStage(4)">
+              Self-Attention ➔
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- STAGE 4: SELF-ATTENTION (AUTOMATIC RAINBOW WORD-BY-WORD SWEEP) -->
+      <!-- ======================================================== -->
+      <section class="stage-section" id="stageSection4">
+        <div class="stage-canvas-card">
+          <div class="stage-header-block">
+            <span class="stage-index-badge">Stage 04 · Self-Attention</span>
+            <h2 class="stage-main-title">04 · How each token gathers context</h2>
+            <p class="stage-subtitle-text">
+              Watch the attention spotlight advance word-by-word automatically like a rainbow sweep, firing beams with percentage relevance to all other tokens.
+            </p>
+          </div>
+
+          <div class="attention-control-deck">
+            <div class="attention-token-nodes" id="attentionTokensRow">
+              <!-- Clickable query token nodes -->
+            </div>
+            <div>
+              <button class="btn-action-pill" id="btnAutoPlayAttention" onclick="toggleAutoAttention()">▶ Auto-Sweep: ON</button>
+            </div>
+          </div>
+
+          <!-- Dynamic Arcs & Particle Canvas -->
+          <div class="attention-arcs-viewport">
+            <canvas id="attentionArcsCanvas" style="width:100%; height:100%; display:block;"></canvas>
+          </div>
+
+          <!-- Contextual User Action Callout with TRANSFORMERS BUTTON -->
+          <div class="stage-action-callout ready" id="callout4">
+            <div class="action-instruction-text">
+              <span>💡</span>
+              <span id="calloutText4">Attention beams sweep word-by-word across the context.</span>
+            </div>
+            <button id="btnAction4" class="btn-advance-stage" onclick="goToStage(5)">
+              Transformers ➔
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- STAGE 5: TRANSFORMERS (REVOLUTIONIZED ACCELERATOR CHAMBER) -->
+      <!-- ======================================================== -->
+      <!-- ======================================================== -->
+      <!-- STAGE 5: TRANSFORMER STUDIO (CLEAR, INTUITIVE & HIGH VISIBILITY) -->
+      <!-- ======================================================== -->
+      <section class="stage-section" id="stageSection5">
+        <div class="stage-canvas-card">
+          <div class="stage-header-block">
+            <span class="stage-index-badge">Stage 05 · Transformer Layers</span>
+            <h2 class="stage-main-title">05 · Inside the Transformer: How Words Gain Meaning</h2>
+            <p class="stage-subtitle-text">
+              Across 32 layers, words connect to each other, recall facts from memory, and build an enriched understanding.
+            </p>
+          </div>
+
+          <!-- CLEAN & INTUITIVE TRANSFORMER STUDIO -->
+          <div class="transformer-studio-deck" id="transformerLayersArena">
+            <!-- 3 Step Navigation Pills -->
+            <div class="studio-step-pills">
+              <button class="studio-step-btn active" id="stepPill1" onclick="selectStudioStep(0)">
+                <span class="studio-step-num">1</span>
+                <div class="studio-step-label-group">
+                  <span class="studio-step-title">Words Connect</span>
+                  <span class="studio-step-sub">Self-Attention</span>
+                </div>
+              </button>
+              <button class="studio-step-btn" id="stepPill2" onclick="selectStudioStep(1)">
+                <span class="studio-step-num">2</span>
+                <div class="studio-step-label-group">
+                  <span class="studio-step-title">Memory Recall</span>
+                  <span class="studio-step-sub">Knowledge Neurons</span>
+                </div>
+              </button>
+              <button class="studio-step-btn" id="stepPill3" onclick="selectStudioStep(2)">
+                <span class="studio-step-num">3</span>
+                <div class="studio-step-label-group">
+                  <span class="studio-step-title">Enriched Meaning</span>
+                  <span class="studio-step-sub">32-Layer Output</span>
+                </div>
+              </button>
+            </div>
+
+            <!-- Central Visual Display Area -->
+            <div class="studio-display-area">
+              <!-- VIEW 1: Words Connect (Attention) -->
+              <div class="studio-step-view active-view" id="studioView1">
+                <div style="font-size:0.75rem; font-weight:700; color:var(--deep-purple); text-align:left;">
+                  STEP 1: Words exchange clues to understand who is doing what:
+                </div>
+                <div class="connections-grid" id="connectionsContainer">
+                  <!-- Populated dynamically based on active prompt -->
+                </div>
+              </div>
+
+              <!-- VIEW 2: Memory Recall (Feed-Forward Neurons) -->
+              <div class="studio-step-view" id="studioView2">
+                <div style="font-size:0.75rem; font-weight:700; color:#92400E; text-align:left;">
+                  STEP 2: The model activates factual memories stored in training parameters:
+                </div>
+                <div class="memories-grid" id="memoriesContainer">
+                  <!-- Populated dynamically based on active prompt -->
+                </div>
+              </div>
+
+              <!-- VIEW 3: Before vs After Enriched Meaning -->
+              <div class="studio-step-view" id="studioView3">
+                <div style="font-size:0.75rem; font-weight:700; color:#065F46; text-align:left;">
+                  STEP 3: The final token vector is now infused with deep real-world meaning:
+                </div>
+                <div class="enriched-comparison-layout" id="enrichedCompContainer">
+                  <!-- Populated dynamically based on active prompt -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Prompt Tokens Deck -->
+            <div class="tokens-holding-deck" id="wordsCascadeRow"></div>
+
+            <!-- Clear Narrative Status Bar -->
+            <div class="emerged-hidden-state-bar" id="emergedHiddenBar">
+              Click "▶ Step Through Flow" to watch the words transform through all 3 stages!
+            </div>
+          </div>
+
+          <div style="font-size:0.72rem; color:var(--text-sub);" id="layerNarrationLine">
+            Words enter Layer 1 as basic text and emerge from Layer 32 with full context.
+          </div>
+
+          <!-- Contextual User Action Callout with AUTO-PLAY & REPLY GENERATION BUTTON -->
+          <div class="stage-action-callout ready" id="callout5">
+            <div class="action-instruction-text">
+              <span>⚡</span>
+              <span id="calloutText5">Click "Step Through Flow" to see how the words transform.</span>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button id="btnRunLayerFlow" class="btn-advance-stage" style="background:var(--warm-amber);" onclick="triggerTransformerAutoFlow()">
+                ▶ Step Through Flow ➔
+              </button>
+              <button id="btnAction5" class="btn-advance-stage" onclick="goToStage(6)">
+                Reply Generation ➔
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- STAGE 6: AUTO-STARTING REPLY & FINAL CELEBRATION -->
+      <!-- ======================================================== -->
+      <section class="stage-section" id="stageSection6">
+        <div class="stage-canvas-card">
+          <div class="stage-header-block">
+            <span class="stage-index-badge">Stage 06 · Answer Generation</span>
+            <h2 class="stage-main-title">06 · From layer output to a complete answer</h2>
+            <p class="stage-subtitle-text">
+              The final layer vectors produce vocabulary logits. Candidate tokens are evaluated with probability scores, and the response is generated token by token!
+            </p>
+          </div>
+
+          <!-- Celebratory Final Banner ("Yes, now you know how a prompt works!") -->
+          <div class="celebration-final-banner" id="celebrationFinalBanner" style="display:none;">
+            <img src="assets/celebration-badge.svg" alt="Award Medal" class="celebration-medal-icon">
+            <div class="celebration-text-cluster">
+              <h3 class="celebration-headline">Yes, now you know how a prompt works!</h3>
+              <p class="celebration-subline">You guided raw text through tokens, 3D embeddings, self-attention, 32 transformer layers, and probability logits into an answer.</p>
+            </div>
+            <button class="btn-action-pill" style="font-weight:700; padding:4px 10px;" onclick="restartWholeJourney()">Explore Again ↺</button>
+          </div>
+
+          <div class="generation-showcase-grid" id="generationShowcaseGrid">
+            <!-- Candidate next-token sampling deck -->
+            <div class="candidates-scoring-deck">
+              <span class="deck-headline">Next-Token Probabilities (Softmax):</span>
+              <div id="candidateProbBars" style="display:flex; flex-direction:column; gap:4px;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <!-- Beautiful typeset response card -->
+            <div class="answer-typeset-card">
+              <div class="typeset-header">
+                <span>AUTOREGRESSIVE DECODER EMISSION</span>
+                <span id="generationStatusBadge" style="color:var(--mint); font-weight:700;">Starting automatically...</span>
+              </div>
+              <div class="typeset-body" id="finalAnswerParagraph">
+                <span style="color:var(--text-muted); font-style:italic;">
+                  Starting response generation...
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contextual User Action Callout -->
+          <div class="stage-action-callout ready" id="callout6">
+            <div class="action-instruction-text">
+              <span>✦</span>
+              <span id="calloutText6">Generating answer token-by-token from the neural hidden state!</span>
+            </div>
+            <button id="btnAction6" class="btn-advance-stage" onclick="restartWholeJourney()">
+              Explore Again ↺
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- BOTTOM MINIMAL TRACKER BAR (38px) -->
+  <footer class="bottom-stepper-track">
+    <div class="stepper-pills-row">
+      <span class="step-nav-pill current" id="navPill1" onclick="goToStage(1)">1. Load Prompt</span>
+      <span>›</span>
+      <span class="step-nav-pill" id="navPill2" onclick="goToStage(2)">2. Token IDs</span>
+      <span>›</span>
+      <span class="step-nav-pill" id="navPill3" onclick="goToStage(3)">3. 3D Embeddings</span>
+      <span>›</span>
+      <span class="step-nav-pill" id="navPill4" onclick="goToStage(4)">4. Self-Attention</span>
+      <span>›</span>
+      <span class="step-nav-pill" id="navPill5" onclick="goToStage(5)">5. Transformers</span>
+      <span>›</span>
+      <span class="step-nav-pill" id="navPill6" onclick="goToStage(6)">6. Reply</span>
+    </div>
+
+    <div>
+      <span class="step-counter-tag" id="stepperCounterLabel">STAGE 1 OF 6</span>
+    </div>
+  </footer>
+
+  <script>
+    /* =====================================================================
+       SUBTLE & WARM WEB AUDIO SYNTHESIS
+       ===================================================================== */
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      try {
+        initAudio();
+        const now = audioCtx.currentTime;
+
+        if (type === 'stamp') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(540, now);
+          osc.frequency.exponentialRampToValueAtTime(140, now + 0.08);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.linearRampToValueAtTime(0, now + 0.08);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.09);
+        } else if (type === 'ping') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(620, now);
+          gain.gain.setValueAtTime(0.06, now);
+          gain.gain.linearRampToValueAtTime(0, now + 0.12);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.13);
+        } else if (type === 'beam') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(420, now);
+          osc.frequency.exponentialRampToValueAtTime(760, now + 0.12);
+          gain.gain.setValueAtTime(0.06, now);
+          gain.gain.linearRampToValueAtTime(0, now + 0.12);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.13);
+        } else if (type === 'type') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(640 + Math.random() * 200, now);
+          gain.gain.setValueAtTime(0.02, now);
+          gain.gain.linearRampToValueAtTime(0, now + 0.025);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.03);
+        } else if (type === 'chime') {
+          [523.25, 659.25, 783.99].forEach((freq, idx) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+            gain.gain.setValueAtTime(0.07, now + idx * 0.06);
+            gain.gain.linearRampToValueAtTime(0, now + idx * 0.06 + 0.28);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + idx * 0.06);
+            osc.stop(now + idx * 0.06 + 0.32);
+          });
+        }
+      } catch(e) {}
+    }
+
+    /* =====================================================================
+       PRESET PROMPT DATA (Deterministic, Educational, 3D Vectors Match Attached Image)
+       ===================================================================== */
+    const PRESETS = {
+      cat: {
+        text: "Why did my cat stare at the wall at 3 AM?",
+        tokens: ["Why", "did", "my", "cat", "stare", "at", "the", "wall", "at", "3", "AM", "?"],
+        tokenIds: [7420, 750, 616, 4758, 28491, 379, 262, 3349, 379, 513, 4429, 30],
+        // Exact 3D coordinates from the user's attached screenshot!
+        vectors: [
+          { x: -2.0, y: -0.1, z: -0.4, color: '#6554C8' }, // Why (purple)
+          { x: -0.1, y: -0.7, z: 1.2, color: '#6554C8' },  // did (purple)
+          { x: -0.4, y: -0.2, z: -2.2, color: '#E7A35A' }, // my (amber)
+          { x: 1.9,  y: -1.0, z: -0.6, color: '#6554C8' }, // cat (purple)
+          { x: 1.5,  y: -0.4, z: 0.1, color: '#E7A35A' },  // stare (amber)
+          { x: -0.5, y: 0.2,  z: -1.6, color: '#E7A35A' }, // at (amber)
+          { x: 1.0,  y: -1.4, z: -0.8, color: '#6554C8' }, // the (purple)
+          { x: 1.5,  y: 0.4,  z: 1.4, color: '#E7A35A' },  // wall (amber)
+          { x: -0.5, y: 0.2,  z: -1.6, color: '#E7A35A' }, // at (amber)
+          { x: 1.3,  y: 0.4,  z: 1.6, color: '#E7A35A' },  // 3 (amber)
+          { x: 0.5,  y: -1.1, z: -1.2, color: '#E7A35A' }, // AM (amber)
+          { x: 1.1,  y: 0.2,  z: 2.1, color: '#6554C8' }   // ? (purple)
+        ],
+        answer: "Your cat was not looking at an empty wall; it was monitoring an undocumented quantum anomaly.\n\nFelines can detect high-frequency vibrations up to 64,000 Hz. It is likely a water pipe was humming or a single dust mote caught moonlight at a 4-degree angle.\n\nAlternatively, your cat understands that staring motionless into blank geometry at 3:00 AM induces profound psychological vulnerability in humans. It was a silent power move."
+      },
+      spoon: {
+        text: "Can I microwave a metal spoon if I apologize first?",
+        tokens: ["Can", "I", "micro", "wave", "a", "metal", "spoon", "if", "I", "apologize", "first", "?"],
+        tokenIds: [4215, 314, 15482, 10842, 257, 5972, 28312, 611, 314, 38194, 717, 30],
+        vectors: [
+          { x: -1.8, y: -0.4, z: -0.5, color: '#6554C8' },
+          { x: -0.8, y: -1.0, z: -1.2, color: '#6554C8' },
+          { x: 1.6,  y: -0.8, z: 0.4, color: '#E7A35A' },
+          { x: 1.4,  y: -0.2, z: 0.9, color: '#E7A35A' },
+          { x: -0.4, y: 0.2,  z: -1.8, color: '#6554C8' },
+          { x: 1.8,  y: 0.6,  z: 1.2, color: '#E7A35A' },
+          { x: 1.9,  y: 0.2,  z: 1.6, color: '#E7A35A' },
+          { x: -1.2, y: 0.4,  z: -0.9, color: '#6554C8' },
+          { x: -0.8, y: -1.0, z: -1.2, color: '#6554C8' },
+          { x: 0.4,  y: -1.4, z: -0.6, color: '#E7A35A' },
+          { x: -0.2, y: 0.8,  z: 0.8, color: '#E7A35A' },
+          { x: 1.1,  y: 0.2,  z: 2.1, color: '#6554C8' }
+        ],
+        answer: "Physically, yes. Electromagnetically, absolutely not.\n\nWhile smooth round spoons are technically less prone to instant sparks than sharp fork tines, microwaves create intense standing electrical fields. Remorse is not a recognized dielectric insulating layer.\n\nThe spoon will reject your apology, ionize the air, and turn your kitchen into a miniature plasma experiment."
+      },
+      coffee: {
+        text: "Why does coffee make debugging feel faster?",
+        tokens: ["Why", "does", "coffee", "make", "debug", "ging", "feel", "faster", "?"],
+        tokenIds: [7420, 1053, 7812, 787, 18421, 624, 1254, 5991, 30],
+        vectors: [
+          { x: -2.0, y: -0.1, z: -0.4, color: '#6554C8' },
+          { x: -0.6, y: -0.8, z: 0.8, color: '#6554C8' },
+          { x: 1.7,  y: -0.9, z: -0.8, color: '#E7A35A' },
+          { x: 0.8,  y: -0.3, z: 0.2, color: '#6554C8' },
+          { x: 1.6,  y: 0.5,  z: 1.4, color: '#E7A35A' },
+          { x: 1.2,  y: 0.8,  z: 1.1, color: '#E7A35A' },
+          { x: 0.2,  y: -1.2, z: -1.4, color: '#6554C8' },
+          { x: 1.4,  y: -0.5, z: 1.8, color: '#E7A35A' },
+          { x: 1.1,  y: 0.2,  z: 2.1, color: '#6554C8' }
+        ],
+        answer: "Because without coffee, the bugs occur at normal speed and developers must suffer the emotional consequences in slow motion.\n\nCoffee converts existential dread into aggressive cardiovascular optimism. It does not fix your pointer references; it merely gives you the velocity required to push 12 emergency git commits before standup."
+      }
+    };
+
+    let activeData = PRESETS.cat;
+    let currentStageIndex = 1;
+    let isTokenized = false;
+    let isVectorized = false;
+    let isLayerPassDone = false;
+    let isGeneratingResponse = false;
+    let attentionSweepTimer = null;
+    let isAutoAttentionOn = true;
+    let queryTokenIndex = 0;
+    let cascadeTimer = null;
+    let autoReplyTimer = null;
+    let showFull3DCoords = true;
+
+    /* =====================================================================
+       STAGE 1: 3 PRESET CARDS (DRAG & DROP -> AUTO-TRANSITIONS)
+       ===================================================================== */
+    const bigLoadDropBox = document.getElementById('bigLoadDropBox');
+    const loadBoxHeading = document.getElementById('loadBoxHeading');
+    const loadBoxCaption = document.getElementById('loadBoxCaption');
+    const loadBoxIcon = document.getElementById('loadBoxIcon');
+    const tutorialHand = document.getElementById('tutorialHand');
+
+    function selectPresetPrompt(key) {
+      activeData = PRESETS[key];
+      document.querySelectorAll('.preset-prompt-card').forEach(c => {
+        c.classList.toggle('selected', c.getAttribute('data-id') === key);
+      });
+      loadBoxHeading.textContent = `READY TO LOAD: "${activeData.tokens.slice(0, 4).join(' ')}..."`;
+      playSound('ping');
+    }
+
+    function setupDragAndDrop() {
+      // Preset Cards Dragging
+      document.querySelectorAll('.preset-prompt-card').forEach(card => {
+        card.addEventListener('dragstart', (e) => {
+          tutorialHand.style.display = 'none';
+          const id = card.getAttribute('data-id');
+          selectPresetPrompt(id);
+          e.dataTransfer.setData('text/plain', id);
+        });
+      });
+
+      // Drop Box Listeners
+      bigLoadDropBox.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        bigLoadDropBox.classList.add('drag-hover');
+      });
+
+      bigLoadDropBox.addEventListener('dragleave', () => {
+        bigLoadDropBox.classList.remove('drag-hover');
+      });
+
+      bigLoadDropBox.addEventListener('drop', (e) => {
+        e.preventDefault();
+        bigLoadDropBox.classList.remove('drag-hover');
+        triggerDropDockAnimation();
+      });
+
+      // Click on drop box directly to load selected
+      bigLoadDropBox.addEventListener('click', () => {
+        triggerDropDockAnimation();
+      });
+    }
+
+    function triggerDropDockAnimation() {
+      tutorialHand.style.display = 'none';
+      bigLoadDropBox.classList.add('loaded-docked');
+      loadBoxIcon.textContent = "✅";
+      loadBoxHeading.textContent = "PROMPT LOADED INTO AI PIPELINE!";
+      loadBoxCaption.textContent = "Launching transformation sequence now...";
+      playSound('chime');
+
+      setTimeout(() => {
+        goToStage(2);
+      }, 750);
+    }
+
+    /* =====================================================================
+       STAGE 2: TOKENIZATION & VISUAL DICTIONARY LOOKUP
+       ===================================================================== */
+    const tokenChipsTray = document.getElementById('tokenChipsTray');
+    const vocabRowsContainer = document.getElementById('vocabRowsContainer');
+    const scannerBeam = document.getElementById('scannerBeam');
+    const dictSearchStatus = document.getElementById('dictSearchStatus');
+    const calloutText2 = document.getElementById('calloutText2');
+
+    function triggerTokenizeProcess() {
+      if (isTokenized) return;
+      tokenChipsTray.innerHTML = '';
+      vocabRowsContainer.innerHTML = '';
+      scannerBeam.style.display = 'block';
+
+      const tokens = activeData.tokens;
+      const ids = activeData.tokenIds;
+      let idx = 0;
+
+      dictSearchStatus.textContent = `SCANNING VOCABULARY FOR ${tokens.length} TOKENS...`;
+
+      const interval = setInterval(() => {
+        if (idx < tokens.length) {
+          const t = tokens[idx];
+          const id = ids[idx];
+
+          // 1. Add Stamped Token Chip
+          const chip = document.createElement('div');
+          chip.className = 'stamped-token-pill';
+          chip.innerHTML = `
+            <span class="token-word-piece">"${t}"</span>
+            <span class="token-vocab-id">#${id}</span>
+          `;
+          tokenChipsTray.appendChild(chip);
+
+          // 2. Add Matching Vocabulary Row
+          const row = document.createElement('div');
+          row.className = 'vocab-entry-row active-lookup';
+          row.innerHTML = `
+            <strong>"${t}"</strong>
+            <span style="color:var(--text-muted);">➔</span>
+            <span style="font-family:var(--font-mono); color:var(--deep-purple); font-weight:700;">ID: ${id}</span>
+          `;
+          vocabRowsContainer.prepend(row);
+
+          calloutText2.textContent = `Matched subword "${t}" ➔ Vocabulary Index #${id}`;
+          playSound('stamp');
+          idx++;
+        } else {
+          clearInterval(interval);
+          isTokenized = true;
+          scannerBeam.style.display = 'none';
+          dictSearchStatus.textContent = "✓ ALL TOKENS MAPPED TO VOCABULARY IDS";
+          calloutText2.textContent = `All token pieces matched to dictionary IDs. Click Embeddings to project into 3D!`;
+          playSound('chime');
+        }
+      }, 160);
+    }
+
+    /* =====================================================================
+       STAGE 3: 3D VECTOR EMBEDDINGS (MATCH ATTACHED IMAGE + BLINK ARRIVAL + INTERACTIVE)
+       ===================================================================== */
+    const space3dCanvas = document.getElementById('space3dCanvas');
+    const space3dFrame = document.getElementById('space3dFrame');
+    const hudTokenName = document.getElementById('hudTokenName');
+    const hudTokenCoords = document.getElementById('hudTokenCoords');
+    const calloutText3 = document.getElementById('calloutText3');
+    const btnToggleCoords = document.getElementById('btnToggleCoords');
+
+    let rotX = 0.24;
+    let rotY = -0.46;
+    let zoomScale = 1.0;
+    let isMouseDown = false;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
+    let visiblePointsCount = 0;
+    let pointsArrivalTimer = null;
+    let hoveredPointIndex = -1;
+    let selectedPointIndex = 3; // Default select "cat"
+    let pointArrivalBlinkProgress = [];
+
+    function toggle3DCoordinatesFormat() {
+      showFull3DCoords = !showFull3DCoords;
+      btnToggleCoords.textContent = showFull3DCoords ? "🏷️ Labels: Full [X,Y,Z]" : "🏷️ Labels: Compact";
+      btnToggleCoords.classList.toggle('active', showFull3DCoords);
+      render3DScene();
+    }
+
+    function init3DCanvasEvents() {
+      space3dFrame.addEventListener('mousedown', (e) => {
+        isMouseDown = true;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isMouseDown) {
+          // Check for hover hit detection
+          handleCanvasHover(e);
+          return;
+        }
+        const dx = e.clientX - lastMouseX;
+        const dy = e.clientY - lastMouseY;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+
+        rotY += dx * 0.008;
+        rotX += dy * 0.008;
+        rotX = Math.max(-0.65, Math.min(0.85, rotX));
+        render3DScene();
+      });
+
+      window.addEventListener('mouseup', () => { isMouseDown = false; });
+
+      // Click to select
+      space3dFrame.addEventListener('click', (e) => {
+        handleCanvasClick(e);
+      });
+
+      // Mouse wheel to zoom
+      space3dFrame.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        zoomScale += e.deltaY * -0.001;
+        zoomScale = Math.max(0.6, Math.min(2.0, zoomScale));
+        render3DScene();
+      }, { passive: false });
+
+      // Touch support
+      space3dFrame.addEventListener('touchstart', (e) => {
+        isMouseDown = true;
+        lastMouseX = e.touches[0].clientX;
+        lastMouseY = e.touches[0].clientY;
+      }, { passive: true });
+
+      window.addEventListener('touchmove', (e) => {
+        if (!isMouseDown) return;
+        const dx = e.touches[0].clientX - lastMouseX;
+        const dy = e.touches[0].clientY - lastMouseY;
+        lastMouseX = e.touches[0].clientX;
+        lastMouseY = e.touches[0].clientY;
+
+        rotY += dx * 0.008;
+        rotX += dy * 0.008;
+        rotX = Math.max(-0.65, Math.min(0.85, rotX));
+        render3DScene();
+      }, { passive: true });
+
+      window.addEventListener('touchend', () => { isMouseDown = false; });
+    }
+
+    let currentProjectedCache = [];
+
+    function handleCanvasHover(e) {
+      const rect = space3dCanvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      let found = -1;
+      for (let i = currentProjectedCache.length - 1; i >= 0; i--) {
+        const p = currentProjectedCache[i];
+        const dist = Math.hypot(p.px - mx, p.py - my);
+        if (dist < 18) {
+          found = p.originalIndex;
+          break;
+        }
+      }
+
+      if (found !== hoveredPointIndex) {
+        hoveredPointIndex = found;
+        if (found !== -1) {
+          updateHudWithToken(found);
+        }
+        render3DScene();
+      }
+    }
+
+    function handleCanvasClick(e) {
+      if (hoveredPointIndex !== -1) {
+        selectedPointIndex = hoveredPointIndex;
+        updateHudWithToken(selectedPointIndex);
+        render3DScene();
+        playSound('ping');
+      }
+    }
+
+    function updateHudWithToken(idx) {
+      const tokens = activeData.tokens;
+      const vectors = activeData.vectors;
+      if (idx >= 0 && idx < tokens.length) {
+        const t = tokens[idx];
+        const v = vectors[idx];
+        hudTokenName.textContent = `"${t}"`;
+        hudTokenCoords.textContent = `[X: ${v.x.toFixed(1)}, Y: ${v.y.toFixed(1)}, Z: ${v.z.toFixed(1)}]`;
+        calloutText3.textContent = `Token "${t}" embedded at coordinates [${v.x.toFixed(1)}, ${v.y.toFixed(1)}, ${v.z.toFixed(1)}]`;
+      }
+    }
+
+    function render3DScene() {
+      const ctx = space3dCanvas.getContext('2d');
+      const w = space3dCanvas.parentElement.clientWidth;
+      const h = space3dCanvas.parentElement.clientHeight;
+      space3dCanvas.width = w * devicePixelRatio;
+      space3dCanvas.height = h * devicePixelRatio;
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+
+      ctx.clearRect(0, 0, w, h);
+
+      const cx = w * 0.48;
+      const cy = h * 0.52;
+      const focalLength = 320 * zoomScale;
+
+      function project(x, y, z) {
+        const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+        let x1 = x * cosY - z * sinY;
+        let z1 = z * cosY + x * sinY;
+
+        const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+        let y2 = y * cosX - z1 * sinX;
+        let z2 = z1 * cosX + y * sinX;
+
+        const depth = z2 + 280;
+        const scale = focalLength / Math.max(depth, 40);
+        return {
+          px: cx + x1 * scale,
+          py: cy + y2 * scale,
+          scale: scale,
+          depth: z2
+        };
+      }
+
+      // Draw Floor Perspective Grid (Subtle, matches attached screenshot)
+      ctx.strokeStyle = '#EDE8F5';
+      ctx.lineWidth = 1;
+      const floorY = 80;
+      for (let gx = -180; gx <= 180; gx += 40) {
+        const p1 = project(gx, floorY, -180);
+        const p2 = project(gx, floorY, 180);
+        ctx.beginPath();
+        ctx.moveTo(p1.px, p1.py);
+        ctx.lineTo(p2.px, p2.py);
+        ctx.stroke();
+      }
+      for (let gz = -180; gz <= 180; gz += 40) {
+        const p1 = project(-180, floorY, gz);
+        const p2 = project(180, floorY, gz);
+        ctx.beginPath();
+        ctx.moveTo(p1.px, p1.py);
+        ctx.lineTo(p2.px, p2.py);
+        ctx.stroke();
+      }
+
+      // 3D Schematic Coordinate Axes
+      const origin = project(0, 0, 0);
+      const axisX = project(150, 0, 0);
+      const axisY = project(0, -130, 0); // Y points straight UP like in user image!
+      const axisZ = project(0, 0, 150);
+
+      // Vertical Y Axis (Vibrant Teal / Mint, straight up, matches screenshot!)
+      ctx.strokeStyle = '#2DD4BF';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(origin.px, origin.py);
+      ctx.lineTo(axisY.px, axisY.py);
+      ctx.stroke();
+
+      // X Axis (Soft Lavender / Blue)
+      ctx.strokeStyle = '#818CF8';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(origin.px, origin.py);
+      ctx.lineTo(axisX.px, axisX.py);
+      ctx.stroke();
+
+      // Z Axis (Purple / Blue)
+      ctx.strokeStyle = '#6554C8';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(origin.px, origin.py);
+      ctx.lineTo(axisZ.px, axisZ.py);
+      ctx.stroke();
+
+      // Tokens and 3D Vectors
+      const tokens = activeData.tokens;
+      const vectors = activeData.vectors;
+
+      const points = tokens.map((t, i) => {
+        const v = vectors[i];
+        // Scale vector coordinates to canvas units
+        const scaleFactor = 48;
+        return {
+          t,
+          x: v.x * scaleFactor,
+          y: v.y * scaleFactor,
+          z: v.z * scaleFactor,
+          originalVector: v,
+          color: v.color || (i % 2 === 0 ? '#6554C8' : '#E7A35A'),
+          originalIndex: i
+        };
+      });
+
+      // ONLY RENDER POINTS UP TO visiblePointsCount (ONE BY ONE ARRIVAL)
+      const visiblePoints = points.slice(0, visiblePointsCount);
+      const projectedPoints = visiblePoints.map(p => {
+        const proj = project(p.x, p.y, p.z);
+        return {
+          ...p,
+          px: proj.px,
+          py: proj.py,
+          scale: proj.scale,
+          depth: proj.depth
+        };
+      }).sort((a, b) => b.depth - a.depth);
+
+      currentProjectedCache = projectedPoints;
+
+      const time = performance.now() * 0.003;
+
+      projectedPoints.forEach((p) => {
+        const isLatest = (p.originalIndex === visiblePointsCount - 1);
+        const isHovered = (p.originalIndex === hoveredPointIndex);
+        const isSelected = (p.originalIndex === selectedPointIndex);
+        const shouldBlink = isLatest || isHovered || isSelected;
+
+        // Connecting ray from origin (0,0,0) to token point
+        ctx.strokeStyle = shouldBlink ? 'rgba(101, 84, 200, 0.45)' : 'rgba(129, 140, 248, 0.18)';
+        ctx.lineWidth = shouldBlink ? 1.6 : 1;
+        ctx.beginPath();
+        ctx.moveTo(origin.px, origin.py);
+        ctx.lineTo(p.px, p.py);
+        ctx.stroke();
+
+        // Drop shadow onto floor
+        const floorP = project(p.x, floorY, p.z);
+        ctx.fillStyle = 'rgba(36, 35, 43, 0.08)';
+        ctx.beginPath();
+        ctx.ellipse(floorP.px, floorP.py, 4.5 * p.scale, 2.2 * p.scale, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Dashed reference projection line to floor if selected
+        if (isSelected) {
+          ctx.strokeStyle = 'rgba(101, 84, 200, 0.35)';
+          ctx.setLineDash([2, 3]);
+          ctx.beginPath();
+          ctx.moveTo(p.px, p.py);
+          ctx.lineTo(floorP.px, floorP.py);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
+        // BLINK HALO (Pulsating radar ring expanding on arrival or hover/select)
+        if (shouldBlink) {
+          const pulsePhase = Math.sin(time * 4) * 0.5 + 0.5;
+          const pulseRadius = (7 + pulsePhase * 8) * p.scale;
+          ctx.strokeStyle = p.color;
+          ctx.globalAlpha = 0.55 - pulsePhase * 0.35;
+          ctx.lineWidth = 2.2;
+          ctx.beginPath();
+          ctx.arc(p.px, p.py, pulseRadius, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.globalAlpha = 1.0;
+        }
+
+        // Center Vector Point Node Sphere (Purple or Amber)
+        const radius = Math.max(4, (shouldBlink ? 7 : 5.5) * p.scale);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.px, p.py, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Inner sphere specular highlight
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.beginPath();
+        ctx.arc(p.px - radius * 0.3, p.py - radius * 0.3, radius * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+
+        // EXACT LABEL FORMAT MATCHING USER SCREENSHOT: `word [X, Y, Z]`
+        const v = p.originalVector;
+        const labelText = showFull3DCoords
+          ? `${p.t} [${v.x.toFixed(1)}, ${v.y.toFixed(1)}, ${v.z.toFixed(1)}]`
+          : p.t;
+
+        ctx.fillStyle = shouldBlink ? '#1E1B4B' : '#24232B';
+        const fontSize = Math.max(9, Math.round(11 * p.scale));
+        ctx.font = `700 ${fontSize}px Space Grotesk, Plus Jakarta Sans, sans-serif`;
+
+        // Smart text shadow / pill for crisp legibility
+        ctx.shadowColor = 'rgba(255, 255, 255, 0.9)';
+        ctx.shadowBlur = 4;
+        ctx.fillText(labelText, p.px + 9, p.py + 4);
+        ctx.shadowBlur = 0;
+      });
+    }
+
+    // Animation frame for continuous subtle pulse
+    function startPulseAnimationLoop() {
+      function loop() {
+        if (currentStageIndex === 3) {
+          render3DScene();
+        }
+        requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(loop);
+    }
+
+    function animateTokensOneByOne3D() {
+      if (pointsArrivalTimer) clearInterval(pointsArrivalTimer);
+      visiblePointsCount = 0;
+      const total = activeData.tokens.length;
+
+      pointsArrivalTimer = setInterval(() => {
+        if (visiblePointsCount < total) {
+          visiblePointsCount++;
+          selectedPointIndex = visiblePointsCount - 1;
+          updateHudWithToken(selectedPointIndex);
+          render3DScene();
+          playSound('ping');
+        } else {
+          clearInterval(pointsArrivalTimer);
+          isVectorized = true;
+          calloutText3.textContent = "Every token positioned in 3D manifold! Click & drag view to rotate.";
+          playSound('chime');
+        }
+      }, 160);
+    }
+
+    /* =====================================================================
+       STAGE 4: SELF-ATTENTION (AUTOMATIC RAINBOW WORD-BY-WORD SWEEP)
+       ===================================================================== */
+    const attentionTokensRow = document.getElementById('attentionTokensRow');
+    const attentionArcsCanvas = document.getElementById('attentionArcsCanvas');
+    const calloutText4 = document.getElementById('calloutText4');
+    const btnAutoPlayAttention = document.getElementById('btnAutoPlayAttention');
+
+    function renderAttentionStage() {
+      attentionTokensRow.innerHTML = '';
+      const tokens = activeData.tokens.slice(0, 9);
+
+      tokens.forEach((t, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `query-node-btn ${idx === queryTokenIndex ? 'active-query' : ''}`;
+        btn.textContent = t;
+        btn.onclick = () => {
+          queryTokenIndex = idx;
+          isAutoAttentionOn = false;
+          btnAutoPlayAttention.textContent = "▶ Auto-Sweep: OFF";
+          renderAttentionStage();
+          drawRainbowAttentionArcs();
+          playSound('beam');
+        };
+        attentionTokensRow.appendChild(btn);
+      });
+
+      drawRainbowAttentionArcs();
+    }
+
+    function toggleAutoAttention() {
+      isAutoAttentionOn = !isAutoAttentionOn;
+      btnAutoPlayAttention.textContent = isAutoAttentionOn ? "▶ Auto-Sweep: ON" : "▶ Auto-Sweep: OFF";
+      if (isAutoAttentionOn) startRainbowAutoSweep();
+      else if (attentionSweepTimer) clearInterval(attentionSweepTimer);
+    }
+
+    function startRainbowAutoSweep() {
+      if (attentionSweepTimer) clearInterval(attentionSweepTimer);
+      isAutoAttentionOn = true;
+      btnAutoPlayAttention.textContent = "▶ Auto-Sweep: ON";
+      renderAttentionStage();
+
+      const total = Math.min(activeData.tokens.length, 9);
+      attentionSweepTimer = setInterval(() => {
+        if (!isAutoAttentionOn) return;
+        queryTokenIndex = (queryTokenIndex + 1) % total;
+        renderAttentionStage();
+        playSound('beam');
+      }, 1400);
+    }
+
+    function drawRainbowAttentionArcs() {
+      const ctx = attentionArcsCanvas.getContext('2d');
+      const w = attentionArcsCanvas.parentElement.clientWidth;
+      const h = attentionArcsCanvas.parentElement.clientHeight;
+      attentionArcsCanvas.width = w * devicePixelRatio;
+      attentionArcsCanvas.height = h * devicePixelRatio;
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+
+      ctx.clearRect(0, 0, w, h);
+
+      const tokens = activeData.tokens.slice(0, 9);
+      const total = tokens.length;
+      if (total === 0) return;
+
+      const paddingX = 40;
+      const stepX = (w - paddingX * 2) / Math.max(1, total - 1);
+      const baseLineY = h * 0.65;
+
+      const rainbowColors = [
+        '#8877E8', // Lavender
+        '#6554C8', // Deep Purple
+        '#63C9AC', // Mint
+        '#2DD4BF', // Teal
+        '#E7A35A', // Warm Amber
+        '#E98B8B', // Coral
+        '#3B82F6', // Blue
+        '#EC4899', // Pink
+        '#8B5CF6'  // Violet
+      ];
+
+      // Draw horizontal baseline
+      ctx.strokeStyle = '#E8E2D8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(paddingX - 10, baseLineY);
+      ctx.lineTo(w - paddingX + 10, baseLineY);
+      ctx.stroke();
+
+      // Draw Key/Value token nodes on the baseline
+      tokens.forEach((t, i) => {
+        const x = paddingX + i * stepX;
+        const isQuery = (i === queryTokenIndex);
+
+        // Node dot
+        ctx.fillStyle = isQuery ? '#6554C8' : '#FAF8F4';
+        ctx.strokeStyle = isQuery ? '#6554C8' : '#D5CBBD';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x, baseLineY, isQuery ? 7 : 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Node label
+        ctx.fillStyle = isQuery ? '#6554C8' : '#716D79';
+        ctx.font = `${isQuery ? '700' : '600'} 10px Plus Jakarta Sans, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText(t, x, baseLineY + 18);
+      });
+
+      // Draw Attention Arcs from Query token to all other tokens
+      const originX = paddingX + queryTokenIndex * stepX;
+
+      tokens.forEach((targetToken, j) => {
+        if (j === queryTokenIndex) return;
+        const targetX = paddingX + j * stepX;
+        const midX = (originX + targetX) / 2;
+        const dist = Math.abs(originX - targetX);
+        const arcHeight = Math.min(dist * 0.45, 75);
+        const midY = baseLineY - arcHeight;
+
+        let weight = Math.round(100 / (1 + Math.abs(queryTokenIndex - j) * 0.72));
+
+        ctx.beginPath();
+        ctx.moveTo(originX, baseLineY);
+        ctx.quadraticCurveTo(midX, midY, targetX, baseLineY);
+
+        const col = rainbowColors[j % rainbowColors.length];
+        ctx.strokeStyle = col;
+        ctx.lineWidth = Math.max(1.5, weight / 25);
+        ctx.stroke();
+
+        // Percentage Weight pill at peak
+        ctx.fillStyle = '#24232B';
+        ctx.font = 'bold 9px JetBrains Mono, monospace';
+        ctx.fillText(`${weight}%`, midX, midY - 4);
+      });
+
+      calloutText4.textContent = `Word "${tokens[queryTokenIndex]}" actively evaluating relevance to other words in context!`;
+    }
+
+    /* =====================================================================
+       STAGE 5: TRANSFORMER PROCESSING STUDIO (CLEAR, INTUITIVE & HIGH VISIBILITY)
+       ===================================================================== */
+    const wordsCascadeRow = document.getElementById('wordsCascadeRow');
+    const emergedHiddenBar = document.getElementById('emergedHiddenBar');
+    const layerNarrationLine = document.getElementById('layerNarrationLine');
+    const calloutText5 = document.getElementById('calloutText5');
+    const connectionsContainer = document.getElementById('connectionsContainer');
+    const memoriesContainer = document.getElementById('memoriesContainer');
+    const enrichedCompContainer = document.getElementById('enrichedCompContainer');
+
+    const TRANSFORMER_STUDIO_DATA = {
+      cat: {
+        connections: [
+          { from: "cat", to: "stare", icon: "🐾", label: "Subject ➔ Action", desc: "Connects the cat directly to its staring behavior." },
+          { from: "stare", to: "wall", icon: "🧱", label: "Action ➔ Target", desc: "Binds the gaze to the solid drywall surface." },
+          { from: "wall", to: "3 AM", icon: "🌙", label: "Target ➔ Setting", desc: "Links the quiet 3:00 AM silence where vibrations become noticeable." }
+        ],
+        memories: [
+          { icon: "🔊", title: "Feline Ultrasonic Hearing", desc: "Cats detect frequencies up to 64,000 Hz (3x human limit), easily hearing mice or pipe hums behind walls." },
+          { icon: "🌙", title: "3:00 AM Thermal Shifts", desc: "Night temperature drops cause house pipes and wooden frames to contract and creak subtly." },
+          { icon: "🐾", title: "Crepuscular Hunting Drive", desc: "Cats naturally enter hyper-alert predatory states during predawn hours." }
+        ],
+        before: "Isolated word: 'cat' (just dictionary token #4758)",
+        after: "Enriched vector: 'A nocturnal feline alert to acoustic drywall vibrations at 3 AM'",
+        token: "cat"
+      },
+      spoon: {
+        connections: [
+          { from: "microwave", to: "metal", icon: "⚡", label: "Device ➔ Material", desc: "Recognizes conductive metal placed inside high-energy standing waves." },
+          { from: "metal", to: "spoon", icon: "🥄", label: "Material ➔ Object", desc: "Evaluates smooth rounded geometry vs sharp fork tines." },
+          { from: "spoon", to: "apologize", icon: "💬", label: "Physics ➔ Emotion", desc: "Detects human remorse attempting to alter physical electromagnetic laws." }
+        ],
+        memories: [
+          { icon: "⚡", title: "Electromagnetic Arcing", desc: "Microwaves induce thousands of volts of standing charge across conductive metal surfaces." },
+          { icon: "🚫", title: "Zero Dielectric Protection", desc: "Apologizing has zero dielectric insulating capacity against atmospheric ionization." },
+          { icon: "🔥", title: "Plasma Ionization", desc: "Air around the metal ionizes into glowing plasma balls within seconds." }
+        ],
+        before: "Isolated word: 'apologize' (verb: express regret)",
+        after: "Enriched vector: 'Human emotional intent that fails against dielectric breakdown and plasma sparks'",
+        token: "apologize"
+      },
+      coffee: {
+        connections: [
+          { from: "coffee", to: "debugging", icon: "☕", label: "Stimulant ➔ Task", desc: "Connects caffeine intake directly to software problem-solving." },
+          { from: "debugging", to: "feel", icon: "🧠", label: "Task ➔ Perception", desc: "Binds cognitive debugging load to subjective emotional perception." },
+          { from: "feel", to: "faster", icon: "⚡", label: "Perception ➔ Speed", desc: "Calculates subjective perception of time acceleration." }
+        ],
+        memories: [
+          { icon: "🧠", title: "Adenosine Antagonism", desc: "Caffeine blocks drowsiness receptors, creating cardiovascular optimism without fixing logic errors." },
+          { icon: "⚡", title: "Subjective Time Dilation", desc: "Elevated heart rate speeds up typing velocity, giving the illusion of faster debugging." },
+          { icon: "💻", title: "Emergency Commit Surge", desc: "Developers gain the kinetic momentum needed to push 12 git commits before standup." }
+        ],
+        before: "Isolated word: 'faster' (adverb: high speed)",
+        after: "Enriched vector: 'Subjective acceleration induced by caffeine-driven cardiovascular optimism'",
+        token: "faster"
+      }
+    };
+
+    let activeStudioStep = 0;
+    let studioAutoTimer = null;
+
+    function populateTransformerStudio() {
+      // Find key matching activeData
+      let key = 'cat';
+      if (activeData.text.includes('spoon')) key = 'spoon';
+      else if (activeData.text.includes('coffee')) key = 'coffee';
+
+      const data = TRANSFORMER_STUDIO_DATA[key];
+
+      // 1. Populate Connections (View 1)
+      connectionsContainer.innerHTML = '';
+      data.connections.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'connection-visual-card';
+        card.innerHTML = `
+          <div class="conn-tag-badge">${c.icon} ${c.label}</div>
+          <div class="conn-pair-title">"${c.from}" ↔ "${c.to}"</div>
+          <div class="conn-desc-text">${c.desc}</div>
+        `;
+        connectionsContainer.appendChild(card);
+      });
+
+      // 2. Populate Memories (View 2)
+      memoriesContainer.innerHTML = '';
+      data.memories.forEach(m => {
+        const card = document.createElement('div');
+        card.className = 'memory-visual-card';
+        card.innerHTML = `
+          <div class="mem-icon-badge">${m.icon}</div>
+          <div class="mem-card-title">${m.title}</div>
+          <div class="mem-card-desc">${m.desc}</div>
+        `;
+        memoriesContainer.appendChild(card);
+      });
+
+      // 3. Populate Before vs After Comparison (View 3)
+      enrichedCompContainer.innerHTML = `
+        <div class="before-card">
+          <span class="comp-header" style="color:var(--text-muted);">BEFORE TRANSFORMER (LAYER 01)</span>
+          <span class="comp-token-highlight">"${data.token}"</span>
+          <span class="comp-body-text">${data.before}</span>
+        </div>
+        <div class="comp-arrow-divider">➔</div>
+        <div class="after-card">
+          <span class="comp-header" style="color:#059669;">AFTER 32 TRANSFORMER LAYERS</span>
+          <span class="comp-token-highlight" style="color:#065F46;">"${data.token}"</span>
+          <span class="comp-body-text" style="color:#047857; font-weight:600;">${data.after}</span>
+        </div>
+      `;
+
+      // 4. Populate Prompt Tokens Row
+      wordsCascadeRow.innerHTML = '';
+      activeData.tokens.forEach(t => {
+        const pill = document.createElement('span');
+        pill.className = 'reactor-token-capsule';
+        pill.textContent = t;
+        wordsCascadeRow.appendChild(pill);
+      });
+    }
+
+    function selectStudioStep(step) {
+      activeStudioStep = step;
+
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById(`stepPill${i}`).classList.toggle('active', i - 1 === step);
+        document.getElementById(`studioView${i}`).classList.toggle('active-view', i - 1 === step);
+      }
+
+      const pills = document.querySelectorAll('.reactor-token-capsule');
+      if (step === 0) {
+        emergedHiddenBar.textContent = "Step 1: Words exchange clues with each other via Self-Attention.";
+        emergedHiddenBar.style.background = "#F0EAFF";
+        emergedHiddenBar.style.color = "#4C1D95";
+        layerNarrationLine.textContent = "Tokens connect to form grammatical and semantic relationships.";
+        pills.forEach(p => p.classList.remove('enriched-gold'));
+      } else if (step === 1) {
+        emergedHiddenBar.textContent = "Step 2: Training memories recall real-world facts from Knowledge Neurons.";
+        emergedHiddenBar.style.background = "#FFFBEB";
+        emergedHiddenBar.style.color = "#92400E";
+        layerNarrationLine.textContent = "Knowledge neurons activate stored facts about physical objects and situations.";
+        pills.forEach(p => p.classList.remove('enriched-gold'));
+      } else if (step === 2) {
+        emergedHiddenBar.textContent = "✓ Step 3: Layer 32 complete! All words enriched with deep context, ready to generate the answer.";
+        emergedHiddenBar.style.background = "#D1FAE5";
+        emergedHiddenBar.style.color = "#065F46";
+        layerNarrationLine.textContent = "Contextual representations emerged from Layer 32! Output vectors ready for decoder.";
+        pills.forEach(p => p.classList.add('enriched-gold'));
+        calloutText5.textContent = "Transformation complete! Click Reply Generation to see the answer.";
+      }
+
+      playSound('ping');
+    }
+
+    function triggerTransformerAutoFlow() {
+      if (studioAutoTimer) clearInterval(studioAutoTimer);
+      populateTransformerStudio();
+
+      let currentStep = 0;
+      selectStudioStep(0);
+
+      studioAutoTimer = setInterval(() => {
+        if (currentStep < 2) {
+          currentStep++;
+          selectStudioStep(currentStep);
+          playSound('beam');
+        } else {
+          clearInterval(studioAutoTimer);
+          isLayerPassDone = true;
+          playSound('chime');
+        }
+      }, 1500);
+    }
+
+    /* =====================================================================
+       STAGE 6: AUTO-STARTING REPLY & FINAL CELEBRATION
+       ===================================================================== */
+    const candidateProbBars = document.getElementById('candidateProbBars');
+    const finalAnswerParagraph = document.getElementById('finalAnswerParagraph');
+    const generationStatusBadge = document.getElementById('generationStatusBadge');
+    const calloutText6 = document.getElementById('calloutText6');
+    const celebrationFinalBanner = document.getElementById('celebrationFinalBanner');
+    const btnAction6 = document.getElementById('btnAction6');
+
+    function renderCandidateLogits(stepIndex) {
+      candidateProbBars.innerHTML = '';
+      const candidatePools = [
+        [ { word: "Your", score: 74 }, { word: "A", score: 16 }, { word: "The", score: 10 } ],
+        [ { word: "cat", score: 86 }, { word: "feline", score: 9 }, { word: "pet", score: 5 } ],
+        [ { word: "was", score: 79 }, { word: "is", score: 13 }, { word: "might", score: 8 } ],
+        [ { word: "not", score: 82 }, { word: "likely", score: 11 }, { word: "simply", score: 7 } ],
+        [ { word: "monitoring", score: 68 }, { word: "staring", score: 20 }, { word: "observing", score: 12 } ]
+      ];
+
+      const set = candidatePools[stepIndex % candidatePools.length];
+      set.forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'candidate-score-row';
+        row.innerHTML = `
+          <span class="cand-token-txt">"${c.word}"</span>
+          <div class="cand-bar-rail">
+            <div class="cand-bar-fill-bar" style="width:${c.score}%;"></div>
+          </div>
+          <span class="cand-pct-tag">${c.score}%</span>
+        `;
+        candidateProbBars.appendChild(row);
+      });
+    }
+
+    function triggerAutoregressiveGeneration() {
+      if (isGeneratingResponse) return;
+      isGeneratingResponse = true;
+
+      finalAnswerParagraph.innerHTML = '';
+      celebrationFinalBanner.style.display = 'none';
+      generationStatusBadge.textContent = 'Generating 45 tokens/sec...';
+
+      const fullText = activeData.answer;
+      const words = fullText.split(' ');
+      let idx = 0;
+
+      const caret = document.createElement('span');
+      caret.className = 'streaming-caret';
+
+      const timer = setInterval(() => {
+        if (idx < words.length) {
+          const span = document.createElement('span');
+          if (words[idx].includes('\n')) {
+            span.innerHTML = words[idx].replace(/\n/g, '<br>') + ' ';
+          } else {
+            span.textContent = words[idx] + ' ';
+          }
+          finalAnswerParagraph.appendChild(span);
+          finalAnswerParagraph.appendChild(caret);
+
+          if (idx % 3 === 0) {
+            renderCandidateLogits(idx);
+          }
+
+          playSound('type');
+          idx++;
+        } else {
+          clearInterval(timer);
+          isGeneratingResponse = false;
+          caret.remove();
+          generationStatusBadge.textContent = 'Complete (EOS stop token)';
+
+          // CELEBRATION HERO: "Yes, now you know how a prompt works!"
+          celebrationFinalBanner.style.display = 'flex';
+          calloutText6.innerHTML = '<strong>Yes, now you know how a prompt works! 🎉</strong>';
+          btnAction6.textContent = 'Explore Again ↺';
+          playSound('chime');
+        }
+      }, 42);
+    }
+
+    /* =====================================================================
+       GLOBAL STAGE NAVIGATION
+       ===================================================================== */
+    function goToStage(stage) {
+      if (stage < 1) stage = 1;
+      if (stage > 6) stage = 6;
+      currentStageIndex = stage;
+
+      const conveyor = document.getElementById('conveyorBelt');
+      conveyor.style.transform = `translateX(-${(stage - 1) * 100}vw)`;
+
+      // Update bottom stepper pills
+      for (let i = 1; i <= 6; i++) {
+        const pill = document.getElementById(`navPill${i}`);
+        pill.classList.remove('current', 'completed');
+        if (i === stage) pill.classList.add('current');
+        if (i < stage) pill.classList.add('completed');
+      }
+
+      document.getElementById('stepperCounterLabel').textContent = `STAGE ${stage} OF 6`;
+
+      // STAGE SPECIFIC AUTO-STARTS
+      if (stage === 2 && !isTokenized) {
+        setTimeout(triggerTokenizeProcess, 200);
+      } else if (stage === 3 && !isVectorized) {
+        setTimeout(animateTokensOneByOne3D, 250);
+      } else if (stage === 4) {
+        setTimeout(startRainbowAutoSweep, 250);
+      } else if (stage === 5) {
+        populateTransformerStudio();
+        selectStudioStep(0);
+        if (!isLayerPassDone) {
+          setTimeout(triggerTransformerAutoFlow, 350);
+        }
+      } else if (stage === 6) {
+        // AUTOMATICALLY START REPLY GENERATION IN 1 SECOND
+        renderCandidateLogits(0);
+        if (autoReplyTimer) clearTimeout(autoReplyTimer);
+        autoReplyTimer = setTimeout(triggerAutoregressiveGeneration, 1000);
+      }
+
+      playSound('ping');
+    }
+
+    function restartWholeJourney() {
+      if (attentionSweepTimer) clearInterval(attentionSweepTimer);
+      if (studioAutoTimer) clearInterval(studioAutoTimer);
+      if (cascadeTimer) clearInterval(cascadeTimer);
+      if (pointsArrivalTimer) clearInterval(pointsArrivalTimer);
+      if (autoReplyTimer) clearTimeout(autoReplyTimer);
+
+      isTokenized = false;
+      isVectorized = false;
+      isLayerPassDone = false;
+      isGeneratingResponse = false;
+
+      // Reset Stage 1
+      selectPresetPrompt('cat');
+      tutorialHand.style.display = 'block';
+      bigLoadDropBox.classList.remove('loaded-docked');
+      loadBoxIcon.textContent = "📥";
+      loadBoxHeading.textContent = "DROP PROMPT HERE TO LOAD";
+      loadBoxCaption.textContent = "Drag any of the 3 prompt cards above into this box to auto-advance!";
+
+      // Reset Stage 2
+      tokenChipsTray.innerHTML = '';
+      vocabRowsContainer.innerHTML = '';
+      scannerBeam.style.display = 'none';
+      dictSearchStatus.textContent = "DICTIONARY SCANNER: IDLE";
+      calloutText2.textContent = 'Searching vocabulary entries for prompt tokens...';
+
+      // Reset Stage 3
+      visiblePointsCount = 0;
+      selectedPointIndex = 3;
+      updateHudWithToken(3);
+
+      // Reset Stage 5
+      populateTransformerStudio();
+      selectStudioStep(0);
+
+      // Reset Stage 6
+      celebrationFinalBanner.style.display = 'none';
+      finalAnswerParagraph.innerHTML = '<span style="color:var(--text-muted); font-style:italic;">Starting response generation...</span>';
+      generationStatusBadge.textContent = 'Starting automatically...';
+      calloutText6.textContent = 'Generating answer token-by-token from the neural hidden state!';
+      btnAction6.textContent = 'Explore Again ↺';
+
+      goToStage(1);
+    }
+
+    /* =====================================================================
+       HEADER CONTROLS & INITIALIZATION
+       ===================================================================== */
+    document.getElementById('btnSound').addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundIcon').textContent = soundEnabled ? '🔔' : '🔕';
+      document.getElementById('soundLabel').textContent = soundEnabled ? 'Sound: ON' : 'Sound: OFF';
+    });
+
+    document.getElementById('btnRestartAll').addEventListener('click', restartWholeJourney);
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setupDragAndDrop();
+      init3DCanvasEvents();
+      startPulseAnimationLoop();
+      restartWholeJourney();
+    });
+  </script>
+</body>
+</html>

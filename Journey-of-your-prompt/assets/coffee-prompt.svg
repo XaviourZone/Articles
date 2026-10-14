@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" fill="none">
+  <circle cx="24" cy="24" r="22" fill="#E8F8F2" stroke="#63C9AC" stroke-width="1.5"/>
+  <!-- Coffee Cup Body -->
+  <path d="M14 17 H30 V26 C30 30 26 33 22 33 C18 33 14 30 14 26 Z" fill="#FFFFFF" stroke="#24232B" stroke-width="1.5"/>
+  <!-- Handle -->
+  <path d="M30 19 H33 C35.2 19 37 20.8 37 23 C37 25.2 35.2 27 33 27 H30" stroke="#24232B" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Coffee Surface -->
+  <ellipse cx="22" cy="18" rx="6" ry="1.5" fill="#E7A35A"/>
+  <!-- Steam Curves -->
+  <path d="M19 13 Q21 10 19 7" stroke="#63C9AC" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+  <path d="M25 14 Q27 11 25 8" stroke="#63C9AC" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+  <!-- Code brackets on cup -->
+  <path d="M19 23 L17 25 L19 27 M25 23 L27 25 L25 27" stroke="#6554C8" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

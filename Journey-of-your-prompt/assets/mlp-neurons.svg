@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 50" width="160" height="50" fill="none">
+  <!-- Input Dimension (4096) -->
+  <circle cx="16" cy="16" r="5" fill="#6554C8"/>
+  <circle cx="16" cy="34" r="5" fill="#6554C8"/>
+  <text x="16" y="47" font-family="JetBrains Mono, monospace" font-size="6" text-anchor="middle" fill="#716D79">d=4096</text>
+
+  <!-- Expanded Synaptic Network (11008) -->
+  <line x1="21" y1="16" x2="65" y2="10" stroke="#C8BBE8" stroke-width="1"/>
+  <line x1="21" y1="16" x2="65" y2="25" stroke="#C8BBE8" stroke-width="1"/>
+  <line x1="21" y1="34" x2="65" y2="25" stroke="#C8BBE8" stroke-width="1"/>
+  <line x1="21" y1="34" x2="65" y2="40" stroke="#C8BBE8" stroke-width="1"/>
+
+  <!-- Knowledge Neurons (Expanded) -->
+  <circle cx="70" cy="10" r="5.5" fill="#FFF8EB" stroke="#E7A35A" stroke-width="1.5"/>
+  <circle cx="70" cy="25" r="5.5" fill="#FFF8EB" stroke="#E7A35A" stroke-width="1.5"/>
+  <circle cx="70" cy="40" r="5.5" fill="#FFF8EB" stroke="#E7A35A" stroke-width="1.5"/>
+  <text x="70" y="49" font-family="JetBrains Mono, monospace" font-size="6" text-anchor="middle" fill="#E7A35A">SwiGLU</text>
+
+  <!-- Re-projection lines -->
+  <line x1="75.5" y1="10" x2="120" y2="18" stroke="#E7A35A" stroke-width="1"/>
+  <line x1="75.5" y1="25" x2="120" y2="25" stroke="#E7A35A" stroke-width="1"/>
+  <line x1="75.5" y1="40" x2="120" y2="32" stroke="#E7A35A" stroke-width="1"/>
+
+  <!-- Output Projector -->
+  <circle cx="125" cy="18" r="5" fill="#63C9AC"/>
+  <circle cx="125" cy="32" r="5" fill="#63C9AC"/>
+  <text x="125" y="47" font-family="JetBrains Mono, monospace" font-size="6" text-anchor="middle" fill="#127552">Enriched</text>
+  
+  <!-- Knowledge Recall Badge -->
+  <rect x="135" y="10" width="22" height="30" rx="4" fill="#F5F1EB" stroke="#D5CBBD" stroke-width="1"/>
+  <text x="146" y="22" font-family="Space Grotesk, sans-serif" font-size="7" font-weight="700" text-anchor="middle" fill="#6554C8">FACT</text>
+  <text x="146" y="32" font-family="JetBrains Mono, monospace" font-size="6" text-anchor="middle" fill="#24232B">MEM</text>
+</svg>
