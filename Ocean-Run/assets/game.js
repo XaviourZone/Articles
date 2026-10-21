@@ -3,7 +3,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.m
 const $ = id => document.getElementById(id);
 const canvas = $('world');
 let renderer, scene, camera, water, boat, clock, raf, lastQuizAt=-99;
-let running=false, paused=false, started=false, elapsed=0, distance=0, score=0, lane=0, laneTarget=0, slideTimer=0, fireCooldown=0, invulnerable=0, taskCount=0, quizCount=0, collected=0, hull=100, transponder=false, kills=0, intelPause=false, helmAngle=0, helmDragging=false, helmPointer=null, missionOrder=0, lastOrderAt=0, spawnedEnemies=0;
+let running=false, paused=false, started=false, elapsed=0, distance=0, score=0, lane=0, laneTarget=0, slideTimer=0, fireCooldown=0, invulnerable=0, taskCount=0, quizCount=0, collected=0, hull=100, transponder=false, transponderRewarded=false, kills=0, intelPause=false, helmAngle=0, helmDragging=false, helmPointer=null, missionOrder=0, lastOrderAt=0, spawnedEnemies=0;
 let obstacles=[], collectibles=[], projectiles=[], effects=[], clouds=[];
 const laneX=[-3.05,0,3.05], rnd=(a,b)=>a+Math.random()*(b-a), clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
@@ -117,7 +117,7 @@ function setup(){try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alp
  makeSky();makeWater();makeClouds();makeDistantScene();boat=makeBoat();boat.position.set(0,.1,3.3);scene.add(boat);wake=makeWake();clock=new THREE.Clock();addEventListener('resize',resize);$('loading').classList.add('hidden');$('start').classList.remove('hidden');animate();}catch(e){console.error(e);$('loadingText').textContent='3D renderer unavailable. Try the latest Chrome or enable WebGL.'}}
 function resize(){if(!renderer)return;renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.7));renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
 function start(){
- elapsed=distance=score=taskCount=quizCount=collected=0;update.spawn=0;update.enemySpawn=1.4;hull=100;transponder=false;kills=0;intelPause=false;helmAngle=0;helmDragging=false;helmPointer=null;missionOrder=0;lastOrderAt=0;spawnedEnemies=0;lastQuizAt=-99;
+ elapsed=distance=score=taskCount=quizCount=collected=0;update.spawn=0;update.enemySpawn=1.4;hull=100;transponder=false;transponderRewarded=false;kills=0;intelPause=false;helmAngle=0;helmDragging=false;helmPointer=null;missionOrder=0;lastOrderAt=0;spawnedEnemies=0;lastQuizAt=-99;
  lane=laneTarget=0;slideTimer=fireCooldown=invulnerable=0;
  obstacles.forEach(o=>scene.remove(o));collectibles.forEach(o=>scene.remove(o));projectiles.forEach(o=>scene.remove(o));effects.forEach(o=>scene.remove(o));
  obstacles=[];collectibles=[];projectiles=[];effects=[];
@@ -133,12 +133,12 @@ function updateHud(){
  $('score').textContent=String(score).padStart(5,'0');$('dist').textContent=distance.toFixed(1);
  $('hullfill').style.width=hull+'%';$('hulltext').textContent=Math.max(0,Math.round(hull))+'%';
  $('hullfill').style.background=hull<35?'linear-gradient(90deg,#ff4c55,#ffb26c)':'linear-gradient(90deg,#42efc4,#a8f48d)';
- $('missionstate').textContent=kills+' / 5';$('helm').setAttribute('aria-valuenow',String(Math.round(helmAngle*100)));
+ $('missionstate').textContent=Math.min(kills,5)+' / 5';$('helm').setAttribute('aria-valuenow',String(Math.round(helmAngle*100)));
 }
 function move(d){if(!running)return;helmAngle=clamp(helmAngle+d*.35,-1,1);$('helmknob').style.transform='rotate('+(helmAngle*135)+'deg)'}
 function fire(){if(!running||fireCooldown>0||intelPause)return;fireCooldown=.42;makeProjectile();burst(boat.position,'#ffad60',3);toast('PULSE CANNON · SHOT AWAY')}
 function slide(){if(!running)return;slideTimer=1.05;toast('LOW PROFILE')}
-function setTransponder(){if(!running)return;transponder=!transponder;$('transponder').classList.toggle('active',transponder);$('xpdrstate').textContent=transponder?'ON':'OFF';if(transponder){score+=100;$('statusText').textContent='AIS / TRANSPONDER ACTIVE';toast('TRANSPONDER ACTIVE +100');$('missiontext').textContent=kills>=5?'Reach the patrol marker':'Neutralise hostile contacts';}else{$('statusText').textContent='TRANSPONDER OFFLINE';toast('TRANSPONDER OFFLINE');}updateHud()}
+function setTransponder(){if(!running)return;transponder=!transponder;$('transponder').classList.toggle('active',transponder);$('xpdrstate').textContent=transponder?'ON':'OFF';if(transponder){if(!transponderRewarded){score+=100;transponderRewarded=true;toast('TRANSPONDER ACTIVE +100')}else{toast('TRANSPONDER ACTIVE')} $('statusText').textContent='AIS / TRANSPONDER ACTIVE';$('missiontext').textContent=kills>=5?'Reach the patrol marker':'Neutralise hostile contacts';}else{$('statusText').textContent='TRANSPONDER OFFLINE';toast('TRANSPONDER OFFLINE');}updateHud()}
 function showIntel(title,body,reward,badge='HOSTILE NEUTRALISED'){
  intelPause=true;running=false;$('inteltitle').textContent=title;$('intelbody').textContent=body;$('intelreward').textContent=reward;$('intelbadge').textContent=badge;$('intel').classList.remove('hidden');
 }
