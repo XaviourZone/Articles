@@ -3,7 +3,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.m
 const $ = id => document.getElementById(id);
 const canvas = $('world');
 let renderer, scene, camera, water, boat, clock, raf, lastQuizAt=-99;
-let running=false, paused=false, started=false, elapsed=0, distance=0, score=0, lane=0, laneTarget=0, slideTimer=0, fireCooldown=0, invulnerable=0, taskCount=0, quizCount=0, collected=0, hull=100, transponder=false, transponderRewarded=false, kills=0, intelPause=false, helmAngle=0, helmDragging=false, helmPointer=null, missionOrder=0, lastOrderAt=0, spawnedEnemies=0;
+let running=false, paused=false, started=false, elapsed=0, distance=0, score=0, lane=0, laneTarget=0, slideTimer=0, fireCooldown=0, invulnerable=0, taskCount=0, quizCount=0, collected=0, hull=100, transponder=false, transponderRewarded=false, kills=0, intelPause=false, helmAngle=0, helmDragging=false, helmPointer=null, missionOrder=0, lastOrderAt=0, spawnedEnemies=0, throttle=0.65;
 let obstacles=[], collectibles=[], projectiles=[], effects=[], clouds=[];
 const laneX=[-3.05,0,3.05], rnd=(a,b)=>a+Math.random()*(b-a), clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
@@ -55,7 +55,7 @@ function makeBoat(){
 function makeSky(){const geo=new THREE.SphereGeometry(500,32,20);const mat=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,uniforms:{uTime:{value:0}},vertexShader:'varying vec3 vPos; void main(){vPos=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',fragmentShader:'varying vec3 vPos; void main(){float h=normalize(vPos).y;vec3 c=mix(vec3(0.95,0.68,0.43),vec3(0.08,0.49,0.73),smoothstep(-0.08,0.5,h));c=mix(c,vec3(0.025,0.16,0.3),smoothstep(0.45,0.9,h));gl_FragColor=vec4(c,1.0);}'});scene.add(new THREE.Mesh(geo,mat))}
 function makeWater(){
  const geo=new THREE.PlaneGeometry(180,420,160,260);geo.rotateX(-Math.PI/2);
- const mat=new THREE.ShaderMaterial({uniforms:{uTime:{value:0},uSpeed:{value:1},uStorm:{value:0},uSun:{value:new THREE.Vector3(-.4,.8,.3)}},vertexShader:`uniform float uTime; uniform float uSpeed; varying vec3 vWorld; varying float vWave; varying vec2 vUv; void main(){vUv=uv;vec3 p=position;float t=uTime;float w1=sin(p.x*.19+p.z*.045+t*1.2)*.11;float w2=sin(p.x*.43-p.z*.075-t*1.7)*.045;float w3=cos(p.x*.075+p.z*.13+t*.8)*.16;p.y+=w1+w2+w3;vWave=w1+w2+w3;vec4 world=modelMatrix*vec4(p,1.);vWorld=world.xyz;gl_Position=projectionMatrix*viewMatrix*world;}`,fragmentShader:`uniform float uTime;uniform float uStorm;uniform vec3 uSun;varying vec3 vWorld;varying float vWave;varying vec2 vUv;void main(){float t=uTime;float longWave=sin(vWorld.x*.12+vWorld.z*.035+t*.8);float crossWave=sin(vWorld.x*.29-vWorld.z*.11-t*1.25);float smallWave=sin(vWorld.x*1.7+vWorld.z*.42+t*2.1)*sin(vWorld.z*1.25-vWorld.x*.19-t*1.7);float crest=longWave*.42+crossWave*.31+smallWave*.27;vec3 deep=vec3(.006,.105,.19);vec3 blue=vec3(.008,.29,.41);vec3 teal=vec3(.035,.47,.53);vec3 c=mix(deep,blue,smoothstep(-.85,.35,crest));c=mix(c,teal,smoothstep(.2,.9,crest)*.34);float sunLine=exp(-pow((vWorld.x+vWorld.z*.075+sin(vWorld.z*.08+t)*1.8)*.16,2.))*smoothstep(-.5,.5,vWorld.z+45.);float spec=pow(max(0.,crest*.52+smallWave*.6),8.)*.62;float brokenReflection=sunLine*(.18+.82*pow(max(0.,sin(vWorld.x*2.1+vWorld.z*.16+t*2.8)),7.));float foam=smoothstep(.72,.97,abs(sin(vWorld.x*.52+vWorld.z*.19+t*1.4)*sin(vWorld.x*.17-vWorld.z*.7-t*1.1)));float nearFoam=exp(-abs(vWorld.z-3.5)*.16)*smoothstep(2.5,7.,abs(vWorld.x));c+=vec3(.28,.68,.75)*spec;c+=vec3(.9,.83,.64)*brokenReflection*.42;c=mix(c,vec3(.74,.92,.93),foam*.15+nearFoam*.28);c=mix(c,vec3(.015,.045,.09),uStorm*.72);gl_FragColor=vec4(c,1.);}`,transparent:false});
+ const mat=new THREE.ShaderMaterial({uniforms:{uTime:{value:0},uSpeed:{value:1},uStorm:{value:0},uSun:{value:new THREE.Vector3(-.4,.8,.3)}},vertexShader:`uniform float uTime; uniform float uSpeed; varying vec3 vWorld; varying float vWave; varying vec2 vUv; void main(){vUv=uv;vec3 p=position;float t=uTime;float w1=sin(p.x*.19+p.z*.045+t*1.2)*.11;float w2=sin(p.x*.43-p.z*.075-t*1.7)*.045;float w3=cos(p.x*.075+p.z*.13+t*.8)*.16;p.y+=w1+w2+w3;vWave=w1+w2+w3;vec4 world=modelMatrix*vec4(p,1.);vWorld=world.xyz;gl_Position=projectionMatrix*viewMatrix*world;}`,fragmentShader:`uniform float uTime;uniform float uStorm;uniform vec3 uSun;varying vec3 vWorld;varying float vWave;varying vec2 vUv;void main(){float t=uTime;float longWave=sin(vWorld.x*.12+vWorld.z*.035+t*.8);float crossWave=sin(vWorld.x*.29-vWorld.z*.11-t*1.25);float smallWave=sin(vWorld.x*1.7+vWorld.z*.42+t*2.1)*sin(vWorld.z*1.25-vWorld.x*.19-t*1.7);float crest=longWave*.42+crossWave*.31+smallWave*.27;vec3 deep=vec3(.018,.09,.14);vec3 blue=vec3(.035,.19,.25);vec3 teal=vec3(.07,.27,.31);vec3 c=mix(deep,blue,smoothstep(-.85,.35,crest));c=mix(c,teal,smoothstep(.2,.9,crest)*.18);float sunLine=exp(-pow((vWorld.x+vWorld.z*.075+sin(vWorld.z*.08+t)*1.8)*.16,2.))*smoothstep(-.5,.5,vWorld.z+45.);float spec=pow(max(0.,crest*.52+smallWave*.35),12.)*.12;float brokenReflection=sunLine*(.04+.16*pow(max(0.,sin(vWorld.x*.65+vWorld.z*.08+t*.35)),5.));float foam=smoothstep(.72,.97,abs(sin(vWorld.x*.52+vWorld.z*.19+t*1.4)*sin(vWorld.x*.17-vWorld.z*.7-t*1.1)));float nearFoam=exp(-abs(vWorld.z-3.5)*.16)*smoothstep(2.5,7.,abs(vWorld.x));c+=vec3(.18,.34,.4)*spec;c+=vec3(.72,.72,.64)*brokenReflection*.16;c=mix(c,vec3(.48,.62,.65),foam*.045+nearFoam*.12);c=mix(c,vec3(.015,.045,.09),uStorm*.72);gl_FragColor=vec4(c,1.);}`,transparent:false});
  water=new THREE.Mesh(geo,mat);water.position.set(0,-.45,-120);water.frustumCulled=false;scene.add(water);
  // ocean fog helps blend horizon
 }
@@ -112,12 +112,12 @@ function makeDistantScene(){
  distantShip(-31,-142,.7,'#334f5d');distantShip(38,-178,.95,'#243f50');distantShip(-95,-260,1.15,'#354f5a');
 }
 function setup(){try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.7));renderer.setSize(innerWidth,innerHeight,false);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
- scene=new THREE.Scene();scene.fog=new THREE.FogExp2('#0b5775',.0027);camera=new THREE.PerspectiveCamera(57,innerWidth/innerHeight,.1,700);camera.position.set(0,6.6,15.8);camera.lookAt(0,1,-13);
+ scene=new THREE.Scene();scene.fog=new THREE.FogExp2('#0b5775',.0027);camera=new THREE.PerspectiveCamera(57,innerWidth/innerHeight,.1,700);camera.position.set(0,4.7,12.8);camera.lookAt(0,1,-18);
  scene.add(new THREE.HemisphereLight('#bdeeff','#10364c',2.1));const sun=new THREE.DirectionalLight('#fff0d1',3.4);sun.position.set(-28,45,-30);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-25;sun.shadow.camera.right=25;sun.shadow.camera.top=25;sun.shadow.camera.bottom=-25;scene.add(sun);const fill=new THREE.DirectionalLight('#50d8ff',1.25);fill.position.set(20,15,12);scene.add(fill);
  makeSky();makeWater();makeClouds();makeDistantScene();boat=makeBoat();boat.position.set(0,.1,3.3);scene.add(boat);wake=makeWake();clock=new THREE.Clock();addEventListener('resize',resize);bindControls();$('loading').classList.add('hidden');$('start').classList.remove('hidden');animate();}catch(e){console.error(e);$('loadingText').textContent='3D renderer unavailable. Try the latest Chrome or enable WebGL.'}}
 function resize(){if(!renderer)return;renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.7));renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
 function start(){
- elapsed=distance=score=taskCount=quizCount=collected=0;update.spawn=0;update.enemySpawn=1.4;hull=100;transponder=false;transponderRewarded=false;kills=0;intelPause=false;helmAngle=0;helmDragging=false;helmPointer=null;missionOrder=0;lastOrderAt=0;spawnedEnemies=0;lastQuizAt=-99;
+ elapsed=distance=score=taskCount=quizCount=collected=0;update.spawn=0;update.enemySpawn=1.4;hull=100;throttle=.65;transponder=false;transponderRewarded=false;kills=0;intelPause=false;helmAngle=0;helmDragging=false;helmPointer=null;missionOrder=0;lastOrderAt=0;spawnedEnemies=0;lastQuizAt=-99;
  lane=laneTarget=0;slideTimer=fireCooldown=invulnerable=0;
  obstacles.forEach(o=>scene.remove(o));collectibles.forEach(o=>scene.remove(o));projectiles.forEach(o=>scene.remove(o));effects.forEach(o=>scene.remove(o));
  obstacles=[];collectibles=[];projectiles=[];effects=[];
@@ -125,20 +125,21 @@ function start(){
  $('start').classList.add('hidden');$('end').classList.add('hidden');$('intel').classList.add('hidden');
  $('hud').classList.remove('hidden');$('bottom').classList.remove('hidden');$('mission').classList.remove('hidden');$('status').classList.remove('hidden');
  $('toast').classList.remove('on');$('transponder').classList.remove('active');$('xpdrstate').textContent='OFF';$('helmknob').style.transform='none';$('helm').style.setProperty('--wheel-rotation','0deg');$('helmread').textContent='000°';
- $('missiontext').textContent='Neutralise 5 hostile contacts';$('missionstate').textContent='0 / 5';$('missiontag').textContent='PRIMARY OBJECTIVE';
+ $('missiontext').textContent='Intercept 5 hostile craft';$('missionstate').textContent='0 / 5';$('missiontag').textContent='PRIMARY OBJECTIVE';$('throttleRead').textContent='65%';$('throttleFill').style.width='65%';
  $('statusText').textContent='RADAR ONLINE · GUN SYSTEM READY';updateHud();clock.getDelta();
 }
 function toast(msg){$('toast').textContent=msg;$('toast').classList.add('on');clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('toast').classList.remove('on'),1450)}
 function updateHud(){
+ if($('throttleRead')){$('throttleRead').textContent=Math.round(throttle*100)+'%';$('throttleFill').style.width=(throttle*100)+'%'}
  $('score').textContent=String(score).padStart(5,'0');$('dist').textContent=distance.toFixed(1);
  $('hullfill').style.width=hull+'%';$('hulltext').textContent=Math.max(0,Math.round(hull))+'%';
  $('hullfill').style.background=hull<35?'linear-gradient(90deg,#ff4c55,#ffb26c)':'linear-gradient(90deg,#42efc4,#a8f48d)';
  $('missionstate').textContent=Math.min(kills,5)+' / 5';$('helm').setAttribute('aria-valuenow',String(Math.round(helmAngle*100)));
 }
 function move(d){if(!running)return;helmAngle=clamp(helmAngle+d*.35,-1,1);$('helmknob').style.transform='rotate('+(helmAngle*135)+'deg)'}
-function fire(){if(!running||fireCooldown>0||intelPause)return;fireCooldown=.42;makeProjectile();burst(boat.position,'#ffad60',3);toast('PULSE CANNON · SHOT AWAY')}
+function fire(){if(!running||fireCooldown>0||intelPause)return;fireCooldown=.19;makeProjectile();burst(boat.position,'#ffad60',3);}
 function slide(){if(!running)return;slideTimer=1.05;toast('LOW PROFILE')}
-function setTransponder(){if(!running)return;transponder=!transponder;$('transponder').classList.toggle('active',transponder);$('xpdrstate').textContent=transponder?'ON':'OFF';if(transponder){if(!transponderRewarded){score+=100;transponderRewarded=true;toast('TRANSPONDER ACTIVE +100')}else{toast('TRANSPONDER ACTIVE')} $('statusText').textContent='AIS / TRANSPONDER ACTIVE';$('missiontext').textContent=kills>=5?'Reach the patrol marker':'Neutralise hostile contacts';}else{$('statusText').textContent='TRANSPONDER OFFLINE';toast('TRANSPONDER OFFLINE');}updateHud()}
+function setTransponder(){if(!running)return;transponder=!transponder;$('transponder').classList.toggle('active',transponder);$('xpdrstate').textContent=transponder?'ON':'OFF';if(transponder){if(!transponderRewarded){score+=100;transponderRewarded=true;toast('TRANSPONDER ACTIVE +100')}else{toast('TRANSPONDER ACTIVE')} $('statusText').textContent='AIS / TRANSPONDER ACTIVE';$('missiontext').textContent=kills>=5?'Reach the patrol marker':'Intercept hostile craft';}else{$('statusText').textContent='TRANSPONDER OFFLINE';toast('TRANSPONDER OFFLINE');}updateHud()}
 function showIntel(title,body,reward,badge='HOSTILE NEUTRALISED'){
  intelPause=true;running=false;$('inteltitle').textContent=title;$('intelbody').textContent=body;$('intelreward').textContent=reward;$('intelbadge').textContent=badge;$('intel').classList.remove('hidden');
 }
@@ -170,9 +171,9 @@ function hitTest(){
 }
 function update(dt,t){
  if(!running||intelPause)return;
- elapsed+=dt;distance=Math.min(10,elapsed/6);fireCooldown=Math.max(0,fireCooldown-dt);slideTimer=Math.max(0,slideTimer-dt);invulnerable=Math.max(0,invulnerable-dt);
- const speed=15.5+Math.min(10,distance)*.65;
- water.material.uniforms.uTime.value=t;water.material.uniforms.uStorm.value=clamp((distance-6.2)/3.8,0,1);
+ elapsed+=dt;fireCooldown=Math.max(0,fireCooldown-dt);slideTimer=Math.max(0,slideTimer-dt);invulnerable=Math.max(0,invulnerable-dt);
+ const speed=(8+throttle*15)+Math.min(10,distance)*.35; distance=Math.min(10,distance+dt*throttle/6);
+ water.material.uniforms.uTime.value=t;water.material.uniforms.uStorm.value=0;
  // Wheel steering is continuous, with inertia and a gentle recentering when released.
  const targetX=helmDragging?helmAngle*6.2:helmAngle*6.2;
  boat.position.x=THREE.MathUtils.damp(boat.position.x,targetX,3.9,dt);
@@ -185,22 +186,24 @@ function update(dt,t){
  wake.position.x=boat.position.x;wake.position.z=boat.position.z;
  wake.children.forEach((m,i)=>{m.material.opacity=.18+Math.sin(t*5+i)*.06;m.scale.x=1+Math.sin(t*4+i)*.3});
  camera.position.x=THREE.MathUtils.damp(camera.position.x,boat.position.x*.31,1.8,dt);
- camera.position.y=6.3+Math.sin(t*1.7)*.08;camera.lookAt(boat.position.x*.22,1,-13);
+ camera.position.y=4.7+Math.sin(t*1.1)*.035;camera.lookAt(boat.position.x*.22,.65,-18);
  clouds.forEach((cl,i)=>{cl.position.x+=dt*(.7+i%3*.2);if(cl.position.x>100)cl.position.x=-100});
  // Spawn hazards with safe gaps. Hostile craft are separate contacts, not quiz prompts.
+ // No random box-wall obstacle course: the channel is populated by identifiable vessel traffic.
  if(!update.spawn)update.spawn=0;update.spawn+=dt;
- if(update.spawn>Math.max(.95,1.55-distance*.035)){
-  update.spawn=0;const l=Math.floor(Math.random()*3),z=-105;const roll=Math.random();
-  createObstacle(roll<.45?'container':roll<.78?'buoy':'timber',l,z);
-  if(Math.random()<.28){const cache=createBook(Math.floor(Math.random()*3),z-rnd(18,30));if(cache)cache.position.x=rnd(-5.2,5.2)}
+ if(update.spawn>3.8){
+  update.spawn=0;
+  if(Math.random()<.34){
+   const cache=createBook(Math.floor(Math.random()*3),-125-rnd(0,18));cache.position.x=rnd(-5.2,5.2);
+  }
  }
  if(!update.enemySpawn)update.enemySpawn=2.6;update.enemySpawn+=dt;
- if(update.enemySpawn>Math.max(2.5,4.4-distance*.08)&&kills<7){
-  update.enemySpawn=0;const enemy=createTarget(Math.floor(Math.random()*3),-112-rnd(0,18));enemy.position.x=rnd(-5.3,5.3);enemy.userData.speed=rnd(.83,1.05);
-  toast('RADAR · HOSTILE CONTACT');$('statusText').textContent='RADAR CONTACT · ID '+enemy.userData.contactId;
+ if(update.enemySpawn>Math.max(3.0,5.2-distance*.08)&&kills<7){
+  update.enemySpawn=0;const enemy=createTarget(Math.floor(Math.random()*3),-112-rnd(0,18));enemy.position.x=rnd(-5.3,5.3);enemy.userData.speed=rnd(.68,.92);
+  toast('RADAR CONTACT · FAST CRAFT');$('statusText').textContent='FAST CRAFT · CONTACT '+enemy.userData.contactId;
  }
  obstacles.forEach(o=>{
-  o.position.z+=speed*dt*(o.userData.kind==='target'?(o.userData.speed||.95):1);
+  o.position.z+=speed*dt*(o.userData.kind==='target'?(o.userData.speed||.8):1);
   if(o.userData.kind==='target'){o.rotation.y+=Math.sin(t*1.1)*dt*.1;if(o.userData.ring)o.userData.ring.rotation.z+=dt*.7}
   else if(o.userData.kind==='buoy')o.rotation.y+=dt*.25;
  });
@@ -220,7 +223,7 @@ function update(dt,t){
      'A transponder can help other stations identify and track a vessel. Keep equipment use consistent with operational orders and applicable procedures.'
     ];
     showIntel(name+' · CONTACT '+id,facts[(kills-1)%facts.length],'+250 SCORE','CONTACT NEUTRALISED');
-    $('missiontag').textContent='PRIMARY OBJECTIVE';$('missiontext').textContent=kills>=5?'Proceed to rendezvous marker':'Neutralise '+(5-kills)+' more hostile contact'+(5-kills===1?'':'s');
+    $('missiontag').textContent='PRIMARY OBJECTIVE';$('missiontext').textContent=kills>=5?'Proceed to rendezvous marker':'Intercept '+(5-kills)+' more hostile craft';
     break;
    }
   }
@@ -233,7 +236,7 @@ function update(dt,t){
  hitTest();if(!running)return;
  // A timed bridge order teaches a control through action, not a quiz.
  if(elapsed>7&&missionOrder===0)orderTransponder();
- if(missionOrder===1&&transponder){missionOrder=2;$('missiontag').textContent='PRIMARY OBJECTIVE';$('missiontext').textContent='Neutralise 5 hostile contacts';$('missionstate').textContent=kills+' / 5';score+=100;toast('ORDER ACKNOWLEDGED · +100');$('statusText').textContent='TRANSPONDER ACTIVE · RADAR ONLINE';updateHud()}
+ if(missionOrder===1&&transponder){missionOrder=2;$('missiontag').textContent='PRIMARY OBJECTIVE';$('missiontext').textContent='Intercept 5 hostile craft';$('missionstate').textContent=kills+' / 5';score+=100;toast('ORDER ACKNOWLEDGED · +100');$('statusText').textContent='TRANSPONDER ACTIVE · RADAR ONLINE';updateHud()}
  if(missionOrder===1&&!transponder&&elapsed-lastOrderAt>12){lastOrderAt=elapsed;toast('BRIDGE: TRANSPONDER REQUIRED')}
  if(distance>=10){finish(kills>=5&&transponder&&hull>0);return}
  updateHud();
@@ -249,7 +252,7 @@ function bindControls(){
  helm.addEventListener('pointerup',endHelm);helm.addEventListener('pointercancel',endHelm);helm.addEventListener('lostpointercapture',()=>{helmDragging=false;helmPointer=null;pid=null});
  world.addEventListener('pointerdown',e=>{if(!running||e.target!==world)return;sx=e.clientX;sy=e.clientY;pid='world-'+e.pointerId;try{world.setPointerCapture(e.pointerId)}catch(_){}});
  world.addEventListener('pointerup',e=>{if(!running||pid!=='world-'+e.pointerId)return;const dx=e.clientX-sx,dy=e.clientY-sy;pid=null;const threshold=Math.max(22,Math.min(42,innerWidth*.05));if(Math.abs(dx)>threshold){helmAngle=clamp(helmAngle+(dx>0?.32:-.32),-1,1);$('helmknob').style.transform='rotate('+(helmAngle*135)+'deg)';$('helm').style.setProperty('--wheel-rotation',(helmAngle*135)+'deg');$('helmread').textContent=String(Math.round(helmAngle*135)).padStart(3,'0')+'°'}else if(dy>threshold){/* down gesture is reserved for moving the camera in a later build */}else if(dy< -threshold){fire()}});
- $('fire').addEventListener('pointerdown',e=>{e.preventDefault();fire()});$('transponder').onclick=setTransponder;$('startbtn').onclick=start;$('restart').onclick=start;$('intelclose').onclick=closeIntel;
+ $('fire').addEventListener('pointerdown',e=>{e.preventDefault();fire();if(e.pointerType==='touch')try{$('fire').setPointerCapture(e.pointerId)}catch(_){}});$('fire').addEventListener('pointerup',()=>{});$('throttleUp').addEventListener('click',()=>{throttle=clamp(throttle+.1,.25,1);updateHud();toast('ENGINE POWER '+Math.round(throttle*100)+'%')});$('throttleDown').addEventListener('click',()=>{throttle=clamp(throttle-.1,.25,1);updateHud();toast('ENGINE POWER '+Math.round(throttle*100)+'%')});$('transponder').onclick=setTransponder;$('startbtn').onclick=start;$('restart').onclick=start;$('intelclose').onclick=closeIntel;
  $('share').onclick=()=>{const text='I scored '+score+' in Ocean Run 🌊⚓ Can you take command and beat my score?';if(navigator.share)navigator.share({title:'Ocean Run',text,url:location.href}).catch(()=>{});else location.href='https://wa.me/?text='+encodeURIComponent(text+' '+location.href)};
  addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='a'){helmAngle=clamp(helmAngle-.18,-1,1);$('helmknob').style.transform='rotate('+(helmAngle*135)+'deg)';$('helm').style.setProperty('--wheel-rotation',(helmAngle*135)+'deg')}if(e.key==='ArrowRight'||e.key==='d'){helmAngle=clamp(helmAngle+.18,-1,1);$('helmknob').style.transform='rotate('+(helmAngle*135)+'deg)';$('helm').style.setProperty('--wheel-rotation',(helmAngle*135)+'deg')}if(e.key===' '||e.key==='Enter')fire();if(e.key==='t')setTransponder()});
 }
