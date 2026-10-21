@@ -1,0 +1,123 @@
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
+
+const $ = id => document.getElementById(id);
+const canvas = $('world');
+let renderer, scene, camera, water, boat, clock, raf, lastQuizAt=-99;
+let running=false, paused=false, started=false, elapsed=0, distance=0, score=0, lane=0, laneTarget=0, slideTimer=0, fireCooldown=0, invulnerable=0, taskCount=0, quizCount=0, correctCount=0, collected=0;
+let obstacles=[], collectibles=[], projectiles=[], effects=[], clouds=[];
+const laneX=[-3.05,0,3.05], rnd=(a,b)=>a+Math.random()*(b-a), clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const quizzes=[
+ {q:'What information does AIS normally broadcast?',a:['Vessel identity, position, course and speed','Only the vessel’s cargo manifest','Ocean depth beneath the keel','Weather forecasts for the next week'],ok:0,f:'AIS helps vessels and shore stations exchange identification and navigation information. It complements—not replaces—other sources.'},
+ {q:'One nautical mile equals approximately…',a:['1.852 kilometres','1.000 kilometre','2.500 kilometres','1.609 kilometres'],ok:0,f:'The nautical mile is based on latitude and is defined as 1,852 metres.'},
+ {q:'Which instrument is used to measure water depth?',a:['Echo sounder','Anemometer','Barometer','Gyroscope'],ok:0,f:'An echo sounder measures depth using sound pulses and their returning echoes.'},
+ {q:'In IALA Region A, when entering from sea, red lateral marks indicate…',a:['Port (left) side','Starboard (right) side','The deepest water only','A no-wake area'],ok:0,f:'In IALA Region A, red marks port and green marks starboard when entering from sea. Follow local charts and notices.'},
+ {q:'A “knot” is a unit of…',a:['Speed','Depth','Wave height','Compass bearing'],ok:0,f:'One knot is one nautical mile per hour.'},
+ {q:'What should a bridge team do when conditions worsen?',a:['Reassess risk, speed and route','Keep speed unchanged regardless','Ignore updated forecasts','Head toward the nearest rocks'],ok:0,f:'Safe passage planning adapts to forecasts, observations, vessel limits and navigational hazards.'},
+ {q:'What does a nautical chart help a mariner understand?',a:['Depths, hazards and navigation aids','Only the names of ports','Only the wind speed','The engine’s fuel level'],ok:0,f:'Charts combine hydrographic information with hazards, aids to navigation and other passage-planning details.'},
+ {q:'Which is a useful reason to cross-check vessel information?',a:['Data sources may be incomplete or delayed','AIS guarantees every ship is visible','Names never change','Position data cannot contain errors'],ok:0,f:'AIS can be missing, delayed, incorrect or deliberately manipulated, so analysts compare multiple sources.'},
+ {q:'What is the safest response to an uncertain floating object?',a:['Maintain a safe distance and assess it','Aim directly at it','Assume it is harmless','Ignore it at night'],ok:0,f:'Maintain situational awareness and use safe navigation practices around unidentified hazards.'},
+ {q:'What is a major purpose of a lighthouse?',a:['Provide a visual aid to navigation','Measure vessel speed','Transmit every ship’s cargo details','Measure ocean salinity'],ok:0,f:'Lighthouses and other visual aids help mariners identify locations and navigate safely.'}
+];
+function makeMat(color,rough=.5,metal=0,extra={}){return new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal,...extra})}
+function addMesh(parent,geo,mat,pos=[0,0,0],rot=[0,0,0],scale=[1,1,1]){const m=new THREE.Mesh(geo,mat);m.position.set(...pos);m.rotation.set(...rot);m.scale.set(...scale);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
+function box(parent,w,h,d,mat,pos){return addMesh(parent,new THREE.BoxGeometry(w,h,d),mat,pos)}
+function makeBoat(){
+ const g=new THREE.Group();
+ const hullMat=makeMat('#e8edf0',.32,.35), navy=makeMat('#153b52',.3,.35), orange=makeMat('#ff643c',.34,.15), glass=makeMat('#69d8ee',.17,.4,{emissive:'#0a3148',emissiveIntensity:.4}), metal=makeMat('#c8e4ed',.25,.75), black=makeMat('#0b202d',.4,.4);
+ // sculpted hull cross-sections; bow tapers forward
+ const rings=[{z:-2.45,w:.08,y:.1},{z:-1.95,w:.58,y:-.12},{z:-1.2,w:.86,y:-.28},{z:.1,w:.94,y:-.34},{z:1.2,w:.82,y:-.26},{z:1.75,w:.68,y:-.08},{z:1.95,w:.55,y:.02}];
+ const verts=[],inds=[];
+ rings.forEach(r=>{verts.push(-r.w,r.y, r.z, r.w,r.y,r.z, -r.w,r.y+.28,r.z, r.w,r.y+.28,r.z)});
+ for(let i=0;i<rings.length-1;i++){let a=i*4,b=a+4;inds.push(a,b,a+2,a+2,b,b+2,a+1,a+3,b+1,a+3,b+3,b+1,a,a+1,b,a+1,b+1,b)}
+ const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));geo.setIndex(inds);geo.computeVertexNormals();addMesh(g,geo,new THREE.MeshStandardMaterial({color:'#e8edf0',roughness:.3,metalness:.35,side:THREE.DoubleSide}));
+ // rub rail, dark hull stripe and bow trim
+ box(g,1.45,.12,2.75,navy,[0,-.02,.05]);box(g,1.66,.1,1.8,hullMat,[0,.18,.18]);
+ // rear deck and non-slip pads
+ box(g,1.35,.12,1.12,makeMat('#b9c9d0',.72),[0,.24,1.05]);
+ for(let x of [-.46,-.23,0,.23,.46])box(g,.035,.012,.78,makeMat('#637e8c',.8),[x,.307,1.05]);
+ // central cabin
+ box(g,.93,.48,1.03,hullMat,[0,.48,-.05]);
+ box(g,.87,.06,.98,navy,[0,.74,-.05]);
+ // bridge front windows, angled windscreen strips
+ for(let x of [-.31,-.1,.1,.31]){const win=box(g,.18,.22,.035,glass,[x,.58,-.59]);win.rotation.x=-.16}
+ // orange safety bands both sides
+ for(let side of [-1,1]){box(g,.06,.14,1.8,orange,[side*.81,.02,.1]);box(g,.07,.08,1.22,orange,[side*.72,.23,.86]);
+  // rail stanchions
+  for(let z of [-.45,.05,.55,1.05,1.45]){let pole=addMesh(g,new THREE.CylinderGeometry(.018,.022,.36,8),metal,[side*.68,.46,z]);}
+  const rail=addMesh(g,new THREE.CylinderGeometry(.018,.018,1.9,8),metal,[side*.68,.64,.52],[Math.PI/2,0,0]);}
+ // bow deck, anchor cleat and light
+ box(g,.42,.09,.55,hullMat,[0,.26,-1.4]);
+ addMesh(g,new THREE.CylinderGeometry(.035,.035,.1,10),metal,[0,.33,-1.55],[Math.PI/2,0,0]);
+ // cabin roof, mast, radar scanner
+ box(g,1.02,.1,.9,makeMat('#f8fbfd',.3),[0,.79,-.04]);
+ addMesh(g,new THREE.CylinderGeometry(.025,.035,.9,8),metal,[0,1.22,-.02]);
+ box(g,.46,.035,.09,navy,[0,1.58,-.02]);
+ const radar=addMesh(g,new THREE.BoxGeometry(.52,.025,.055),makeMat('#9cf4ff',.2,.4,{emissive:'#34caff',emissiveIntensity:1}),[0,1.6,-.02]);radar.userData.spin=true;
+ // mast lights
+ const red= new THREE.MeshStandardMaterial({color:'#ff503e',emissive:'#ff251c',emissiveIntensity:2});
+ const green=new THREE.MeshStandardMaterial({color:'#44ffd2',emissive:'#20ffbd',emissiveIntensity:2});
+ addMesh(g,new THREE.SphereGeometry(.055,12,8),red,[-.48,.49,.15]);addMesh(g,new THREE.SphereGeometry(.055,12,8),green,[.48,.49,.15]);
+ // lifebuoys and twin outboards
+ for(let side of [-1,1]){addMesh(g,new THREE.TorusGeometry(.12,.035,8,18),orange,[side*.58,.32,1.32],[Math.PI/2,0,0]);box(g,.22,.42,.2,black,[side*.31,-.08,1.78]);}
+ // search lamp
+ addMesh(g,new THREE.SphereGeometry(.09,12,8),new THREE.MeshStandardMaterial({color:'#fff4bd',emissive:'#ffe79a',emissiveIntensity:1.8}),[0,.87,-.56]);
+ g.userData.radar=radar;return g;
+}
+function makeSky(){const geo=new THREE.SphereGeometry(500,32,20);const mat=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,uniforms:{uTime:{value:0}},vertexShader:'varying vec3 vPos; void main(){vPos=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',fragmentShader:'varying vec3 vPos; void main(){float h=normalize(vPos).y;vec3 c=mix(vec3(0.95,0.68,0.43),vec3(0.08,0.49,0.73),smoothstep(-0.08,0.5,h));c=mix(c,vec3(0.025,0.16,0.3),smoothstep(0.45,0.9,h));gl_FragColor=vec4(c,1.0);}'});scene.add(new THREE.Mesh(geo,mat))}
+function makeWater(){
+ const geo=new THREE.PlaneGeometry(180,420,160,260);geo.rotateX(-Math.PI/2);
+ const mat=new THREE.ShaderMaterial({uniforms:{uTime:{value:0},uSpeed:{value:1},uStorm:{value:0},uSun:{value:new THREE.Vector3(-.4,.8,.3)}},vertexShader:`uniform float uTime; uniform float uSpeed; varying vec3 vWorld; varying float vWave; varying vec2 vUv; void main(){vUv=uv;vec3 p=position;float t=uTime;float w1=sin(p.x*.19+p.z*.045+t*1.2)*.11;float w2=sin(p.x*.43-p.z*.075-t*1.7)*.045;float w3=cos(p.x*.075+p.z*.13+t*.8)*.16;p.y+=w1+w2+w3;vWave=w1+w2+w3;vec4 world=modelMatrix*vec4(p,1.);vWorld=world.xyz;gl_Position=projectionMatrix*viewMatrix*world;}`,fragmentShader:`uniform float uTime;uniform float uStorm;uniform vec3 uSun;varying vec3 vWorld;varying float vWave;varying vec2 vUv;void main(){vec3 deep=vec3(.012,.19,.29);vec3 teal=vec3(.015,.43,.55);vec3 c=mix(deep,teal,smoothstep(-.8,.6,vWorld.y+vWave));float swell=sin(vWorld.x*.8+uTime*1.5)*sin(vWorld.z*.21-uTime*2.2);float fine=sin(vWorld.x*2.5+vWorld.z*.6+uTime*2.6)*sin(vWorld.z*1.8-uTime*2.2);float glint=pow(max(0.,swell*.5+fine*.5),9.)*.7;float foam=smoothstep(.73,.98,abs(sin(vWorld.x*.65+vWorld.z*.23+uTime*2.)*sin(vWorld.x*.14-vWorld.z*.8-uTime*1.4)));float fresnel=pow(1.-abs(dot(normalize(vec3(dFdx(vWorld.x),1.,dFdy(vWorld.z))),vec3(0.,1.,0.))),2.);c+=vec3(.16,.56,.64)*glint;c=mix(c,vec3(.66,.89,.91),foam*.18);c+=vec3(.02,.12,.17)*fresnel;c=mix(c,vec3(.02,.055,.12),uStorm*.72);gl_FragColor=vec4(c,1.);}`,transparent:false});
+ water=new THREE.Mesh(geo,mat);water.position.set(0,-.45,-120);water.frustumCulled=false;scene.add(water);
+ // ocean fog helps blend horizon
+}
+function makeCloudTexture(){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');const g=x.createRadialGradient(64,64,4,64,64,62);g.addColorStop(0,'rgba(255,255,255,.78)');g.addColorStop(.45,'rgba(255,255,255,.42)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return new THREE.CanvasTexture(c)}
+function makeClouds(){const tex=makeCloudTexture();for(let i=0;i<17;i++){const m=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,color:i%4===0?'#ffe6c6':'#e7f8ff',transparent:true,opacity:rnd(.15,.4),depthWrite:false}));m.position.set(rnd(-85,85),rnd(14,35),rnd(-230,-100));m.scale.set(rnd(18,42),rnd(6,14),1);scene.add(m);clouds.push(m)}}
+function createObstacle(type,lane,z){const g=new THREE.Group();if(type==='container'){const body=makeMat(['#df6746','#276d87','#d3a148','#b64a51'][Math.floor(Math.random()*4)],.6);addMesh(g,new THREE.BoxGeometry(2.2,1.35,3.1),body,[0,.68,0]);const line=makeMat('#ffffff55',.6);for(let x=-.85;x<=.9;x+=.28)addMesh(g,new THREE.BoxGeometry(.035,1.2,.025),line,[x,.68,1.56]);addMesh(g,new THREE.BoxGeometry(2.25,.09,3.15),makeMat('#263f4c'),[0,1.37,0]);}
+ else if(type==='buoy'){addMesh(g,new THREE.CylinderGeometry(.22,.42,1.35,12),makeMat('#ff6c45',.36),[0,.7,0]);addMesh(g,new THREE.CylinderGeometry(.24,.24,.18,12),makeMat('#f3f7f5'),[0,.62,0]);addMesh(g,new THREE.CylinderGeometry(.07,.07,.45,8),makeMat('#f9d66e'),[0,1.58,0]);addMesh(g,new THREE.SphereGeometry(.12,12,8),new THREE.MeshStandardMaterial({color:'#ffdb75',emissive:'#ff9d32',emissiveIntensity:1.2}),[0,1.82,0]);}
+ else { // drifting timber / net hazard
+ addMesh(g,new THREE.CylinderGeometry(.23,.28,2.4,10),makeMat('#7b553d'),[0,.28,0],[0,0,Math.PI/2]);for(let x of [-.8,-.25,.3,.8])addMesh(g,new THREE.CylinderGeometry(.3,.3,.05,10),makeMat('#a47a54'),[x,.28,0],[0,0,Math.PI/2]);}
+ g.position.set(laneX[lane],-.35,z);g.userData={kind:type,lane,hit:false};scene.add(g);obstacles.push(g);return g}
+function createBook(lane,z){const g=new THREE.Group();const aura=new THREE.Mesh(new THREE.TorusGeometry(.68,.025,8,40),new THREE.MeshBasicMaterial({color:'#4df5ed',transparent:true,opacity:.65}));aura.rotation.x=Math.PI/2;g.add(aura);const cover=makeMat('#14bfae',.25,.15,{emissive:'#006e75',emissiveIntensity:.4});addMesh(g,new THREE.BoxGeometry(.72,.12,.88),cover,[0,0,0]);addMesh(g,new THREE.BoxGeometry(.035,.13,.84),makeMat('#d9ffff'),[0,.012,0]);for(let x of [-.2,.2])addMesh(g,new THREE.BoxGeometry(.025,.012,.45),makeMat('#f3ffff'),[x,.075,0]);const glow=new THREE.PointLight('#39ffeb',2,4);glow.position.y=.7;g.add(glow);g.position.set(laneX[lane],.6,z);g.userData={lane,spin:true};scene.add(g);collectibles.push(g)}
+function createTarget(lane,z){const g=new THREE.Group();const torus=addMesh(g,new THREE.TorusGeometry(.65,.06,10,28),new THREE.MeshStandardMaterial({color:'#ffdc73',emissive:'#ff8b30',emissiveIntensity:1.1}),[0,1.15,0]);torus.rotation.x=Math.PI/2;addMesh(g,new THREE.BoxGeometry(1.2,.8,.55),makeMat('#d76b43',.4),[0,.42,0]);g.position.set(laneX[lane],-.25,z);g.userData={lane,hit:false,kind:'target',ring:torus};scene.add(g);obstacles.push(g)}
+function burst(pos,color='#8af7ff',n=18){for(let i=0;i<n;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(rnd(.025,.075),6,5),new THREE.MeshBasicMaterial({color,transparent:true,opacity:1}));m.position.copy(pos);m.userData={vel:new THREE.Vector3(rnd(-2,2),rnd(-.1,2.6),rnd(-3,2)),life:rnd(.3,.9),max:0};m.userData.max=m.userData.life;scene.add(m);effects.push(m)}}
+function makeProjectile(){const g=new THREE.Group();addMesh(g,new THREE.SphereGeometry(.12,12,8),new THREE.MeshBasicMaterial({color:'#fff2a5'}));addMesh(g,new THREE.CylinderGeometry(.025,.09,1.7,8),new THREE.MeshBasicMaterial({color:'#ff8b3d'}),[0,0,.75],[Math.PI/2,0,0]);const light=new THREE.PointLight('#ff9e48',3,5);g.add(light);g.position.set(boat.position.x,.5,2);scene.add(g);projectiles.push(g)}
+function makeWake(){const g=new THREE.Group();for(let i=0;i<7;i++){const m=new THREE.Mesh(new THREE.PlaneGeometry(.1,1.3+i*.16),new THREE.MeshBasicMaterial({color:'#e8fdff',transparent:true,opacity:.3-i*.025,side:THREE.DoubleSide,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set((i-3)*.14,-.27,2.3+i*.28);g.add(m)}scene.add(g);return g}
+let wake;
+function setup(){try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.7));renderer.setSize(innerWidth,innerHeight,false);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+ scene=new THREE.Scene();scene.fog=new THREE.FogExp2('#0b5775',.0027);camera=new THREE.PerspectiveCamera(57,innerWidth/innerHeight,.1,700);camera.position.set(0,6.6,15.8);camera.lookAt(0,1,-13);
+ scene.add(new THREE.HemisphereLight('#bdeeff','#10364c',2.1));const sun=new THREE.DirectionalLight('#fff0d1',3.4);sun.position.set(-28,45,-30);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-25;sun.shadow.camera.right=25;sun.shadow.camera.top=25;sun.shadow.camera.bottom=-25;scene.add(sun);const fill=new THREE.DirectionalLight('#50d8ff',1.25);fill.position.set(20,15,12);scene.add(fill);
+ makeSky();makeWater();makeClouds();boat=makeBoat();boat.position.set(0,.1,3.3);scene.add(boat);wake=makeWake();clock=new THREE.Clock();addEventListener('resize',resize);$('loading').classList.add('hidden');$('start').classList.remove('hidden');animate();}catch(e){console.error(e);$('loadingText').textContent='3D renderer unavailable. Try the latest Chrome or enable WebGL.'}}
+function resize(){if(!renderer)return;renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.7));renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
+function start(){elapsed=distance=score=taskCount=quizCount=correctCount=collected=0;lastQuizAt=-99;lane=laneTarget=0;slideTimer=fireCooldown=invulnerable=0;obstacles.forEach(o=>scene.remove(o));collectibles.forEach(o=>scene.remove(o));projectiles.forEach(o=>scene.remove(o));effects.forEach(o=>scene.remove(o));obstacles=[];collectibles=[];projectiles=[];effects=[];running=true;paused=false;started=true;boat.position.set(0,.1,3.3);boat.rotation.set(0,0,0);$('start').classList.add('hidden');$('end').classList.add('hidden');$('quizback').classList.add('hidden');$('hud').classList.remove('hidden');$('bottom').classList.remove('hidden');$('routebar').classList.remove('hidden');$('toast').classList.remove('on');updateHud();clock.getDelta()}
+function toast(msg){$('toast').textContent=msg;$('toast').classList.add('on');clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('toast').classList.remove('on'),1350)}
+function updateHud(){$('score').textContent=String(score).padStart(4,'0');$('dist').textContent=distance.toFixed(1);$('time').textContent=Math.max(0,Math.ceil(60-elapsed));$('routefill').style.width=(distance/10*100)+'%';$('taskdots').innerHTML=Array.from({length:10},(_,i)=>'<i class="taskdot '+(i<taskCount?'done':'')+'"></i>').join('')}
+function move(d){if(!running)return;laneTarget=clamp(laneTarget+d,-1,1)}
+function fire(){if(!running||fireCooldown>0)return;fireCooldown=.38;makeProjectile();toast('PULSE LAUNCHED');}
+function slide(){if(!running)return;slideTimer=.75;boat.scale.y=.76;toast('LOW PROFILE')}
+function openQuiz(idx){if(!running)return;running=false;quizCount++;lastQuizAt=elapsed;const q=quizzes[idx%quizzes.length];$('qcount').textContent='SEA TASK '+String(taskCount).padStart(2,'0')+' / 10';$('qcategory').textContent=['VESSEL AWARENESS','NAVIGATION','SAFETY KNOWLEDGE'][idx%3];$('question').textContent=q.q;$('fact').textContent='';$('nextquiz').classList.add('hidden');$('answers').innerHTML='';q.a.forEach((txt,i)=>{const b=document.createElement('button');b.className='answer';b.textContent=String.fromCharCode(65+i)+'  '+txt;b.onclick=()=>{if(b.dataset.done)return;[...$('answers').children].forEach(x=>x.dataset.done='1');if(i===q.ok){b.classList.add('correct');score+=150;correctCount++;toast('CORRECT  +150')}else{b.classList.add('wrong');$('answers').children[q.ok].classList.add('correct');score=Math.max(0,score-25)}$('fact').textContent=q.f;$('nextquiz').classList.remove('hidden');updateHud()};$('answers').appendChild(b)});$('quizback').classList.remove('hidden')}
+function continueQuiz(){$('quizback').classList.add('hidden');if(distance>=10||elapsed>=60)finish();else{running=true;toast('BACK TO THE VOYAGE')}}
+function finish(){running=false;started=false;$('hud').classList.add('hidden');$('bottom').classList.add('hidden');$('routebar').classList.add('hidden');$('quizback').classList.add('hidden');$('end').classList.remove('hidden');$('endtitle').textContent=distance>=10?'LIGHTHOUSE REACHED':'VOYAGE COMPLETE';$('finalscore').textContent=String(score).padStart(4,'0');$('endtext').textContent=distance>=10?'A steady helm and a sharp mind brought you safely home.':'The sea was challenging today. Your next run can be even better.';$('endstats').innerHTML='<span class="chip">DISTANCE '+distance.toFixed(1)+' NM</span><span class="chip">QUIZ '+correctCount+'/'+quizCount+'</span><span class="chip">TASKS '+taskCount+'/10</span>'}
+function hitTest(){const bx=boat.position.x;for(const o of obstacles){if(o.userData.hit)continue;if(Math.abs(o.position.z-boat.position.z)<1.55&&Math.abs(o.position.x-bx)<1.25){if(o.userData.kind==='target'){o.userData.hit=true;scene.remove(o);burst(o.position,'#ffd774',24);score+=100;toast('TARGET CLEARED +100');taskCount=Math.min(10,taskCount+1);updateHud()}else if(invulnerable<=0){o.userData.hit=true;invulnerable=1.25;score=Math.max(0,score-35);burst(boat.position,'#ff805f',24);toast('WAKE COLLISION −35');boat.position.x+=Math.sign(bx-o.position.x||1)*.45;}}}
+ for(const c of collectibles){if(c.userData.hit)continue;if(Math.abs(c.position.z-boat.position.z)<1.45&&Math.abs(c.position.x-bx)<1.25){c.userData.hit=true;scene.remove(c);collected++;score+=40;taskCount=Math.min(10,taskCount+1);burst(c.position,'#5cfff0',30);updateHud();toast('CHART FRAGMENT +40');const qi=Math.min(quizzes.length-1,taskCount-1);openQuiz(qi);return}}
+}
+function update(dt,t){if(!running)return;elapsed+=dt;distance=Math.min(10,elapsed/6);fireCooldown=Math.max(0,fireCooldown-dt);slideTimer=Math.max(0,slideTimer-dt);invulnerable=Math.max(0,invulnerable-dt);boat.scale.y=THREE.MathUtils.damp(boat.scale.y,slideTimer>0?.76:1,10,dt);
+ const speed=19+Math.min(10,distance)*.8;water.material.uniforms.uTime.value=t;water.material.uniforms.uStorm.value=clamp((distance-6.2)/3.8,0,1);
+ lane=laneTarget;const targetX=laneX[lane+1];boat.position.x=THREE.MathUtils.damp(boat.position.x,targetX,7.2,dt);boat.rotation.z=THREE.MathUtils.damp(boat.rotation.z,-(targetX-boat.position.x)*.065,6,dt);boat.position.y=.08+Math.sin(t*3.1)*.07+Math.sin(t*5.3)*.035;boat.rotation.x=Math.sin(t*1.4)*.025;boat.rotation.y=THREE.MathUtils.damp(boat.rotation.y,Math.sin(t*1.1)*.025,2,dt);boat.userData.radar.rotation.y=t*2.2;
+ wake.position.x=boat.position.x;wake.position.z=boat.position.z;wake.children.forEach((m,i)=>{m.material.opacity=.18+Math.sin(t*5+i)*.06;m.scale.x=1+Math.sin(t*4+i)*.3});
+ camera.position.x=THREE.MathUtils.damp(camera.position.x,boat.position.x*.25,2.2,dt);camera.position.y=6.3+Math.sin(t*1.7)*.08;camera.lookAt(boat.position.x*.18,1,-13);
+ clouds.forEach((c,i)=>{c.position.x+=dt*(.7+i%3*.2);if(c.position.x>100)c.position.x=-100});
+ // Spawn hazards with lane gaps and increasing pace
+ if(!update.spawn)update.spawn=0;update.spawn+=dt;if(update.spawn>Math.max(.65,1.28-distance*.05)){update.spawn=0;const l=Math.floor(Math.random()*3),z=-88;const roll=Math.random();createObstacle(roll<.55?'container':roll<.83?'buoy':'timber',l,z);if(Math.random()<.52)createBook(Math.floor(Math.random()*3),z-rnd(14,28));if(distance>2&&Math.random()<.25)createTarget(Math.floor(Math.random()*3),z-rnd(18,32))}
+ obstacles.forEach(o=>{o.position.z+=speed*dt;if(o.userData.kind==='target'){o.rotation.y+=dt*.8;if(o.userData.ring)o.userData.ring.rotation.z+=dt*1.2}});collectibles.forEach(c=>{c.position.z+=speed*dt;c.rotation.y+=dt*1.8;c.position.y=.65+Math.sin(t*3+c.position.z)*.14;c.children[0].rotation.z+=dt*.5});
+ // Projectile travels forward, glowing and impacts targets
+ projectiles.forEach(p=>{p.position.z-=dt*58;p.position.y+=dt*.4;for(const o of obstacles){if(o.userData.kind==='target'&&!o.userData.hit&&Math.abs(o.position.z-p.position.z)<2&&Math.abs(o.position.x-p.position.x)<1.5){o.userData.hit=true;scene.remove(o);burst(o.position,'#ffcf6e',24);score+=125;taskCount=Math.min(10,taskCount+1);toast('TARGET HIT +125');p.userData.dead=true;break}}});projectiles=projectiles.filter(p=>{if(p.userData.dead||p.position.z<-100){scene.remove(p);return false}return true});
+ effects.forEach(p=>{p.userData.life-=dt;p.position.addScaledVector(p.userData.vel,dt);p.userData.vel.y-=dt*2.6;p.material.opacity=clamp(p.userData.life/p.userData.max,0,1)});effects=effects.filter(p=>{if(p.userData.life<=0){scene.remove(p);p.geometry.dispose();p.material.dispose();return false}return true});
+ obstacles=obstacles.filter(o=>{if(o.position.z>12||o.userData.hit){scene.remove(o);return false}return true});collectibles=collectibles.filter(o=>{if(o.position.z>12||o.userData.hit){scene.remove(o);return false}return true});
+ hitTest();if(!running)return;
+ // A knowledge checkpoint every ~6 seconds if no book was encountered.
+ if(taskCount<10&&elapsed-lastQuizAt>7.5&&elapsed>5&&Math.floor(elapsed/6)>Math.floor((elapsed-dt)/6)&&quizCount<10){taskCount=Math.min(10,taskCount+1);openQuiz(Math.min(quizzes.length-1,quizCount));updateHud()}
+ if(elapsed>=60||distance>=10){finish();return}updateHud();
+}
+function animate(){raf=requestAnimationFrame(animate);if(!renderer)return;const dt=Math.min(clock.getDelta(),.04),t=clock.elapsedTime;if(water){water.position.z= -120 + (t*4%4);water.material.uniforms.uTime.value=t;clouds.forEach((c,i)=>{c.material.opacity=(.18+Math.sin(t*.2+i)*.08)})}if(running)update(dt,t);renderer.render(scene,camera)}
+function bindControls(){let sx=0,sy=0,st=0;$('world').addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY;st=performance.now()});$('world').addEventListener('pointerup',e=>{if(!running)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)>24||Math.abs(dy)>24){if(Math.abs(dx)>Math.abs(dy))move(dx>0?1:-1);else if(dy>24)slide();else fire()}else if(performance.now()-st<220&&e.clientY>innerHeight*.48){/* tap leaves steering to the visible controls */}});$('left').onclick=()=>move(-1);$('right').onclick=()=>move(1);$('slide').onclick=slide;$('fire').onclick=fire;$('startbtn').onclick=start;$('restart').onclick=start;$('nextquiz').onclick=continueQuiz;$('share').onclick=()=>{const text='I scored '+score+' in Ocean Run 🌊⚓ Can you complete the voyage and beat my score?';if(navigator.share)navigator.share({title:'Ocean Run',text,url:location.href}).catch(()=>{});else location.href='https://wa.me/?text='+encodeURIComponent(text+' '+location.href)};addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='a')move(-1);if(e.key==='ArrowRight'||e.key==='d')move(1);if(e.key==='ArrowDown'||e.key==='s')slide();if(e.key===' '||e.key==='Enter')fire()})}
+bindControls();setup();
