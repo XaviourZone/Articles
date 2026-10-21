@@ -139,7 +139,7 @@ function update(dt,t){if(!running)return;elapsed+=dt;distance=Math.min(10,elapse
  obstacles=obstacles.filter(o=>{if(o.position.z>12||o.userData.hit){scene.remove(o);return false}return true});collectibles=collectibles.filter(o=>{if(o.position.z>12||o.userData.hit){scene.remove(o);return false}return true});
  hitTest();if(!running)return;
  // A knowledge checkpoint every ~6 seconds if no book was encountered.
- if(taskCount<10&&elapsed-lastQuizAt>7.5&&elapsed>5&&Math.floor(elapsed/6)>Math.floor((elapsed-dt)/6)&&quizCount<10){taskCount=Math.min(10,taskCount+1);openQuiz(Math.min(quizzes.length-1,quizCount));updateHud()}
+ if(taskCount<10&&elapsed-lastQuizAt>4.8&&elapsed>5&&Math.floor(elapsed/6)>Math.floor((elapsed-dt)/6)&&quizCount<10){taskCount=Math.min(10,taskCount+1);openQuiz(Math.min(quizzes.length-1,quizCount));updateHud()}
  if(elapsed>=60||distance>=10){finish();return}updateHud();
 }
 function animate(){raf=requestAnimationFrame(animate);if(!renderer)return;const dt=Math.min(clock.getDelta(),.04),t=clock.elapsedTime;if(water){water.position.z= -120 + (t*4%4);water.material.uniforms.uTime.value=t;clouds.forEach((c,i)=>{c.material.opacity=(.18+Math.sin(t*.2+i)*.08)})}if(running)update(dt,t);renderer.render(scene,camera)}
