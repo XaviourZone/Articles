@@ -11,3 +11,56 @@
 .intel{position:absolute;z-index:9;inset:0;display:grid;place-items:center;padding:20px;background:#03101e77;backdrop-filter:blur(6px)}.intel-card{width:min(100%,410px);padding:22px;border:1px solid #7ce9ff44;border-radius:20px;background:linear-gradient(150deg,#103c50f5,#061b2df7);box-shadow:0 20px 70px #0008;animation:rise .24s ease-out}.intel-kicker{display:flex;justify-content:space-between;gap:12px;font-size:8px;font-weight:900;letter-spacing:1.4px;color:#90b9c9}.intel-kicker span:last-child{color:#66f0c3}.intel-card h2{font:800 28px 'Barlow Condensed';margin:14px 0 7px}.intel-card p{font-size:12px;line-height:1.7;color:#bdd7e1}.intel-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #b7ecff20;padding-top:14px;margin-top:16px}.intel-foot>span{font:800 15px 'Barlow Condensed';color:var(--gold)}.intel-close{padding:10px 12px;border-radius:9px;background:#0d8db6;font-size:9px;font-weight:900;letter-spacing:.6px;white-space:nowrap}
 .result{font:900 54px 'Barlow Condensed';color:var(--gold);margin:10px 0;text-shadow:0 0 25px #ffca5b28}#endstats{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;color:#a9cad7;font-size:10px}.stat-chip{padding:8px 10px;border-radius:9px;border:1px solid #9feaff25;background:#ffffff08}
 @keyframes rise{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}@media(max-width:420px){.hud{left:8px;right:8px;gap:5px}.hudbox{padding:8px 9px}.label{font-size:7px;letter-spacing:1px}.number{font-size:19px}.mission{top:82px;left:8px;right:8px;padding:9px}.mission strong{font-size:10px}.status{top:140px;left:9px}.bottom{left:8px;right:8px;bottom:max(9px,env(safe-area-inset-bottom));gap:6px}.left-actions{width:32%;gap:7px}.action-btn{grid-template-columns:20px 1fr;gap:4px;padding:9px 7px;font-size:7px}.action-btn b{grid-column:2}.action-icon{font-size:17px}.fire-btn{height:70px}.helm-wrap{width:52vw}.helm{width: min(42vw,160px);height:min(42vw,160px);min-width:130px;min-height:130px}.helm-caption{font-size:6px}.helm-knob{transform-origin:8px calc(min(42vw,160px)*.5 - 4px)}}@media(max-height:650px){.helm{width:125px;height:125px;min-width:125px;min-height:125px}.helm-wrap{width:155px}.bottom{bottom:6px}.fire-btn{height:60px}.mission{top:76px}.status{top:133px}.panel{padding:22px 20px}.feature-grid{margin:14px 0}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* Modern bridge controls: throttle left, firing beside the helm, larger wheel right. */
+.bottom{align-items:flex-end;gap:clamp(8px,2vw,24px);padding:0 1vw}
+.throttle-panel{width:clamp(118px,23vw,176px);display:flex;flex-direction:column;gap:8px;pointer-events:auto;padding:10px;border:1px solid #b9e4f222;border-radius:17px;background:linear-gradient(150deg,#071e2dcc,#061522bb);backdrop-filter:blur(12px);box-shadow:0 12px 30px #0005}
+.control-caption{font-size:9px;font-weight:900;letter-spacing:1.8px;color:#a8d2e1}
+.throttle-btn{display:flex;align-items:center;gap:9px;padding:10px 9px;border:1px solid #a9d9e51f;border-radius:10px;background:linear-gradient(135deg,#163b4b,#0b2737);text-align:left}
+.throttle-btn span{display:grid;place-items:center;width:23px;height:23px;border-radius:7px;background:#4ae3bc19;color:#68f0cb;font-size:12px}
+.throttle-btn b{font-size:8px;letter-spacing:.6px}
+.throttle-read{display:flex;align-items:center;gap:8px;padding:1px 3px}
+.throttle-read strong{font:800 20px 'Barlow Condensed';color:#d8f7ff;min-width:42px}
+.throttle-track{height:5px;flex:1;border-radius:9px;background:#ffffff18;overflow:hidden}
+.throttle-track i{display:block;height:100%;width:65%;background:linear-gradient(90deg,#45d8b2,#b5f0a0);border-radius:9px;transition:width .18s}
+.fire-dock{width:clamp(84px,13vw,120px);display:flex;flex-direction:column;align-items:center;gap:7px;pointer-events:auto;margin-bottom:16px}
+.fire-dock .fire-btn{width:100%;height:clamp(86px,14vw,116px);border-radius:50%;border:2px solid #ffbd85a8;background:radial-gradient(circle at 36% 24%,#ffad5d,#a63822 55%,#421820);box-shadow:0 0 0 5px #ff8a3c18,0 10px 30px #0008,inset 0 2px 4px #fff4}
+.fire-dock .fire-symbol{font-size:28px}
+.fire-dock .fire-btn>span:nth-child(2){font-size:11px}
+.fire-dock .fire-btn small{font-size:7px}
+.fire-hint{font-size:7px;font-weight:800;letter-spacing:1px;color:#a5c5d1;text-align:center;white-space:nowrap}
+.helm-wrap{width:clamp(185px,29vw,245px);gap:8px}
+.helm{width:clamp(176px,28vw,228px);height:clamp(176px,28vw,228px);max-width:228px;max-height:228px;min-width:176px;min-height:176px}
+.helm-ring{inset:3px;border-width:10px}
+.helm-spoke{left:calc(50% - 4px);width:8px;height:42%;top:8%}
+.helm-hub{inset:35%}
+.helm-hub span{font-size:27px}
+.helm-knob{left:calc(50% - 9px);top:4px;width:18px;height:18px;transform-origin:9px calc(clamp(176px,28vw,228px)*.5 - 5px)}
+.helm-caption{font-size:8px;letter-spacing:.8px}
+.left-actions{width:auto}
+@media(max-width:520px){
+ .bottom{left:7px;right:7px;gap:5px;padding:0;bottom:max(8px,env(safe-area-inset-bottom))}
+ .throttle-panel{width:clamp(104px,30vw,130px);padding:7px;gap:6px}
+ .throttle-btn{padding:8px 6px;gap:5px}
+ .throttle-btn b{font-size:7px}
+ .throttle-read strong{font-size:17px;min-width:36px}
+ .fire-dock{width:72px;margin-bottom:10px}
+ .fire-dock .fire-btn{height:72px}
+ .fire-dock .fire-symbol{font-size:22px}
+ .fire-dock .fire-btn>span:nth-child(2){font-size:9px}
+ .fire-dock .fire-btn small{font-size:6px}
+ .fire-hint{font-size:6px;letter-spacing:.4px}
+ .helm-wrap{width:clamp(148px,43vw,185px);gap:5px}
+ .helm{width:clamp(148px,43vw,185px);height:clamp(148px,43vw,185px);min-width:148px;min-height:148px}
+ .helm-caption{font-size:6px}
+ .helm-knob{transform-origin:9px calc(clamp(148px,43vw,185px)*.5 - 5px)}
+ .action-btn{grid-template-columns:20px 1fr;gap:4px;padding:8px 6px;font-size:7px}
+}
+@media(max-height:600px){
+ .helm,.helm-wrap{width:140px;height:140px;min-width:140px;min-height:140px}
+ .helm-wrap{height:auto}
+ .throttle-panel{gap:5px;padding:6px}
+ .throttle-btn{padding:6px}
+ .fire-dock{margin-bottom:5px}
+ .fire-dock .fire-btn{height:64px}
+}
