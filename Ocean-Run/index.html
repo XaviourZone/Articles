@@ -4,47 +4,44 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#061b2d">
-<meta name="description" content="Ocean Run — a 60-second maritime endless runner. Dodge hazards, collect chart fragments and answer quick sea-knowledge challenges.">
-<title>Ocean Run — Dodge · Discover · Survive</title>
+<meta name="description" content="Ocean Run — take the helm, identify contacts, activate your transponder and defend your patrol zone.">
+<title>Ocean Run — Take the Helm</title>
 <link rel="icon" href="./assets/ocean-logo.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./assets/game.css">
 </head>
 <body>
 <main id="scene">
-<canvas id="world" aria-label="Ocean Run 3D game scene"></canvas>
-<div class="vignette"></div>
-<div id="loading" class="screen"><div class="panel"><div class="brand">OCEAN <em>RUN</em></div><p id="loadingText" class="lead">Preparing the sea…</p></div></div>
-<div id="hud" class="hud hidden">
- <div class="hudbox"><div class="label">VOYAGE</div><div class="number"><span id="dist">0.0</span><small style="font-size:10px;color:#9bc9da"> / 10 NM</small></div></div>
- <div class="hudbox"><div class="label">INTEL SCORE</div><div class="number"><b>✦</b> <span id="score">0000</span></div></div>
- <div class="hudbox"><div class="label">TIME LEFT</div><div class="number"><span id="time">60</span><small style="font-size:10px;color:#9bc9da"> SEC</small></div></div>
-</div>
-<div id="routebar" class="hidden"><div id="routefill"></div></div>
-<div id="bottom" class="bottom hidden"><div><div class="hint">SWIPE TO STEER<br>SLIDE UNDER / FIRE AT TARGETS</div><div id="taskdots" class="tasklist" style="justify-content:flex-start;margin:8px 0 0"></div></div><div class="buttons"><button id="left" class="control" aria-label="Steer left">‹</button><button id="right" class="control" aria-label="Steer right">›</button><button id="slide" class="control" aria-label="Slide">⌄</button><button id="fire" class="control fire" aria-label="Fire pulse"><span>✦</span>FIRE</button></div></div>
-<div id="toast" class="toast">CHART FRAGMENT +40</div>
-<section id="start" class="screen hidden"><div class="panel">
- <div style="font-size:35px;margin-bottom:15px;filter:drop-shadow(0 0 15px #43ddff)">⚓</div>
- <div class="brand">OCEAN <em>RUN</em></div>
- <p class="eyebrow" style="margin-top:17px">DODGE · DISCOVER · SURVIVE</p>
- <p class="lead">Take the helm of a fast patrol craft. Thread through busy sea lanes, collect glowing chart fragments and complete ten quick maritime challenges before you reach the lighthouse.</p>
- <div class="statsrow"><div><strong>↔</strong>STEER</div><div><strong>⌄</strong>SLIDE</div><div><strong>✦</strong>FIRE</div><div><strong>▤</strong>LEARN</div></div>
- <span class="chip">60-SECOND VOYAGE</span><span class="chip">10 SEA TASKS</span>
- <button id="startbtn" class="primary">▶ &nbsp; START VOYAGE</button>
- <p class="lead" style="font-size:10px;margin-bottom:0">Swipe across the sea or use the controls. Tap targets with FIRE.</p>
+ <canvas id="world" aria-label="Interactive 3D maritime patrol game"></canvas><div class="vignette"></div>
+ <div id="loading" class="screen"><div class="panel"><div class="brand">OCEAN <em>RUN</em></div><p id="loadingText" class="lead">Bringing systems online…</p></div></div>
+ <div id="hud" class="hud hidden">
+  <div class="hudbox"><div class="label">PATROL ZONE</div><div class="number"><span id="dist">0.0</span><small> NM</small></div></div>
+  <div class="hudbox"><div class="label">MISSION SCORE</div><div class="number"><b>✦</b> <span id="score">0000</span></div></div>
+  <div class="hudbox"><div class="label">HULL</div><div class="hullbar"><i id="hullfill"></i></div><div id="hulltext" class="micro">100%</div></div>
+ </div>
+ <div id="mission" class="mission hidden"><span class="mission-pip"></span><div><small id="missiontag">MISSION OBJECTIVE</small><strong id="missiontext">Secure the patrol zone</strong></div><span id="missionstate">0 / 3</span></div>
+ <div id="status" class="status hidden"><span class="status-light"></span><span id="statusText">RADAR ONLINE</span></div>
+ <div id="bottom" class="bottom hidden">
+  <div class="left-actions">
+   <button id="transponder" class="action-btn"><span class="action-icon">⌁</span><span>TRANSPONDER</span><b id="xpdrstate">OFF</b></button>
+   <button id="fire" class="fire-btn"><span class="fire-symbol">✦</span><span>FIRE</span><small id="ammo">PULSE CANNON</small></button>
+  </div>
+  <div class="helm-wrap">
+   <div class="helm-label"><span>STEERING</span><span id="helmread">000°</span></div>
+   <div id="helm" class="helm" aria-label="Drag the steering wheel to steer the patrol boat" role="slider" aria-valuemin="-100" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+    <div class="helm-glow"></div><div class="helm-ring"></div><div class="helm-spoke s1"></div><div class="helm-spoke s2"></div><div class="helm-spoke s3"></div><div class="helm-spoke s4"></div><div class="helm-spoke s5"></div><div class="helm-spoke s6"></div><div class="helm-hub"><span>⚓</span></div><div id="helmknob" class="helm-knob"></div>
+   </div><div class="helm-caption">DRAG TO TURN · RELEASE TO HOLD COURSE</div>
+  </div>
+ </div>
+ <div id="toast" class="toast">RADAR CONTACT</div>
+ <section id="start" class="screen hidden"><div class="panel start-panel">
+  <div class="eyebrow">MARITIME COMBAT · ARCADE SIM</div><div class="brand">OCEAN <em>RUN</em></div>
+  <p class="lead">Take command of a high-speed patrol craft. Steer freely through open water, identify hostile contacts, fire when aligned, and keep your transponder active when ordered.</p>
+  <div class="feature-grid"><div><b>01</b><strong>STEER</strong><span>Rotate the helm</span></div><div><b>02</b><strong>IDENTIFY</strong><span>Track contacts</span></div><div><b>03</b><strong>ENGAGE</strong><span>Fire on hostiles</span></div></div>
+  <div class="briefing"><span class="briefing-dot"></span><span>MISSION: destroy 5 hostile contacts, respond to bridge orders, reach the patrol marker.</span></div>
+  <button id="startbtn" class="primary">TAKE COMMAND <span>→</span></button><p class="fineprint">Arcade fiction for entertainment. Not a real navigation or weapons simulator.</p>
  </div></section>
-<section id="quizback" class="quizback hidden"><div class="quizcard">
- <div class="quiztop"><span id="qcount">SEA TASK 01 / 10</span><span id="qcategory">NAVIGATION</span></div>
- <h2 id="question">What does AIS stand for?</h2>
- <div id="answers" class="answers"></div>
- <p id="fact" class="fact"></p>
- <button id="nextquiz" class="primary hidden">RETURN TO THE SEA &nbsp; →</button>
- </div></section>
-<section id="end" class="screen hidden"><div class="panel">
- <div style="font-size:38px">🏁</div><p class="eyebrow">VOYAGE DEBRIEF</p><h1 id="endtitle" style="font-size:24px;margin:8px 0 0">LIGHTHOUSE REACHED</h1>
- <div id="finalscore" class="result">0000</div><p id="endtext" class="lead">A steady helm and a sharp mind brought you safely home.</p>
- <div id="endstats" style="margin:14px 0"></div>
- <button id="restart" class="primary">↻ &nbsp; SAIL AGAIN</button><button id="share" class="secondary">↗ &nbsp; CHALLENGE A FRIEND</button>
- </div></section>
+ <section id="intel" class="intel hidden"><div class="intel-card"><div class="intel-kicker"><span>CONTACT DEBRIEF</span><span id="intelbadge">HOSTILE NEUTRALISED</span></div><h2 id="inteltitle">Contact cleared</h2><p id="intelbody">Contact details and a short maritime fact appear here.</p><div class="intel-foot"><span id="intelreward">+250 SCORE</span><button id="intelclose" class="intel-close">ACKNOWLEDGE →</button></div></div></section>
+ <section id="end" class="screen hidden"><div class="panel"><div class="eyebrow">PATROL DEBRIEF</div><h1 id="endtitle">MISSION COMPLETE</h1><div id="finalscore" class="result">0000</div><p id="endtext" class="lead">Patrol complete.</p><div id="endstats"></div><button id="restart" class="primary">DEPLOY AGAIN <span>↻</span></button><button id="share" class="secondary">CHALLENGE A FRIEND ↗</button></div></section>
 </main>
 <script type="module" src="./assets/game.js"></script>
 </body></html>
