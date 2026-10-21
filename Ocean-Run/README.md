@@ -24,9 +24,9 @@ Source folder: https://github.com/XaviourZone/Articles/tree/main/Ocean-Run
 - `assets/ocean-logo.svg` — SVG title mark.
 
 ## Visual / technical notes
-- Uses Three.js via jsDelivr CDN; the browser needs internet access to load that library.
+- Uses Three.js via jsDelivr CDN; the browser needs internet access to load that library. The scene geometry and effects are generated in code, so no large model downloads are required.
 - The boat, obstacles, water shader, wake, lights, clouds, and particles are generated procedurally in Three.js. No large third-party 3D models are downloaded into the repository.
-- Mobile-first renderer settings limit pixel ratio for smoother play on phones.
+- Mobile-first renderer settings limit pixel ratio for smoother play on phones. Pointer capture and adaptive swipe thresholds improve touch response; sliding now awards a clean-dodge bonus, and marked targets must be hit by a projectile rather than simply touched.
 - Includes reduced-motion styling and keyboard controls for desktop.
 - No build step, backend, account, or data collection.
 
