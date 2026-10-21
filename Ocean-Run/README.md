@@ -1,37 +1,39 @@
 # Ocean Run 🌊⚓
 
-**A mobile-first 3D maritime endless runner.** Dodge obstacles, collect chart fragments, fire at marked arcade targets, and answer fast maritime-knowledge questions before reaching the lighthouse.
+**Ocean Run is a mobile-first 3D maritime combat arcade game.** Take the helm of a patrol craft, steer continuously with a circular wheel, engage hostile vessel contacts, respond to bridge orders, protect hull integrity, and reach the patrol rendezvous.
 
 ## Play
-
-GitHub Pages URL (when Pages is enabled for this repository):
-https://xaviourzone.github.io/Articles/Ocean-Run/
-
-Source folder: https://github.com/XaviourZone/Articles/tree/main/Ocean-Run
+- Project: https://github.com/XaviourZone/Articles/tree/main/Ocean-Run
+- GitHub Pages URL (when Pages is enabled): https://xaviourzone.github.io/Articles/Ocean-Run/
 
 ## Controls
-- Swipe left/right on the game scene or use the lane buttons to steer.
-- Swipe down or tap the slide button to duck/settle low.
-- Tap **FIRE** to launch a visible pulse at marked floating targets.
-- Collect glowing chart books to trigger a knowledge checkpoint.
-- Correct answers award points; collisions cost points.
-- Finish the 60-second voyage and share your score.
+- **Steering wheel:** drag around the circular helm to turn. The wheel and craft respond continuously; release to hold the selected course.
+- **Fire:** tap the pulse cannon when a hostile contact is aligned ahead.
+- **Transponder:** toggle the transponder when the bridge order appears.
+- **Keyboard:** A/D or arrow keys steer; Space fires; T toggles the transponder.
+- **Touch gesture:** swipe left/right on the scene for a steering adjustment; swipe upward to fire.
+
+## Gameplay loop
+1. Enter the patrol zone.
+2. A bridge order requests transponder activation; respond with the control.
+3. Steer into alignment with hostile contacts and fire projectiles.
+4. Destroyed contacts award score and trigger a short debrief with a maritime fact—no multiple-choice quiz.
+5. Avoid drifting hazards and hostile contacts. Collisions damage hull integrity and deduct points.
+6. Collect supply caches to recover hull integrity and earn points.
+7. Neutralise five contacts and reach the rendezvous with hull integrity remaining to complete the mission.
 
 ## Project structure
-- `index.html` — game UI and screen layout.
-- `assets/game.css` — responsive HUD, glass panels, buttons, and overlays.
-- `assets/game.js` — Three.js 3D scene, animated shader water, patrol craft, obstacles, pickups, projectiles, particle effects, quiz logic, and controls.
-- `assets/ocean-logo.svg` — SVG title mark.
+- `index.html` — game screens and combat HUD.
+- `assets/game.css` — mobile HUD, circular helm, buttons, debrief overlays.
+- `assets/game.js` — Three.js scene, animated shader water, patrol craft, hostile vessels, hazards, projectiles, collision logic, mission state, and debriefs.
+- `assets/ocean-logo.svg` — SVG mark.
 
-## Visual / technical notes
-- Uses Three.js via jsDelivr CDN; the browser needs internet access to load that library. The scene geometry and effects are generated in code, so no large model downloads are required.
-- The boat, obstacles, water shader, wake, lights, clouds, and particles are generated procedurally in Three.js. No large third-party 3D models are downloaded into the repository.
-- Mobile-first renderer settings limit pixel ratio for smoother play on phones. Pointer capture and adaptive swipe thresholds improve touch response; sliding now awards a clean-dodge bonus, and marked targets must be hit by a projectile rather than simply touched.
-- Includes reduced-motion styling and keyboard controls for desktop.
-- No build step, backend, account, or data collection.
-
-## Knowledge note
-Quiz questions are educational prompts, not navigation instructions. Actual maritime operations must follow official charts, notices, equipment manuals, and applicable procedures.
+## Technical notes
+- Uses Three.js from jsDelivr and Google Fonts from Google Fonts; internet access is required for those external assets.
+- Boat, enemy contacts, obstacles, water, island silhouettes, particles, wake, lights, and effects are generated procedurally. No build step or backend is needed.
+- Rendering pixel ratio is capped to improve mobile performance.
+- This is an arcade fiction, not a real navigation or weapons simulator. Maritime facts are brief educational context, not operational instructions.
+- No account or personal data collection.
 
 ## Third-party software
 Three.js is distributed under the MIT License: https://github.com/mrdoob/three.js/blob/dev/LICENSE
