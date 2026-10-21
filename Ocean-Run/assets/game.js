@@ -6,18 +6,7 @@ let renderer, scene, camera, water, boat, clock, raf, lastQuizAt=-99;
 let running=false, paused=false, started=false, elapsed=0, distance=0, score=0, lane=0, laneTarget=0, slideTimer=0, fireCooldown=0, invulnerable=0, taskCount=0, quizCount=0, correctCount=0, collected=0, hull=100, transponder=false, kills=0, intelPause=false, helmAngle=0, helmDragging=false, helmPointer=null, missionOrder=0, lastOrderAt=0, spawnedEnemies=0;
 let obstacles=[], collectibles=[], projectiles=[], effects=[], clouds=[];
 const laneX=[-3.05,0,3.05], rnd=(a,b)=>a+Math.random()*(b-a), clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const quizzes=[
- {q:'What information does AIS normally broadcast?',a:['Vessel identity, position, course and speed','Only the vessel’s cargo manifest','Ocean depth beneath the keel','Weather forecasts for the next week'],ok:0,f:'AIS helps vessels and shore stations exchange identification and navigation information. It complements—not replaces—other sources.'},
- {q:'One nautical mile equals approximately…',a:['1.852 kilometres','1.000 kilometre','2.500 kilometres','1.609 kilometres'],ok:0,f:'The nautical mile is based on latitude and is defined as 1,852 metres.'},
- {q:'Which instrument is used to measure water depth?',a:['Echo sounder','Anemometer','Barometer','Gyroscope'],ok:0,f:'An echo sounder measures depth using sound pulses and their returning echoes.'},
- {q:'In IALA Region A, when entering from sea, red lateral marks indicate…',a:['Port (left) side','Starboard (right) side','The deepest water only','A no-wake area'],ok:0,f:'In IALA Region A, red marks port and green marks starboard when entering from sea. Follow local charts and notices.'},
- {q:'A “knot” is a unit of…',a:['Speed','Depth','Wave height','Compass bearing'],ok:0,f:'One knot is one nautical mile per hour.'},
- {q:'What should a bridge team do when conditions worsen?',a:['Reassess risk, speed and route','Keep speed unchanged regardless','Ignore updated forecasts','Head toward the nearest rocks'],ok:0,f:'Safe passage planning adapts to forecasts, observations, vessel limits and navigational hazards.'},
- {q:'What does a nautical chart help a mariner understand?',a:['Depths, hazards and navigation aids','Only the names of ports','Only the wind speed','The engine’s fuel level'],ok:0,f:'Charts combine hydrographic information with hazards, aids to navigation and other passage-planning details.'},
- {q:'Which is a useful reason to cross-check vessel information?',a:['Data sources may be incomplete or delayed','AIS guarantees every ship is visible','Names never change','Position data cannot contain errors'],ok:0,f:'AIS can be missing, delayed, incorrect or deliberately manipulated, so analysts compare multiple sources.'},
- {q:'What is the safest response to an uncertain floating object?',a:['Maintain a safe distance and assess it','Aim directly at it','Assume it is harmless','Ignore it at night'],ok:0,f:'Maintain situational awareness and use safe navigation practices around unidentified hazards.'},
- {q:'What is a major purpose of a lighthouse?',a:['Provide a visual aid to navigation','Measure vessel speed','Transmit every ship’s cargo details','Measure ocean salinity'],ok:0,f:'Lighthouses and other visual aids help mariners identify locations and navigate safely.'}
-];
+
 function makeMat(color,rough=.5,metal=0,extra={}){return new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal,...extra})}
 function addMesh(parent,geo,mat,pos=[0,0,0],rot=[0,0,0],scale=[1,1,1]){const m=new THREE.Mesh(geo,mat);m.position.set(...pos);m.rotation.set(...rot);m.scale.set(...scale);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
 function box(parent,w,h,d,mat,pos){return addMesh(parent,new THREE.BoxGeometry(w,h,d),mat,pos)}
@@ -128,14 +117,14 @@ function setup(){try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alp
  makeSky();makeWater();makeClouds();makeDistantScene();boat=makeBoat();boat.position.set(0,.1,3.3);scene.add(boat);wake=makeWake();clock=new THREE.Clock();addEventListener('resize',resize);$('loading').classList.add('hidden');$('start').classList.remove('hidden');animate();}catch(e){console.error(e);$('loadingText').textContent='3D renderer unavailable. Try the latest Chrome or enable WebGL.'}}
 function resize(){if(!renderer)return;renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.7));renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
 function start(){
- elapsed=distance=score=taskCount=quizCount=correctCount=collected=0;hull=100;transponder=false;kills=0;intelPause=false;helmAngle=0;helmDragging=false;helmPointer=null;missionOrder=0;lastOrderAt=0;spawnedEnemies=0;lastQuizAt=-99;
+ elapsed=distance=score=taskCount=quizCount=correctCount=collected=0;update.spawn=0;update.enemySpawn=1.4;hull=100;transponder=false;kills=0;intelPause=false;helmAngle=0;helmDragging=false;helmPointer=null;missionOrder=0;lastOrderAt=0;spawnedEnemies=0;lastQuizAt=-99;
  lane=laneTarget=0;slideTimer=fireCooldown=invulnerable=0;
  obstacles.forEach(o=>scene.remove(o));collectibles.forEach(o=>scene.remove(o));projectiles.forEach(o=>scene.remove(o));effects.forEach(o=>scene.remove(o));
  obstacles=[];collectibles=[];projectiles=[];effects=[];
  running=true;paused=false;started=true;boat.position.set(0,.1,3.3);boat.rotation.set(0,0,0);
  $('start').classList.add('hidden');$('end').classList.add('hidden');$('intel').classList.add('hidden');
  $('hud').classList.remove('hidden');$('bottom').classList.remove('hidden');$('mission').classList.remove('hidden');$('status').classList.remove('hidden');
- $('toast').classList.remove('on');$('transponder').classList.remove('active');$('xpdrstate').textContent='OFF';$('helmknob').style.transform='rotate(0deg)';
+ $('toast').classList.remove('on');$('transponder').classList.remove('active');$('xpdrstate').textContent='OFF';$('helmknob').style.transform='rotate(0deg)';$('helm').style.setProperty('--wheel-rotation','0deg');$('helmread').textContent='000°';
  $('missiontext').textContent='Neutralise 5 hostile contacts';$('missionstate').textContent='0 / 5';$('missiontag').textContent='PRIMARY OBJECTIVE';
  $('statusText').textContent='RADAR ONLINE · GUN SYSTEM READY';updateHud();clock.getDelta();
 }
@@ -255,13 +244,13 @@ function bindControls(){
  let sx=0,sy=0,pid=null,baseAngle=0,lastAngle=0;
  const pointerAngle=e=>{const r=helm.getBoundingClientRect();return Math.atan2(e.clientY-(r.top+r.height/2),e.clientX-(r.left+r.width/2))};
  helm.addEventListener('pointerdown',e=>{if(!running)return;helmDragging=true;helmPointer=e.pointerId;pid=e.pointerId;baseAngle=helmAngle;lastAngle=pointerAngle(e);try{helm.setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
- helm.addEventListener('pointermove',e=>{if(!helmDragging||pid!==e.pointerId)return;let now=pointerAngle(e),delta=now-lastAngle;if(delta>Math.PI)delta-=Math.PI*2;if(delta< -Math.PI)delta+=Math.PI*2;helmAngle=clamp(helmAngle+delta/Math.PI,-1,1);lastAngle=now;$('helmknob').style.transform='rotate('+(helmAngle*135)+'deg)';$('helmread').textContent=String(Math.round(helmAngle*135)).padStart(3,'0')+'°';helm.setAttribute('aria-valuenow',String(Math.round(helmAngle*100)));e.preventDefault()});
+ helm.addEventListener('pointermove',e=>{if(!helmDragging||pid!==e.pointerId)return;let now=pointerAngle(e),delta=now-lastAngle;if(delta>Math.PI)delta-=Math.PI*2;if(delta< -Math.PI)delta+=Math.PI*2;helmAngle=clamp(helmAngle+delta/Math.PI,-1,1);lastAngle=now;$('helmknob').style.transform='rotate('+(helmAngle*135)+'deg)';$('helm').style.setProperty('--wheel-rotation',(helmAngle*135)+'deg');$('helmread').textContent=String(Math.round(helmAngle*135)).padStart(3,'0')+'°';helm.setAttribute('aria-valuenow',String(Math.round(helmAngle*100)));e.preventDefault()});
  const endHelm=e=>{if(pid!==e.pointerId)return;helmDragging=false;helmPointer=null;pid=null};
  helm.addEventListener('pointerup',endHelm);helm.addEventListener('pointercancel',endHelm);helm.addEventListener('lostpointercapture',()=>{helmDragging=false;helmPointer=null;pid=null});
  world.addEventListener('pointerdown',e=>{if(!running||e.target!==world)return;sx=e.clientX;sy=e.clientY;pid='world-'+e.pointerId;try{world.setPointerCapture(e.pointerId)}catch(_){}});
  world.addEventListener('pointerup',e=>{if(!running||pid!=='world-'+e.pointerId)return;const dx=e.clientX-sx,dy=e.clientY-sy;pid=null;const threshold=Math.max(22,Math.min(42,innerWidth*.05));if(Math.abs(dx)>threshold){helmAngle=clamp(helmAngle+(dx>0?.32:-.32),-1,1);$('helmknob').style.transform='rotate('+(helmAngle*135)+'deg)';$('helmread').textContent=String(Math.round(helmAngle*135)).padStart(3,'0')+'°'}else if(dy>threshold){/* down gesture is reserved for moving the camera in a later build */}else if(dy< -threshold){fire()}});
  $('fire').addEventListener('pointerdown',e=>{e.preventDefault();fire()});$('transponder').onclick=setTransponder;$('startbtn').onclick=start;$('restart').onclick=start;$('intelclose').onclick=closeIntel;
  $('share').onclick=()=>{const text='I scored '+score+' in Ocean Run 🌊⚓ Can you take command and beat my score?';if(navigator.share)navigator.share({title:'Ocean Run',text,url:location.href}).catch(()=>{});else location.href='https://wa.me/?text='+encodeURIComponent(text+' '+location.href)};
- addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='a'){helmAngle=clamp(helmAngle-.18,-1,1);$('helmknob').style.transform='rotate('+(helmAngle*135)+'deg)'}if(e.key==='ArrowRight'||e.key==='d'){helmAngle=clamp(helmAngle+.18,-1,1);$('helmknob').style.transform='rotate('+(helmAngle*135)+'deg)'}if(e.key===' '||e.key==='Enter')fire();if(e.key==='t')setTransponder()});
+ addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='a'){helmAngle=clamp(helmAngle-.18,-1,1);$('helmknob').style.transform='rotate('+(helmAngle*135)+'deg)';$('helm').style.setProperty('--wheel-rotation',(helmAngle*135)+'deg')}if(e.key==='ArrowRight'||e.key==='d'){helmAngle=clamp(helmAngle+.18,-1,1);$('helmknob').style.transform='rotate('+(helmAngle*135)+'deg)';$('helm').style.setProperty('--wheel-rotation',(helmAngle*135)+'deg')}if(e.key===' '||e.key==='Enter')fire();if(e.key==='t')setTransponder()});
 }
 setup();
