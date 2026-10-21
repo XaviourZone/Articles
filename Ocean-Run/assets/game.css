@@ -64,3 +64,12 @@
  .fire-dock{margin-bottom:5px}
  .fire-dock .fire-btn{height:64px}
 }
+
+.combat-readout{position:absolute;z-index:3;right:13px;top:151px;display:flex;flex-direction:column;gap:4px;min-width:112px;padding:9px 11px;border:1px solid #a5d9e52a;border-radius:12px;background:#061b2dc9;backdrop-filter:blur(10px);pointer-events:none}
+.readout-label{font-size:7px;letter-spacing:1.5px;color:#89afbd;font-weight:900}.combat-readout strong{font-size:11px;color:#f2d18b;letter-spacing:.7px}.combat-readout>span:last-child{font-size:9px;color:#b9d4df}
+.reticle{position:absolute;z-index:2;left:50%;top:43%;width:74px;height:74px;transform:translate(-50%,-50%);pointer-events:none;opacity:.82}
+.reticle:before,.reticle:after{content:"";position:absolute;background:#c8f4ffb8}
+.reticle:before{left:50%;top:0;width:1px;height:100%}.reticle:after{left:0;top:50%;height:1px;width:100%}
+.reticle i{position:absolute;inset:8px;border:1px solid #c8f4ff99;border-radius:50%}.reticle b{position:absolute;left:calc(50% - 3px);top:calc(50% - 3px);width:6px;height:6px;border-radius:50%;background:#ffb86a;box-shadow:0 0 10px #ff9d50}
+.reticle span{position:absolute;top:calc(100% + 9px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:7px;font-weight:900;letter-spacing:1.2px;color:#d8eff5;text-shadow:0 1px 5px #000}
+@media(max-width:520px){.combat-readout{right:8px;top:139px;min-width:94px;padding:7px 8px}.reticle{top:40%;width:62px;height:62px}}
