@@ -83,10 +83,34 @@ function burst(pos,color='#8af7ff',n=18){for(let i=0;i<n;i++){const m=new THREE.
 function makeProjectile(){const g=new THREE.Group();addMesh(g,new THREE.SphereGeometry(.12,12,8),new THREE.MeshBasicMaterial({color:'#fff2a5'}));addMesh(g,new THREE.CylinderGeometry(.025,.09,1.7,8),new THREE.MeshBasicMaterial({color:'#ff8b3d'}),[0,0,.75],[Math.PI/2,0,0]);const light=new THREE.PointLight('#ff9e48',3,5);g.add(light);g.position.set(boat.position.x,.5,2);scene.add(g);projectiles.push(g)}
 function makeWake(){const g=new THREE.Group();for(let i=0;i<7;i++){const m=new THREE.Mesh(new THREE.PlaneGeometry(.1,1.3+i*.16),new THREE.MeshBasicMaterial({color:'#e8fdff',transparent:true,opacity:.3-i*.025,side:THREE.DoubleSide,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set((i-3)*.14,-.27,2.3+i*.28);g.add(m)}scene.add(g);return g}
 let wake;
+function makeDistantScene(){
+ // Layered island silhouettes give the sea a readable horizon and sense of scale.
+ const islandMat=makeMat('#286b6b',.95), ridgeMat=makeMat('#174f5a',1), sandMat=makeMat('#c8a779',.95), foliage=makeMat('#2e7562',.9);
+ function island(x,z,scale){
+  const g=new THREE.Group();g.position.set(x,-1.2,z);g.scale.setScalar(scale);
+  addMesh(g,new THREE.ConeGeometry(13,19,7),ridgeMat,[0,7,0],[0,.25,.1]);
+  addMesh(g,new THREE.ConeGeometry(10,14,7),islandMat,[-8,5,5],[0,-.4,.08]);
+  addMesh(g,new THREE.CylinderGeometry(11,14,2.2,9),sandMat,[0,0,0]);
+  for(let i=0;i<7;i++){const p=new THREE.Group();addMesh(p,new THREE.CylinderGeometry(.12,.24,2.8,6),makeMat('#74533b'),[0,1.3,0]);addMesh(p,new THREE.SphereGeometry(1.15,8,7),foliage,[0,3,0]);p.position.set(rnd(-10,10),0,rnd(-7,7));g.add(p)}
+  scene.add(g);
+ }
+ island(-68,-185,.9);island(79,-220,1.25);island(-112,-285,1.5);
+ // Tiny merchant silhouettes far ahead make the channel feel inhabited.
+ function distantShip(x,z,scale,color){
+  const g=new THREE.Group();const dark=makeMat('#17384a',.8), hull=makeMat(color,.8), deck=makeMat('#d0d6d2',.8);
+  addMesh(g,new THREE.BoxGeometry(3.5,.8,9),hull,[0,0,0]);
+  addMesh(g,new THREE.BoxGeometry(2.8,1.5,5.2),deck,[0,.9,.7]);
+  for(let i=0;i<5;i++)for(let j=0;j<2;j++)addMesh(g,new THREE.BoxGeometry(1.15,.75,1.2),makeMat(['#c86b4b','#d9b36a','#477d94'][((i+j)%3)],.85),[(j-.5)*1.25,1.95,.6+i*1.1]);
+  addMesh(g,new THREE.BoxGeometry(1.2,1.5,1.3),deck,[0,1.5,-3.1]);
+  addMesh(g,new THREE.CylinderGeometry(.06,.08,2.8,6),dark,[0,2.9,-3.1]);
+  g.position.set(x,-.4,z);g.scale.setScalar(scale);scene.add(g);return g;
+ }
+ distantShip(-31,-142,.7,'#334f5d');distantShip(38,-178,.95,'#243f50');distantShip(-95,-260,1.15,'#354f5a');
+}
 function setup(){try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.7));renderer.setSize(innerWidth,innerHeight,false);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
  scene=new THREE.Scene();scene.fog=new THREE.FogExp2('#0b5775',.0027);camera=new THREE.PerspectiveCamera(57,innerWidth/innerHeight,.1,700);camera.position.set(0,6.6,15.8);camera.lookAt(0,1,-13);
  scene.add(new THREE.HemisphereLight('#bdeeff','#10364c',2.1));const sun=new THREE.DirectionalLight('#fff0d1',3.4);sun.position.set(-28,45,-30);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-25;sun.shadow.camera.right=25;sun.shadow.camera.top=25;sun.shadow.camera.bottom=-25;scene.add(sun);const fill=new THREE.DirectionalLight('#50d8ff',1.25);fill.position.set(20,15,12);scene.add(fill);
- makeSky();makeWater();makeClouds();boat=makeBoat();boat.position.set(0,.1,3.3);scene.add(boat);wake=makeWake();clock=new THREE.Clock();addEventListener('resize',resize);$('loading').classList.add('hidden');$('start').classList.remove('hidden');animate();}catch(e){console.error(e);$('loadingText').textContent='3D renderer unavailable. Try the latest Chrome or enable WebGL.'}}
+ makeSky();makeWater();makeClouds();makeDistantScene();boat=makeBoat();boat.position.set(0,.1,3.3);scene.add(boat);wake=makeWake();clock=new THREE.Clock();addEventListener('resize',resize);$('loading').classList.add('hidden');$('start').classList.remove('hidden');animate();}catch(e){console.error(e);$('loadingText').textContent='3D renderer unavailable. Try the latest Chrome or enable WebGL.'}}
 function resize(){if(!renderer)return;renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.7));renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
 function start(){elapsed=distance=score=taskCount=quizCount=correctCount=collected=0;lastQuizAt=-99;lane=laneTarget=0;slideTimer=fireCooldown=invulnerable=0;obstacles.forEach(o=>scene.remove(o));collectibles.forEach(o=>scene.remove(o));projectiles.forEach(o=>scene.remove(o));effects.forEach(o=>scene.remove(o));obstacles=[];collectibles=[];projectiles=[];effects=[];running=true;paused=false;started=true;boat.position.set(0,.1,3.3);boat.rotation.set(0,0,0);$('start').classList.add('hidden');$('end').classList.add('hidden');$('quizback').classList.add('hidden');$('hud').classList.remove('hidden');$('bottom').classList.remove('hidden');$('routebar').classList.remove('hidden');$('toast').classList.remove('on');updateHud();clock.getDelta()}
 function toast(msg){$('toast').textContent=msg;$('toast').classList.add('on');clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('toast').classList.remove('on'),1350)}
