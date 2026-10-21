@@ -124,7 +124,7 @@ function start(){
  running=true;paused=false;started=true;boat.position.set(0,.1,3.3);boat.rotation.set(0,0,0);
  $('start').classList.add('hidden');$('end').classList.add('hidden');$('intel').classList.add('hidden');
  $('hud').classList.remove('hidden');$('bottom').classList.remove('hidden');$('mission').classList.remove('hidden');$('status').classList.remove('hidden');
- $('toast').classList.remove('on');$('transponder').classList.remove('active');$('xpdrstate').textContent='OFF';$('helmknob').style.transform='rotate(0deg)';$('helm').style.setProperty('--wheel-rotation','0deg');$('helmread').textContent='000°';
+ $('toast').classList.remove('on');$('transponder').classList.remove('active');$('xpdrstate').textContent='OFF';$('helmknob').style.transform='none';$('helm').style.setProperty('--wheel-rotation','0deg');$('helmread').textContent='000°';
  $('missiontext').textContent='Neutralise 5 hostile contacts';$('missionstate').textContent='0 / 5';$('missiontag').textContent='PRIMARY OBJECTIVE';
  $('statusText').textContent='RADAR ONLINE · GUN SYSTEM READY';updateHud();clock.getDelta();
 }
