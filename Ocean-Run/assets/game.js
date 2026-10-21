@@ -4,7 +4,7 @@ const $ = id => document.getElementById(id);
 const canvas = $('world');
 let renderer, scene, camera, water, boat, clock, raf, lastQuizAt=-99;
 let running=false, paused=false, started=false, elapsed=0, distance=0, score=0, lane=0, laneTarget=0, slideTimer=0, fireCooldown=0, invulnerable=0, taskCount=0, quizCount=0, collected=0, hull=100, transponder=false, transponderRewarded=false, kills=0, intelPause=false, helmAngle=0, helmDragging=false, helmPointer=null, missionOrder=0, lastOrderAt=0, spawnedEnemies=0, throttle=0.65;
-let obstacles=[], collectibles=[], projectiles=[], effects=[], clouds=[];
+let obstacles=[], collectibles=[], projectiles=[], effects=[], clouds=[], hostileShots=[], currentTarget=null, combatClock=0, incomingFireClock=0;
 const laneX=[-3.05,0,3.05], rnd=(a,b)=>a+Math.random()*(b-a), clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
 function makeMat(color,rough=.5,metal=0,extra={}){return new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal,...extra})}
@@ -55,7 +55,7 @@ function makeBoat(){
 function makeSky(){const geo=new THREE.SphereGeometry(500,32,20);const mat=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,uniforms:{uTime:{value:0}},vertexShader:'varying vec3 vPos; void main(){vPos=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',fragmentShader:'varying vec3 vPos; void main(){float h=normalize(vPos).y;vec3 c=mix(vec3(0.95,0.68,0.43),vec3(0.08,0.49,0.73),smoothstep(-0.08,0.5,h));c=mix(c,vec3(0.025,0.16,0.3),smoothstep(0.45,0.9,h));gl_FragColor=vec4(c,1.0);}'});scene.add(new THREE.Mesh(geo,mat))}
 function makeWater(){
  const geo=new THREE.PlaneGeometry(180,420,160,260);geo.rotateX(-Math.PI/2);
- const mat=new THREE.ShaderMaterial({uniforms:{uTime:{value:0},uSpeed:{value:1},uStorm:{value:0},uSun:{value:new THREE.Vector3(-.4,.8,.3)}},vertexShader:`uniform float uTime; uniform float uSpeed; varying vec3 vWorld; varying float vWave; varying vec2 vUv; void main(){vUv=uv;vec3 p=position;float t=uTime;float w1=sin(p.x*.19+p.z*.045+t*1.2)*.11;float w2=sin(p.x*.43-p.z*.075-t*1.7)*.045;float w3=cos(p.x*.075+p.z*.13+t*.8)*.16;p.y+=w1+w2+w3;vWave=w1+w2+w3;vec4 world=modelMatrix*vec4(p,1.);vWorld=world.xyz;gl_Position=projectionMatrix*viewMatrix*world;}`,fragmentShader:`uniform float uTime;uniform float uStorm;uniform vec3 uSun;varying vec3 vWorld;varying float vWave;varying vec2 vUv;void main(){float t=uTime;float longWave=sin(vWorld.x*.12+vWorld.z*.035+t*.8);float crossWave=sin(vWorld.x*.29-vWorld.z*.11-t*1.25);float smallWave=sin(vWorld.x*1.7+vWorld.z*.42+t*2.1)*sin(vWorld.z*1.25-vWorld.x*.19-t*1.7);float crest=longWave*.42+crossWave*.31+smallWave*.27;vec3 deep=vec3(.018,.09,.14);vec3 blue=vec3(.035,.19,.25);vec3 teal=vec3(.07,.27,.31);vec3 c=mix(deep,blue,smoothstep(-.85,.35,crest));c=mix(c,teal,smoothstep(.2,.9,crest)*.18);float sunLine=exp(-pow((vWorld.x+vWorld.z*.075+sin(vWorld.z*.08+t)*1.8)*.16,2.))*smoothstep(-.5,.5,vWorld.z+45.);float spec=pow(max(0.,crest*.52+smallWave*.35),12.)*.12;float brokenReflection=sunLine*(.04+.16*pow(max(0.,sin(vWorld.x*.65+vWorld.z*.08+t*.35)),5.));float foam=smoothstep(.72,.97,abs(sin(vWorld.x*.52+vWorld.z*.19+t*1.4)*sin(vWorld.x*.17-vWorld.z*.7-t*1.1)));float nearFoam=exp(-abs(vWorld.z-3.5)*.16)*smoothstep(2.5,7.,abs(vWorld.x));c+=vec3(.18,.34,.4)*spec;c+=vec3(.72,.72,.64)*brokenReflection*.16;c=mix(c,vec3(.48,.62,.65),foam*.045+nearFoam*.12);c=mix(c,vec3(.015,.045,.09),uStorm*.72);gl_FragColor=vec4(c,1.);}`,transparent:false});
+ const mat=new THREE.ShaderMaterial({uniforms:{uTime:{value:0},uSpeed:{value:1},uStorm:{value:0},uSun:{value:new THREE.Vector3(-.4,.8,.3)}},vertexShader:`uniform float uTime; uniform float uSpeed; varying vec3 vWorld; varying float vWave; varying vec2 vUv; void main(){vUv=uv;vec3 p=position;float t=uTime;float w1=sin(p.x*.105+p.z*.026+t*.42)*.075;float w2=sin(p.x*.22-p.z*.045-t*.62)*.028;float w3=cos(p.x*.055+p.z*.075+t*.31)*.09;p.y+=w1+w2+w3;vWave=w1+w2+w3;vec4 world=modelMatrix*vec4(p,1.);vWorld=world.xyz;gl_Position=projectionMatrix*viewMatrix*world;}`,fragmentShader:`uniform float uTime;uniform float uStorm;uniform vec3 uSun;varying vec3 vWorld;varying float vWave;varying vec2 vUv;void main(){float t=uTime;float longWave=sin(vWorld.x*.075+vWorld.z*.021+t*.35);float crossWave=sin(vWorld.x*.17-vWorld.z*.065-t*.55);float smallWave=sin(vWorld.x*.72+vWorld.z*.19+t*.9)*sin(vWorld.z*.56-vWorld.x*.13-t*.75);float crest=longWave*.42+crossWave*.31+smallWave*.27;vec3 deep=vec3(.018,.075,.105);vec3 blue=vec3(.035,.145,.19);vec3 teal=vec3(.065,.21,.24);vec3 c=mix(deep,blue,smoothstep(-.85,.35,crest));c=mix(c,teal,smoothstep(.2,.9,crest)*.12);float sunLine=exp(-pow((vWorld.x+vWorld.z*.075+sin(vWorld.z*.025+t*.25)*1.8)*.10,2.))*smoothstep(-.5,.5,vWorld.z+45.);float spec=pow(max(0.,crest*.52+smallWave*.12),14.)*.055;float brokenReflection=sunLine*(.04+.16*pow(max(0.,sin(vWorld.x*.65+vWorld.z*.08+t*.35)),5.));float foam=smoothstep(.78,.99,abs(sin(vWorld.x*.23+vWorld.z*.075+t*.45)*sin(vWorld.x*.12-vWorld.z*.28-t*.5)));float nearFoam=exp(-abs(vWorld.z-3.5)*.16)*smoothstep(2.5,7.,abs(vWorld.x));c+=vec3(.12,.22,.25)*spec;c+=vec3(.72,.72,.64)*brokenReflection*.08;c=mix(c,vec3(.56,.67,.69),foam*.035+nearFoam*.08);c=mix(c,vec3(.015,.045,.09),uStorm*.72);gl_FragColor=vec4(c,1.);}`,transparent:false});
  water=new THREE.Mesh(geo,mat);water.position.set(0,-.45,-120);water.frustumCulled=false;scene.add(water);
  // ocean fog helps blend horizon
 }
@@ -85,7 +85,11 @@ function createTarget(lane,z){
 }
 function burst(pos,color='#8af7ff',n=18){for(let i=0;i<n;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(rnd(.025,.075),6,5),new THREE.MeshBasicMaterial({color,transparent:true,opacity:1}));m.position.copy(pos);m.userData={vel:new THREE.Vector3(rnd(-2,2),rnd(-.1,2.6),rnd(-3,2)),life:rnd(.3,.9),max:0};m.userData.max=m.userData.life;scene.add(m);effects.push(m)}}
 function makeProjectile(){const g=new THREE.Group();addMesh(g,new THREE.SphereGeometry(.13,16,12),new THREE.MeshBasicMaterial({color:'#fff7c2'}));addMesh(g,new THREE.CylinderGeometry(.025,.12,2.1,10),new THREE.MeshBasicMaterial({color:'#ff8b3d',emissive:'#ff5a23',emissiveIntensity:1.8}),[0,0,.95],[Math.PI/2,0,0]);const light=new THREE.PointLight('#ff9e48',5,8);g.add(light);g.position.set(boat.position.x,.65,boat.position.z-1.4);g.userData={life:0};scene.add(g);burst(g.position,'#ffe7a2',4);projectiles.push(g)}
-function makeWake(){const g=new THREE.Group();for(let i=0;i<7;i++){const m=new THREE.Mesh(new THREE.PlaneGeometry(.1,1.3+i*.16),new THREE.MeshBasicMaterial({color:'#e8fdff',transparent:true,opacity:.3-i*.025,side:THREE.DoubleSide,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set((i-3)*.14,-.27,2.3+i*.28);g.add(m)}scene.add(g);return g}
+function makeWake(){const g=new THREE.Group();
+ for(let side of [-1,1]){
+  for(let i=0;i<9;i++){const m=new THREE.Mesh(new THREE.PlaneGeometry(.035+i*.009,1.3+i*.42),new THREE.MeshBasicMaterial({color:'#c9e0e5',transparent:true,opacity:.12-i*.009,side:THREE.DoubleSide,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set(side*(.22+i*.11),-.28,2.4+i*.48);g.add(m);}
+ }
+ const stern=new THREE.Mesh(new THREE.PlaneGeometry(.9,1.4),new THREE.MeshBasicMaterial({color:'#d3e6e9',transparent:true,opacity:.12,side:THREE.DoubleSide,depthWrite:false}));stern.rotation.x=-Math.PI/2;stern.position.set(0,-.29,2.4);g.add(stern);scene.add(g);return g}
 let wake;
 function makeDistantScene(){
  // Layered island silhouettes give the sea a readable horizon and sense of scale.
@@ -117,13 +121,13 @@ function setup(){try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alp
  makeSky();makeWater();makeClouds();makeDistantScene();boat=makeBoat();boat.position.set(0,.1,3.3);scene.add(boat);wake=makeWake();clock=new THREE.Clock();addEventListener('resize',resize);bindControls();$('loading').classList.add('hidden');$('start').classList.remove('hidden');animate();}catch(e){console.error(e);$('loadingText').textContent='3D renderer unavailable. Try the latest Chrome or enable WebGL.'}}
 function resize(){if(!renderer)return;renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.7));renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
 function start(){
- elapsed=distance=score=taskCount=quizCount=collected=0;update.spawn=0;update.enemySpawn=1.4;hull=100;throttle=.65;transponder=false;transponderRewarded=false;kills=0;intelPause=false;helmAngle=0;helmDragging=false;helmPointer=null;missionOrder=0;lastOrderAt=0;spawnedEnemies=0;lastQuizAt=-99;
+ elapsed=distance=score=taskCount=quizCount=collected=0;update.spawn=0;update.enemySpawn=1.4;hull=100;throttle=.65;combatClock=0;incomingFireClock=0;currentTarget=null;hostileShots.forEach(o=>scene.remove(o));hostileShots=[];transponder=false;transponderRewarded=false;kills=0;intelPause=false;helmAngle=0;helmDragging=false;helmPointer=null;missionOrder=0;lastOrderAt=0;spawnedEnemies=0;lastQuizAt=-99;
  lane=laneTarget=0;slideTimer=fireCooldown=invulnerable=0;
  obstacles.forEach(o=>scene.remove(o));collectibles.forEach(o=>scene.remove(o));projectiles.forEach(o=>scene.remove(o));effects.forEach(o=>scene.remove(o));
  obstacles=[];collectibles=[];projectiles=[];effects=[];
  running=true;paused=false;started=true;boat.position.set(0,.1,3.3);boat.rotation.set(0,0,0);
  $('start').classList.add('hidden');$('end').classList.add('hidden');$('intel').classList.add('hidden');
- $('hud').classList.remove('hidden');$('bottom').classList.remove('hidden');$('mission').classList.remove('hidden');$('status').classList.remove('hidden');
+ $('hud').classList.remove('hidden');$('bottom').classList.remove('hidden');$('mission').classList.remove('hidden');$('status').classList.remove('hidden');$('combatReadout').classList.remove('hidden');$('reticle').classList.remove('hidden');
  $('toast').classList.remove('on');$('transponder').classList.remove('active');$('xpdrstate').textContent='OFF';$('helmknob').style.transform='none';$('helm').style.setProperty('--wheel-rotation','0deg');$('helmread').textContent='000°';
  $('missiontext').textContent='Intercept 5 hostile craft';$('missionstate').textContent='0 / 5';$('missiontag').textContent='PRIMARY OBJECTIVE';$('throttleRead').textContent='65%';$('throttleFill').style.width='65%';
  $('statusText').textContent='RADAR ONLINE · GUN SYSTEM READY';updateHud();clock.getDelta();
@@ -141,11 +145,13 @@ function fire(){if(!running||fireCooldown>0||intelPause)return;fireCooldown=.19;
 function slide(){if(!running)return;slideTimer=1.05;toast('LOW PROFILE')}
 function setTransponder(){if(!running)return;transponder=!transponder;$('transponder').classList.toggle('active',transponder);$('xpdrstate').textContent=transponder?'ON':'OFF';if(transponder){if(!transponderRewarded){score+=100;transponderRewarded=true;toast('TRANSPONDER ACTIVE +100')}else{toast('TRANSPONDER ACTIVE')} $('statusText').textContent='AIS / TRANSPONDER ACTIVE';$('missiontext').textContent=kills>=5?'Reach the patrol marker':'Intercept hostile craft';}else{$('statusText').textContent='TRANSPONDER OFFLINE';toast('TRANSPONDER OFFLINE');}updateHud()}
 function showIntel(title,body,reward,badge='HOSTILE NEUTRALISED'){
- intelPause=true;running=false;$('inteltitle').textContent=title;$('intelbody').textContent=body;$('intelreward').textContent=reward;$('intelbadge').textContent=badge;$('intel').classList.remove('hidden');
+ // Keep the patrol moving; show a short combat report without blocking steering or fire.
+ $('inteltitle').textContent=title;$('intelbody').textContent=body;$('intelreward').textContent=reward;$('intelbadge').textContent=badge;
+ $('toast').textContent='CONTACT DESTROYED · +250';$('toast').classList.add('on');clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('toast').classList.remove('on'),1600);
 }
-function closeIntel(){$('intel').classList.add('hidden');intelPause=false;if(hull<=0){finish(false);return}if(distance>=10){finish(kills>=5&&transponder&&hull>0);return}running=true;toast('BRIDGE · RESUME PATROL')}
+function closeIntel(){$('intel').classList.add('hidden');intelPause=false;if(hull<=0){finish(false);return}if(distance>=10){finish(kills>=5&&transponder&&hull>0);return}running=true;}
 function orderTransponder(){missionOrder=1;lastOrderAt=elapsed;$('missiontag').textContent='BRIDGE ORDER';$('missiontext').textContent='Activate your transponder';$('missionstate').textContent=transponder?'ACK':'REQUIRED';toast('BRIDGE: ACTIVATE TRANSPONDER');$('statusText').textContent='BRIDGE REQUEST · TRANSPONDER';}
-function finish(success=hull>0&&distance>=10){running=false;started=false;intelPause=false;$('hud').classList.add('hidden');$('bottom').classList.add('hidden');$('mission').classList.add('hidden');$('status').classList.add('hidden');$('intel').classList.add('hidden');$('end').classList.remove('hidden');
+function finish(success=hull>0&&distance>=10){running=false;started=false;intelPause=false;$('hud').classList.add('hidden');$('bottom').classList.add('hidden');$('mission').classList.add('hidden');$('status').classList.add('hidden');$('combatReadout').classList.add('hidden');$('reticle').classList.add('hidden');$('intel').classList.add('hidden');$('end').classList.remove('hidden');
  $('endtitle').textContent=success?'PATROL COMPLETE':hull<=0?'VESSEL DISABLED':distance>=10&&kills<5?'OBJECTIVE INCOMPLETE':distance>=10&&!transponder?'ORDER NOT ACKNOWLEDGED':'PATROL ENDED';$('finalscore').textContent=String(score).padStart(5,'0');
  $('endtext').textContent=success?'Hostile contacts neutralised, transponder order acknowledged, and rendezvous reached.':hull<=0?'Hull integrity reached zero. Review your steering and contact engagement.':distance>=10&&kills<5?'You reached the rendezvous, but not enough hostile contacts were neutralised.':distance>=10&&!transponder?'You reached the rendezvous, but the bridge transponder order was not acknowledged.':'The patrol ended before reaching the rendezvous.';
  $('endstats').innerHTML='<span class="stat-chip">CONTACTS '+kills+'/5</span><span class="stat-chip">HULL '+Math.max(0,Math.round(hull))+'%</span><span class="stat-chip">TRANSPONDER '+(transponder?'ON':'OFF')+'</span>';
@@ -154,7 +160,7 @@ function hitTest(){
  const bx=boat.position.x;
  for(const o of obstacles){
   if(o.userData.hit)continue;
-  if(Math.abs(o.position.z-boat.position.z)<1.9&&Math.abs(o.position.x-bx)<1.45){
+  if(o.userData.kind!=='target'&&Math.abs(o.position.z-boat.position.z)<1.9&&Math.abs(o.position.x-bx)<1.45){
    if(o.userData.kind==='target'){
     if(invulnerable<=0){o.userData.hit=true;hull=Math.max(0,hull-24);invulnerable=1.5;score=Math.max(0,score-80);burst(boat.position,'#ff665b',32);toast('HOSTILE CONTACT · HULL −24%');updateHud();if(hull<=0){finish(false);return}}
    }else if(invulnerable<=0){
@@ -179,38 +185,36 @@ function update(dt,t){
  boat.position.x=THREE.MathUtils.damp(boat.position.x,targetX,3.9,dt);
  boat.position.x=clamp(boat.position.x,-6.3,6.3);
  boat.rotation.z=THREE.MathUtils.damp(boat.rotation.z,-(targetX-boat.position.x)*.075,3.8,dt);
- boat.position.y=.08+Math.sin(t*3.1)*.07+Math.sin(t*5.3)*.035;
- boat.rotation.x=THREE.MathUtils.damp(boat.rotation.x,Math.sin(t*1.4)*.025,2,dt);
+ boat.position.y=.08+Math.sin(t*1.7)*.035+Math.sin(t*2.6)*.018;
+ boat.rotation.x=THREE.MathUtils.damp(boat.rotation.x,Math.sin(t*.75)*.012,2,dt);
  boat.rotation.y=THREE.MathUtils.damp(boat.rotation.y,clamp((targetX-boat.position.x)*.09,-.18,.18),3,dt);
  if(boat.userData.radar)boat.userData.radar.rotation.y=t*2.2;
  wake.position.x=boat.position.x;wake.position.z=boat.position.z;
- wake.children.forEach((m,i)=>{m.material.opacity=.18+Math.sin(t*5+i)*.06;m.scale.x=1+Math.sin(t*4+i)*.3});
- camera.position.x=THREE.MathUtils.damp(camera.position.x,boat.position.x*.31,1.8,dt);
- camera.position.y=4.7+Math.sin(t*1.1)*.035;camera.lookAt(boat.position.x*.22,.65,-18);
+ wake.children.forEach((m,i)=>{m.material.opacity=(i%9===0?.12:.055)+Math.sin(t*1.7+i)*.012;m.scale.x=1+Math.sin(t*1.2+i)*.08});
+ camera.position.x=THREE.MathUtils.damp(camera.position.x,boat.position.x*.24,1.5,dt);
+ camera.position.y=4.15+Math.sin(t*.7)*.025;camera.lookAt(boat.position.x*.24,.52,-21);
  clouds.forEach((cl,i)=>{cl.position.x+=dt*(.7+i%3*.2);if(cl.position.x>100)cl.position.x=-100});
  // Spawn hazards with safe gaps. Hostile craft are separate contacts, not quiz prompts.
  // No random box-wall obstacle course: the channel is populated by identifiable vessel traffic.
  if(!update.spawn)update.spawn=0;update.spawn+=dt;
- if(update.spawn>3.8){
-  update.spawn=0;
-  if(Math.random()<.34){
-   const cache=createBook(Math.floor(Math.random()*3),-125-rnd(0,18));cache.position.x=rnd(-5.2,5.2);
-  }
- }
+ if(update.spawn>8){update.spawn=0;}
  if(!update.enemySpawn)update.enemySpawn=2.6;update.enemySpawn+=dt;
- if(update.enemySpawn>Math.max(3.0,5.2-distance*.08)&&kills<7){
-  update.enemySpawn=0;const enemy=createTarget(Math.floor(Math.random()*3),-112-rnd(0,18));enemy.position.x=rnd(-5.3,5.3);enemy.userData.speed=rnd(.68,.92);
+ if(update.enemySpawn>Math.max(3.8,6.4-distance*.08)&&kills<7){
+  update.enemySpawn=0;const enemy=createTarget(Math.floor(Math.random()*3),-94-rnd(0,22));enemy.position.x=rnd(-5.3,5.3);enemy.userData.speed=rnd(.55,.78);enemy.userData.phase=Math.random()*6.28;enemy.userData.strafe=rnd(.35,.8);
   toast('RADAR CONTACT · FAST CRAFT');$('statusText').textContent='FAST CRAFT · CONTACT '+enemy.userData.contactId;
  }
  obstacles.forEach(o=>{
-  o.position.z+=speed*dt*(o.userData.kind==='target'?(o.userData.speed||.8):1);
-  if(o.userData.kind==='target'){o.rotation.y+=Math.sin(t*1.1)*dt*.1;if(o.userData.ring)o.userData.ring.rotation.z+=dt*.7}
-  else if(o.userData.kind==='buoy')o.rotation.y+=dt*.25;
+  if(o.userData.kind==='target'){
+   o.position.z+=speed*dt*(o.userData.speed||.65);
+   o.position.x=clamp(o.position.x+Math.sin(t*.72+(o.userData.phase||0))*dt*(o.userData.strafe||.5),-6.1,6.1);
+   o.rotation.y=Math.PI+Math.sin(t*.72+(o.userData.phase||0))*.12;
+   if(o.userData.ring)o.userData.ring.rotation.z+=dt*.18;
+  } else {o.position.z+=speed*dt;}
  });
  collectibles.forEach(c=>{c.position.z+=speed*dt;c.rotation.y+=dt*1.8;c.position.y=.65+Math.sin(t*3+c.position.z)*.14;if(c.children[0])c.children[0].rotation.z+=dt*.5});
  // Projectile hits are resolved against the actual contact position; aim by steering the boat into alignment.
  projectiles.forEach(p=>{
-  p.position.z-=dt*68;p.position.y+=dt*.35;
+  p.position.z-=dt*(58+throttle*14);p.position.y+=dt*.12;
   for(const o of obstacles){
    if(o.userData.kind==='target'&&!o.userData.hit&&Math.abs(o.position.z-p.position.z)<3.4&&Math.abs(o.position.x-p.position.x)<1.15){
     o.userData.hit=true;scene.remove(o);burst(o.position,'#ffcf6e',34);burst(o.position,'#ff6c45',18);score+=250;kills++;taskCount=kills;updateHud();p.userData.dead=true;
@@ -229,11 +233,30 @@ function update(dt,t){
   }
  });
  projectiles=projectiles.filter(p=>{if(p.userData.dead||p.position.z<-130){scene.remove(p);return false}return true});
+ // Hostile craft fire warning shots toward the patrol boat; throttle and steering both matter.
+ incomingFireClock+=dt;
+ if(incomingFireClock>3.8&&obstacles.some(o=>o.userData.kind==='target'&&o.position.z<-12&&o.position.z>-72)){
+  incomingFireClock=0;
+  const target=obstacles.filter(o=>o.userData.kind==='target'&&o.position.z<-12&&o.position.z>-72).sort((a,b)=>b.position.z-a.position.z)[0];
+  if(target){
+   const shot=new THREE.Mesh(new THREE.SphereGeometry(.16,10,8),new THREE.MeshStandardMaterial({color:'#ff654e',emissive:'#ff321e',emissiveIntensity:2}));
+   shot.position.set(target.position.x,.75,target.position.z+1.5);shot.userData={vx:(boat.position.x-target.position.x)*.11,life:0};scene.add(shot);hostileShots.push(shot);
+   toast('INCOMING FIRE · BREAK COURSE');
+  }
+ }
+ hostileShots.forEach(s=>{s.position.x+=s.userData.vx*dt;s.position.z+=dt*(14+throttle*2);s.userData.life+=dt;
+  if(Math.abs(s.position.z-boat.position.z)<1.3&&Math.abs(s.position.x-boat.position.x)<1.25&&invulnerable<=0){
+   s.userData.dead=true;hull=Math.max(0,hull-9);invulnerable=.65;burst(s.position,'#ff684f',12);toast('HULL HIT · −9%');updateHud();if(hull<=0)finish(false);
+  }
+ });
+ hostileShots=hostileShots.filter(s=>{if(s.userData.dead||s.position.z>12||s.userData.life>7){scene.remove(s);return false}return true});
  effects.forEach(p=>{p.userData.life-=dt;p.position.addScaledVector(p.userData.vel,dt);p.userData.vel.y-=dt*2.6;p.material.opacity=clamp(p.userData.life/p.userData.max,0,1)});
  effects=effects.filter(p=>{if(p.userData.life<=0){scene.remove(p);p.geometry.dispose();p.material.dispose();return false}return true});
  obstacles=obstacles.filter(o=>{if(o.position.z>13||o.userData.hit){scene.remove(o);return false}return true});
  collectibles=collectibles.filter(o=>{if(o.position.z>13||o.userData.hit){scene.remove(o);return false}return true});
  hitTest();if(!running)return;
+ const visibleTargets=obstacles.filter(o=>o.userData.kind==='target'&&!o.userData.hit&&o.position.z<-4).sort((a,b)=>b.position.z-a.position.z);currentTarget=visibleTargets[0]||null;
+ if(currentTarget){$('trackText').textContent='CONTACT '+currentTarget.userData.contactId;$('rangeText').textContent='RANGE '+Math.max(0,Math.round((Math.abs(currentTarget.position.z-boat.position.z))*18))+' m';$('reticle').style.left=(50+clamp((currentTarget.position.x-boat.position.x)*2.3,-15,15))+'%';$('reticle').querySelector('span').textContent=Math.abs(currentTarget.position.x-boat.position.x)<1.1?'FIRE WHEN READY':'STEER TO ALIGN';}else{$('trackText').textContent='SEARCHING';$('rangeText').textContent='RANGE --';$('reticle').style.left='50%';$('reticle').querySelector('span').textContent='SEARCHING';}
  // A timed bridge order teaches a control through action, not a quiz.
  if(elapsed>7&&missionOrder===0)orderTransponder();
  if(missionOrder===1&&transponder){missionOrder=2;$('missiontag').textContent='PRIMARY OBJECTIVE';$('missiontext').textContent='Intercept 5 hostile craft';$('missionstate').textContent=kills+' / 5';score+=100;toast('ORDER ACKNOWLEDGED · +100');$('statusText').textContent='TRANSPONDER ACTIVE · RADAR ONLINE';updateHud()}
