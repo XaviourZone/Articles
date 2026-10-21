@@ -3,7 +3,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.m
 const $ = id => document.getElementById(id);
 const canvas = $('world');
 let renderer, scene, camera, water, boat, clock, raf, lastQuizAt=-99;
-let running=false, paused=false, started=false, elapsed=0, distance=0, score=0, lane=0, laneTarget=0, slideTimer=0, fireCooldown=0, invulnerable=0, taskCount=0, quizCount=0, correctCount=0, collected=0, hull=100, transponder=false, kills=0, intelPause=false, helmAngle=0, helmDragging=false, helmPointer=null, missionOrder=0, lastOrderAt=0, spawnedEnemies=0;
+let running=false, paused=false, started=false, elapsed=0, distance=0, score=0, lane=0, laneTarget=0, slideTimer=0, fireCooldown=0, invulnerable=0, taskCount=0, quizCount=0, collected=0, hull=100, transponder=false, kills=0, intelPause=false, helmAngle=0, helmDragging=false, helmPointer=null, missionOrder=0, lastOrderAt=0, spawnedEnemies=0;
 let obstacles=[], collectibles=[], projectiles=[], effects=[], clouds=[];
 const laneX=[-3.05,0,3.05], rnd=(a,b)=>a+Math.random()*(b-a), clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
@@ -117,7 +117,7 @@ function setup(){try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alp
  makeSky();makeWater();makeClouds();makeDistantScene();boat=makeBoat();boat.position.set(0,.1,3.3);scene.add(boat);wake=makeWake();clock=new THREE.Clock();addEventListener('resize',resize);$('loading').classList.add('hidden');$('start').classList.remove('hidden');animate();}catch(e){console.error(e);$('loadingText').textContent='3D renderer unavailable. Try the latest Chrome or enable WebGL.'}}
 function resize(){if(!renderer)return;renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.7));renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
 function start(){
- elapsed=distance=score=taskCount=quizCount=correctCount=collected=0;update.spawn=0;update.enemySpawn=1.4;hull=100;transponder=false;kills=0;intelPause=false;helmAngle=0;helmDragging=false;helmPointer=null;missionOrder=0;lastOrderAt=0;spawnedEnemies=0;lastQuizAt=-99;
+ elapsed=distance=score=taskCount=quizCount=collected=0;update.spawn=0;update.enemySpawn=1.4;hull=100;transponder=false;kills=0;intelPause=false;helmAngle=0;helmDragging=false;helmPointer=null;missionOrder=0;lastOrderAt=0;spawnedEnemies=0;lastQuizAt=-99;
  lane=laneTarget=0;slideTimer=fireCooldown=invulnerable=0;
  obstacles.forEach(o=>scene.remove(o));collectibles.forEach(o=>scene.remove(o));projectiles.forEach(o=>scene.remove(o));effects.forEach(o=>scene.remove(o));
  obstacles=[];collectibles=[];projectiles=[];effects=[];
@@ -142,11 +142,11 @@ function setTransponder(){if(!running)return;transponder=!transponder;$('transpo
 function showIntel(title,body,reward,badge='HOSTILE NEUTRALISED'){
  intelPause=true;running=false;$('inteltitle').textContent=title;$('intelbody').textContent=body;$('intelreward').textContent=reward;$('intelbadge').textContent=badge;$('intel').classList.remove('hidden');
 }
-function closeIntel(){$('intel').classList.add('hidden');intelPause=false;if(hull<=0){finish(false);return}if(distance>=10){finish(true);return}running=true;toast('BRIDGE · RESUME PATROL')}
+function closeIntel(){$('intel').classList.add('hidden');intelPause=false;if(hull<=0){finish(false);return}if(distance>=10){finish(kills>=5&&transponder&&hull>0);return}running=true;toast('BRIDGE · RESUME PATROL')}
 function orderTransponder(){missionOrder=1;lastOrderAt=elapsed;$('missiontag').textContent='BRIDGE ORDER';$('missiontext').textContent='Activate your transponder';$('missionstate').textContent=transponder?'ACK':'REQUIRED';toast('BRIDGE: ACTIVATE TRANSPONDER');$('statusText').textContent='BRIDGE REQUEST · TRANSPONDER';}
 function finish(success=hull>0&&distance>=10){running=false;started=false;intelPause=false;$('hud').classList.add('hidden');$('bottom').classList.add('hidden');$('mission').classList.add('hidden');$('status').classList.add('hidden');$('intel').classList.add('hidden');$('end').classList.remove('hidden');
  $('endtitle').textContent=success?'PATROL COMPLETE':hull<=0?'VESSEL DISABLED':'PATROL ENDED';$('finalscore').textContent=String(score).padStart(5,'0');
- $('endtext').textContent=success?'Hostile contacts neutralised. Your patrol craft has reached the rendezvous.':hull<=0?'Hull integrity reached zero. Review your steering and contact engagement.':'The patrol ended before reaching the rendezvous.';
+ $('endtext').textContent=success?'Hostile contacts neutralised, transponder order acknowledged, and rendezvous reached.':hull<=0?'Hull integrity reached zero. Review your steering and contact engagement.':'The patrol ended before reaching the rendezvous.';
  $('endstats').innerHTML='<span class="stat-chip">CONTACTS '+kills+'/5</span><span class="stat-chip">HULL '+Math.max(0,Math.round(hull))+'%</span><span class="stat-chip">TRANSPONDER '+(transponder?'ON':'OFF')+'</span>';
 }
 function hitTest(){
@@ -235,7 +235,7 @@ function update(dt,t){
  if(elapsed>7&&missionOrder===0)orderTransponder();
  if(missionOrder===1&&transponder){missionOrder=2;$('missiontag').textContent='PRIMARY OBJECTIVE';$('missiontext').textContent='Neutralise 5 hostile contacts';$('missionstate').textContent=kills+' / 5';score+=100;toast('ORDER ACKNOWLEDGED · +100');$('statusText').textContent='TRANSPONDER ACTIVE · RADAR ONLINE';updateHud()}
  if(missionOrder===1&&!transponder&&elapsed-lastOrderAt>12){lastOrderAt=elapsed;toast('BRIDGE: TRANSPONDER REQUIRED')}
- if(distance>=10){finish(kills>=5&&hull>0);return}
+ if(distance>=10){finish(kills>=5&&transponder&&hull>0);return}
  updateHud();
 }
 function animate(){raf=requestAnimationFrame(animate);if(!renderer)return;const dt=Math.min(clock.getDelta(),.04),t=clock.elapsedTime;if(water){water.position.z= -120 + (t*4%4);water.material.uniforms.uTime.value=t;clouds.forEach((c,i)=>{c.material.opacity=(.18+Math.sin(t*.2+i)*.08)})}if(running)update(dt,t);renderer.render(scene,camera)}
