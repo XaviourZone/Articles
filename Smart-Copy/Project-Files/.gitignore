@@ -1,5 +1,4 @@
-﻿## .NET / Visual Studio
-bin/
+﻿bin/
 obj/
 publish/
 release/*.exe

@@ -37,16 +37,27 @@ public class TrayApplicationContext : IDisposable
 
     private void InitializeTrayIcon()
     {
-        Icon appIcon;
+        Icon? appIcon = null;
         string iconPath = Path.Combine(AppContext.BaseDirectory, "app.ico");
         if (File.Exists(iconPath))
         {
-            appIcon = new Icon(iconPath);
+            try { appIcon = new Icon(iconPath); } catch { }
         }
-        else
+        
+        if (appIcon == null)
         {
-            appIcon = SystemIcons.Application;
+            try
+            {
+                string? processPath = Environment.ProcessPath;
+                if (!string.IsNullOrEmpty(processPath) && File.Exists(processPath))
+                {
+                    appIcon = Icon.ExtractAssociatedIcon(processPath);
+                }
+            }
+            catch { }
         }
+
+        appIcon ??= SystemIcons.Application;
 
         _notifyIcon.Icon = appIcon;
         _notifyIcon.Text = "Smart Copy - Universal OCR Selection";

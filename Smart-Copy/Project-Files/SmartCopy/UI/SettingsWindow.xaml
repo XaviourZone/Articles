@@ -8,7 +8,8 @@
         ResizeMode="NoResize"
         Background="#0f172a"
         Foreground="#f8fafc"
-        FontFamily="Segoe UI, sans-serif">
+        FontFamily="Segoe UI, sans-serif"
+        Icon="app.ico">
 
     <Window.Resources>
         <!-- Toggle button / checkbox styles -->
