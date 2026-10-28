@@ -1,0 +1,13 @@
+﻿## .NET / Visual Studio
+bin/
+obj/
+publish/
+release/*.exe
+release/*.msi
+.vs/
+*.user
+*.suo
+.vscode/
+.idea/
+Thumbs.db
+[Dd]esktop.ini

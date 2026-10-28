@@ -1,0 +1,124 @@
+<Window x:Class="SmartCopy.UI.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Smart Copy - Settings"
+        Height="540"
+        Width="500"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#0f172a"
+        Foreground="#f8fafc"
+        FontFamily="Segoe UI, sans-serif">
+
+    <Window.Resources>
+        <!-- Toggle button / checkbox styles -->
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#f8fafc"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,6,0,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Width="14" Height="14" CornerRadius="7" Background="#38bdf8" Margin="0,0,10,0"/>
+                <TextBlock Text="Smart Copy" FontSize="20" FontWeight="Bold" Foreground="#38bdf8"/>
+            </StackPanel>
+            <TextBlock Text="Universal Windows OCR Selection Utility" FontSize="13" Foreground="#94a3b8" Margin="24,2,0,0"/>
+        </StackPanel>
+
+        <!-- Settings Content Cards -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="0,0,8,0">
+                <!-- General Section -->
+                <Border Background="#1e293b" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="GENERAL" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,0,0,8"/>
+                        <CheckBox x:Name="ChkEnableSmartCopy" Content="Enable Smart Copy"/>
+                        <TextBlock Text="Allows global gesture to trigger OCR text selection" FontSize="12" Foreground="#64748b" Margin="22,-4,0,8"/>
+
+                        <CheckBox x:Name="ChkStartWithWindows" Content="Start Smart Copy with Windows"/>
+                        <TextBlock Text="Automatically launches Smart Copy silently into the system tray" FontSize="12" Foreground="#64748b" Margin="22,-4,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Activation Gesture Section -->
+                <Border Background="#1e293b" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="ACTIVATION GESTURE" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,0,0,8"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,4">
+                            <Border Background="#334155" CornerRadius="4" Padding="8,4" Margin="0,0,6,0">
+                                <TextBlock Text="Left Ctrl" FontWeight="SemiBold" FontSize="12" Foreground="#f8fafc"/>
+                            </Border>
+                            <TextBlock Text="+" VerticalAlignment="Center" Foreground="#94a3b8" Margin="0,0,6,0"/>
+                            <Border Background="#334155" CornerRadius="4" Padding="8,4" Margin="0,0,6,0">
+                                <TextBlock Text="Left Alt" FontWeight="SemiBold" FontSize="12" Foreground="#f8fafc"/>
+                            </Border>
+                            <TextBlock Text="+" VerticalAlignment="Center" Foreground="#94a3b8" Margin="0,0,6,0"/>
+                            <Border Background="#334155" CornerRadius="4" Padding="8,4">
+                                <TextBlock Text="Right Click" FontWeight="SemiBold" FontSize="12" Foreground="#38bdf8"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="Default gesture distinguishes Left modifier keys from Right modifier keys." FontSize="12" Foreground="#64748b" Margin="0,6,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- OCR & Recognition Section -->
+                <Border Background="#1e293b" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="OCR &amp; RECOGNITION" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,0,0,8"/>
+                        <CheckBox x:Name="ChkMultiOrientation" Content="Automatic Orientation Detection (0°, 90°, 180°, 270°)"/>
+                        <TextBlock Text="Recognizes vertical, inverted, and rotated text layouts" FontSize="12" Foreground="#64748b" Margin="22,-4,0,8"/>
+
+                        <CheckBox x:Name="ChkDeskew" Content="Automatic Deskew Angle Correction"/>
+                        <TextBlock Text="Compensates for slightly tilted or skewed text lines" FontSize="12" Foreground="#64748b" Margin="22,-4,0,8"/>
+
+                        <CheckBox x:Name="ChkShowNotifications" Content="Show Notifications on Successful Copy"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Privacy & Offline info -->
+                <Border Background="#1e293b" CornerRadius="8" Padding="16" Margin="0,0,0,8">
+                    <StackPanel>
+                        <TextBlock Text="OFFLINE &amp; PRIVACY" FontSize="11" FontWeight="Bold" Foreground="#10b981" Margin="0,0,0,4"/>
+                        <TextBlock Text="✓ 100% Offline OCR Engine (Bundled Tesseract 5)&#x0a;✓ Zero network requests, zero telemetry&#x0a;✓ Screenshots and clipboard data are never persisted"
+                                   FontSize="12" Foreground="#94a3b8" LineHeight="18"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer Buttons -->
+        <Border Grid.Row="2" BorderBrush="#1e293b" BorderThickness="0,1,0,0" Padding="0,16,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Close"
+                        Width="90"
+                        Height="32"
+                        Background="#334155"
+                        Foreground="#f8fafc"
+                        BorderThickness="0"
+                        Click="BtnClose_Click"
+                        Cursor="Hand"/>
+                <Button Content="Save Settings"
+                        Width="120"
+                        Height="32"
+                        Margin="12,0,0,0"
+                        Background="#0284c7"
+                        Foreground="#ffffff"
+                        FontWeight="SemiBold"
+                        BorderThickness="0"
+                        Click="BtnSave_Click"
+                        Cursor="Hand"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
