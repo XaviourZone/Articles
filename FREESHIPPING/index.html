@@ -152,7 +152,7 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
  let queued=false,lastRender=0,smoothMode=true,viewMode='3d',leafletMap=null,leafletLayer=null,leafletCanvas=null,last2DRender=0;
  function init2D(){if(leafletMap)return;if(typeof L==='undefined'){toast('2D map library unavailable');return;}
   leafletMap=L.map('map2d',{worldCopyJump:true,preferCanvas:true,zoomControl:false,attributionControl:true}).setView([12,12],2);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'}).addTo(leafletMap);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> · <a href="https://www.openstreetmap.org/fixthemap" target="_blank">Report a map issue</a>'}).addTo(leafletMap);
   leafletLayer=L.layerGroup().addTo(leafletMap);leafletCanvas=L.canvas({padding:0.5});
   leafletMap.on('click',e=>{if(viewMode==='2d')$('searchHint').textContent='Map centre: '+e.latlng.lat.toFixed(3)+', '+e.latlng.lng.toFixed(3);});
  }
@@ -162,7 +162,7 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
   else{world.width(window.innerWidth).height(window.innerHeight);}
  }
  function sync2DMarkers(force=false){if(viewMode!=='2d'||!leafletLayer||(!force&&Date.now()-last2DRender<1200))return;last2DRender=Date.now();leafletLayer.clearLayers();
-  const list=[...vessels.values()].slice(-2200);for(const v of list){const marker=L.circleMarker([v.lat,v.lon],{renderer:leafletCanvas,radius:3.2,color:'#062b3a',weight:1,fillColor:Number(v.sog)>18?'#ffc878':'#55d8ee',fillOpacity:.95});
+  const list=[...vessels.values()].slice(-(smoothMode?1200:2200));if(selected&&!list.some(v=>v.mmsi===selected.mmsi))list.push(selected);for(const v of list){const marker=L.circleMarker([v.lat,v.lon],{renderer:leafletCanvas,radius:3.2,color:'#062b3a',weight:1,fillColor:Number(v.sog)>18?'#ffc878':'#55d8ee',fillOpacity:.95});
    marker.bindTooltip((v.name||'Unknown vessel')+' · '+v.mmsi,{direction:'top'});marker.on('click',()=>selectVessel(v));marker.addTo(leafletLayer);}
  }
  function scheduleRender(){if(queued)return;queued=true;const wait=Math.max(0,(smoothMode?260:180)-(Date.now()-lastRender));setTimeout(()=>requestAnimationFrame(()=>{queued=false;lastRender=Date.now();const list=[...vessels.values()];$('vesselCount').textContent=list.length.toLocaleString();const visible=list.slice(- (smoothMode?1500:3000));if(selected&&!visible.some(v=>v.mmsi===selected.mmsi))visible.push(selected);if(viewMode==='3d')world.pointsData(visible);else sync2DMarkers();if(showTracks&&viewMode==='3d')drawTracks();}),wait);}
@@ -187,7 +187,7 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
   if(viewMode==='2d'&&leafletMap)leafletMap.setView([hit.lat,hit.lon],Math.max(leafletMap.getZoom(),8),{animate:true});
  }
  $('searchGo').onclick=searchVessel;$('vesselSearch').addEventListener('keydown',e=>{if(e.key==='Enter')searchVessel();});
- $('reconnect').onclick=()=>{retry=0;connect();};$('zin').onclick=()=>{const p=world.pointOfView();world.pointOfView({altitude:Math.max(.55,p.altitude*.78)},450);};$('zout').onclick=()=>{const p=world.pointOfView();world.pointOfView({altitude:Math.min(5,p.altitude*1.25)},450);};$('home').onclick=()=>world.pointOfView({lat:12,lng:12,altitude:2.05},850);$('allTracks').onclick=()=>{showTracks=!showTracks;$('allTracks').textContent=showTracks?'TRACKS ON':'TRACKS OFF';$('allTracks').classList.toggle('active',showTracks);drawTracks();};
+ $('reconnect').onclick=()=>{retry=0;connect();};$('zin').onclick=()=>{if(viewMode==='2d'&&leafletMap)leafletMap.zoomIn();else{const p=world.pointOfView();world.pointOfView({altitude:Math.max(.55,p.altitude*.78)},450);}};$('zout').onclick=()=>{if(viewMode==='2d'&&leafletMap)leafletMap.zoomOut();else{const p=world.pointOfView();world.pointOfView({altitude:Math.min(5,p.altitude*1.25)},450);}};$('home').onclick=()=>{if(viewMode==='2d'&&leafletMap)leafletMap.setView([12,12],2);else world.pointOfView({lat:12,lng:12,altitude:2.05},850);};$('allTracks').onclick=()=>{showTracks=!showTracks;$('allTracks').textContent=showTracks?'TRACKS ON':'TRACKS OFF';$('allTracks').classList.toggle('active',showTracks);drawTracks();};
  function ageLabel(ms){const sec=Math.floor(ms/1000);if(sec<60)return sec+'s';const min=Math.floor(sec/60);if(min<60)return min+'m '+(sec%60)+'s';return Math.floor(min/60)+'h '+(min%60)+'m';}
  function tickClock(){const now=new Date();$('utcClock').textContent=now.toISOString().slice(11,19);if(lastAt){$('feedDelay').textContent=ageLabel(Math.max(0,Date.now()-lastEventAt));}}
  tickClock();setInterval(tickClock,250);
