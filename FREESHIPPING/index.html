@@ -31,6 +31,7 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
 <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/globe.gl@2.46.2/dist/globe.gl.min.js"></script>
 <script>
 (()=>{
+ requestAnimationFrame(()=>{
  const $=id=>document.getElementById(id), WS='wss://stream.openseafeed.com/v1/stream', API='https://api.openseafeed.com/v1';
  window.addEventListener('error',ev=>{const status=$('status'),note=$('trackNote'),cov=$('coverageLabel');if(status)status.textContent='SCRIPT ERROR';if(cov)cov.textContent='CHECK BROWSER CONSOLE';if(note)note.textContent='JavaScript startup error: '+(ev.message||'unknown error')+'. Open browser DevTools → Console for details.';console.error('OCEAN EYE runtime error:',ev.error||ev.message);});
  window.addEventListener('unhandledrejection',ev=>{const status=$('status'),note=$('trackNote');if(status)status.textContent='NETWORK / SCRIPT ERROR';if(note)note.textContent='An asynchronous operation failed: '+String(ev.reason||'unknown error');console.error('OCEAN EYE unhandled rejection:',ev.reason);});
@@ -92,6 +93,7 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
  $('reconnect').onclick=()=>{retry=0;connect();};$('zin').onclick=()=>{const p=world.pointOfView();world.pointOfView({altitude:Math.max(.55,p.altitude*.78)},450);};$('zout').onclick=()=>{const p=world.pointOfView();world.pointOfView({altitude:Math.min(5,p.altitude*1.25)},450);};$('home').onclick=()=>world.pointOfView({lat:12,lng:12,altitude:2.05},850);$('allTracks').onclick=()=>{showTracks=!showTracks;$('allTracks').textContent=showTracks?'TRACKS ON':'TRACKS OFF';$('allTracks').classList.toggle('active',showTracks);drawTracks();};
  setInterval(()=>{if(lastAt){const sec=Math.floor((Date.now()-lastAt)/1000);$('lastReport').textContent=sec<60?sec+'s AGO':Math.floor(sec/60)+'m AGO';}},1000);
  try{connect();}catch(err){setStatus('STARTUP ERROR');$('coverageLabel').textContent='INITIALIZATION FAILED';$('trackNote').textContent='Startup error: '+(err&&err.message?err.message:String(err));console.error('OCEAN EYE startup error:',err);}
+ });
 })();
 </script>
 </body></html>
