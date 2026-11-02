@@ -27,7 +27,7 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
 <div class="tools"><button class="tool" id="zin" aria-label="Zoom in">＋</button><button class="tool" id="zout" aria-label="Zoom out">－</button><button class="tool" id="home" aria-label="Reset view">⌂</button></div>
 <section id="detail"><div class="detailhead"><span class="eyebrow">VESSEL TRACK / AIS CONTACT</span><button id="close" class="close" aria-label="Close">×</button></div><div id="shipName" class="shipname">Unknown vessel</div><div id="shipMmsi" class="mmsi">MMSI —</div><div id="shipPhoto" class="shipphoto"><div class="photoempty">VESSEL IMAGE<br><span>Searching open photo libraries…</span></div></div><div id="photoCredit" class="photocredit"></div><div class="grid"><div><label>SPEED OVER GROUND</label><b id="sog">—</b></div><div><label>COURSE</label><b id="cog">—</b></div><div><label>VESSEL TYPE</label><b id="shipType">—</b></div><div><label>IMO</label><b id="imo">—</b></div><div><label>LATITUDE</label><b id="lat">—</b></div><div><label>LONGITUDE</label><b id="lon">—</b></div><div><label>LAST SOURCE</label><b id="shipSource">—</b></div></div><div id="trackNote" class="tracknote">Loading recent vessel history…</div></section>
 <div class="bottom"><div class="meta"><label>DATA NETWORK</label><b id="sourceNote">OPENSEAFEED + OPEN WATERS</b></div><div class="meta"><label>TRACK POINTS</label><b id="trackPoints">—</b></div><button id="view3d" class="btn active">◉ 3D</button><button id="view2d" class="btn">▱ 2D</button><button id="smoothMode" class="btn active">✦ SMOOTH</button><button id="allTracks" class="btn active">TRACKS ON</button><button id="reconnect" class="btn">RECONNECT ↻</button></div>
-<footer>PUBLIC AIS · NOT FOR NAVIGATION · <a href="https://openseafeed.com/docs" target="_blank" rel="noopener">DATA API & LIMITS ↗</a> · <a href="https://github.com/BetterInc/openseafeed" target="_blank" rel="noopener">OPEN SOURCE ↗</a> · EARTH TEXTURE: <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noopener">SOLAR SYSTEM SCOPE (CC BY 4.0)</a></footer><div id="toast" class="toast"></div>
+<footer>PUBLIC AIS · NOT FOR NAVIGATION · <span id="sourceCredits">Source attribution loads with AIS records.</span> · <a href="https://openseafeed.com/docs" target="_blank" rel="noopener">DATA API & LIMITS ↗</a> · <a href="https://github.com/BetterInc/openseafeed" target="_blank" rel="noopener">OPEN SOURCE ↗</a> · EARTH TEXTURE: <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noopener">SOLAR SYSTEM SCOPE (CC BY 4.0)</a></footer><div id="toast" class="toast"></div>
 <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/globe.gl@2.46.2/dist/globe.gl.min.js"></script><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
 (()=>{
@@ -195,26 +195,40 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
  }
  $('searchGo').onclick=searchVessel;$('vesselSearch').addEventListener('keydown',e=>{if(e.key==='Enter')searchVessel();});
  $('reconnect').onclick=()=>{retry=0;connect();};$('zin').onclick=()=>{if(viewMode==='2d'&&leafletMap)leafletMap.zoomIn();else{const p=world.pointOfView();world.pointOfView({altitude:Math.max(.55,p.altitude*.78)},450);}};$('zout').onclick=()=>{if(viewMode==='2d'&&leafletMap)leafletMap.zoomOut();else{const p=world.pointOfView();world.pointOfView({altitude:Math.min(5,p.altitude*1.25)},450);}};$('home').onclick=()=>{if(viewMode==='2d'&&leafletMap)leafletMap.setView([12,12],2);else world.pointOfView({lat:12,lng:12,altitude:2.05},850);};$('allTracks').onclick=()=>{showTracks=!showTracks;$('allTracks').textContent=showTracks?'TRACKS ON':'TRACKS OFF';$('allTracks').classList.toggle('active',showTracks);drawTracks();};
+ const OPEN_WATERS_AREAS=[
+  {name:'Gulf of Aden',bbox:'5,45,15,55'},
+  {name:'Arabian Sea',bbox:'5,60,15,70'},
+  {name:'Bay of Bengal',bbox:'5,80,15,90'},
+  {name:'Malacca Strait',bbox:'0,95,10,105'},
+  {name:'South China Sea',bbox:'5,110,15,120'},
+  {name:'East China Sea',bbox:'20,120,30,130'},
+  {name:'North Sea',bbox:'50,0,60,10'},
+  {name:'English Channel',bbox:'45,-5,55,5'}
+ ];
+ let openWatersAreaIndex=0;
  async function loadOpenWaters(){
+  const area=OPEN_WATERS_AREAS[openWatersAreaIndex++%OPEN_WATERS_AREAS.length];
   try{
-   // Anonymous Open Waters requests are capped at 100 square degrees.
-   // This 10° × 10° Bay of Bengal window complements the broad OpenSeaFeed belt.
-   const res=await fetch('https://ais.openwaters.io/v1/vessels?bbox=5,80,15,90&max_age=7d',{headers:{Accept:'application/geo+json, application/json'}});
+   // Anonymous Open Waters requests are capped at 100 square degrees per request.
+   // Rotate eight high-traffic 10° × 10° corridors, one every ten seconds.
+   const res=await fetch('https://ais.openwaters.io/v1/vessels?bbox='+area.bbox+'&max_age=7d',{headers:{Accept:'application/geo+json, application/json'}});
    if(!res.ok)throw new Error('Open Waters HTTP '+res.status);
    const data=await res.json(),features=Array.isArray(data.features)?data.features:[];
-   let added=0;
+   let merged=0;
    for(const f of features){
     const p=f.properties||{},coords=f.geometry&&f.geometry.coordinates;
     if(!coords||coords.length<2)continue;
     const mmsi=String(p.mmsi??f.id??'');if(!/^\d{9}$/.test(mmsi))continue;
     const seen=p.seen??p.time??p.timestamp??new Date().toISOString();
     addPosition({mmsi,lat:Number(coords[1]),lon:Number(coords[0]),name:String(p.name||''),type:p.type??'',imo:p.imo??'',sog:Number(p.sog),cog:Number(p.cog),heading:Number(p.heading),time:seen,source:'Open Waters · '+String(p.source||'AIScast')},true);
-    added++;
+    merged++;
    }
-   if(data.attribution)$('sourceNote').textContent='OpenSeaFeed + Open Waters · '+features.length.toLocaleString()+' regional records';
-   console.info('OCEAN EYE: Open Waters regional sync.',{features:features.length,merged:added,unique:vessels.size,attribution:data.attribution});
-   $('searchHint').textContent='Open Waters Bay of Bengal sync · '+features.length.toLocaleString()+' records';
-  }catch(err){console.warn('OCEAN EYE: Open Waters source unavailable.',err);}
+   const credit=data.attribution;
+   if(credit){const values=typeof credit==='string'?[credit]:Object.values(credit);$('sourceCredits').textContent=values.join(' · ');}
+   $('sourceNote').textContent='OPENSEAFEED + OPEN WATERS · '+area.name.toUpperCase();
+   console.info('OCEAN EYE: Open Waters corridor sync.',{area:area.name,features:features.length,merged,unique:vessels.size,attribution:credit});
+   $('searchHint').textContent='Open Waters '+area.name+' · '+features.length.toLocaleString()+' records';
+  }catch(err){console.warn('OCEAN EYE: Open Waters '+area.name+' source unavailable.',err);}
  }
  async function loadVesselPhoto(s){
   const panel=$('shipPhoto'),credit=$('photoCredit');if(!panel||!credit)return;
@@ -236,7 +250,7 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
  function ageLabel(ms){const sec=Math.floor(ms/1000);if(sec<60)return sec+'s';const min=Math.floor(sec/60);if(min<60)return min+'m '+(sec%60)+'s';return Math.floor(min/60)+'h '+(min%60)+'m';}
  function tickClock(){const now=new Date();$('utcClock').textContent=now.toISOString().slice(11,19);if(lastAt){$('feedDelay').textContent=ageLabel(Math.max(0,Date.now()-lastEventAt));}}
  tickClock();setInterval(tickClock,250);
- loadFleetSnapshot();setInterval(loadFleetSnapshot,10*60*1000);loadOpenWaters();setInterval(loadOpenWaters,60*1000);
+ loadFleetSnapshot();setInterval(loadFleetSnapshot,10*60*1000);loadOpenWaters();setInterval(loadOpenWaters,10*1000);
  try{connect();}catch(err){setStatus('STARTUP ERROR');$('coverageLabel').textContent='INITIALIZATION FAILED';$('trackNote').textContent='Startup error: '+(err&&err.message?err.message:String(err));console.error('OCEAN EYE startup error:',err);}
  });
 })();
