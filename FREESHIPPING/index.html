@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:dark;--bg:#06121d;--panel:rgba(5,19,30,.88);--line:rgba(158,204,224,.17);--muted:#8ca8b8;--text:#eaf6fb;--cyan:#6bdcf0;--green:#64e2b3;--amber:#ffc878}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Manrope,system-ui,sans-serif}button{font:inherit;color:inherit;cursor:pointer}#globe{position:fixed;inset:0;z-index:0}#globe canvas{outline:none}.vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 36%,rgba(1,8,14,.18) 78%),linear-gradient(90deg,rgba(2,11,18,.62),transparent 35%,transparent 72%,rgba(2,11,18,.22)),linear-gradient(0deg,rgba(2,10,17,.68),transparent 33%,rgba(2,10,17,.22))}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Manrope,system-ui,sans-serif}button{font:inherit;color:inherit;cursor:pointer}#globe{position:fixed;inset:0;z-index:0}#globe canvas{display:block;width:100%!important;height:100%!important;outline:none}.vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 36%,rgba(1,8,14,.18) 78%),linear-gradient(90deg,rgba(2,11,18,.62),transparent 35%,transparent 72%,rgba(2,11,18,.22)),linear-gradient(0deg,rgba(2,10,17,.68),transparent 33%,rgba(2,10,17,.22))}
 header{position:fixed;z-index:4;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:17px 23px;pointer-events:none}.brand,.top{pointer-events:auto}.brand{display:flex;align-items:center;gap:11px}.logo{width:37px;height:37px;border:1px solid #65d9ed99;border-radius:50%;display:grid;place-items:center;color:var(--cyan);font-size:22px;box-shadow:0 0 22px #65d9ed20}.brand b{font-size:14px;letter-spacing:.2em}.brand small{display:block;color:var(--muted);font:9px 'DM Mono',monospace;letter-spacing:.14em;margin-top:3px}.top{display:flex;gap:8px;align-items:center}.chip{border:1px solid var(--line);background:#071925d9;backdrop-filter:blur(15px);border-radius:24px;padding:9px 12px;font:9px 'DM Mono',monospace;letter-spacing:.08em;color:#c7dce6}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);margin-right:7px}.dot.on{background:var(--green);box-shadow:0 0 9px #64e2b3}
 .left{position:fixed;z-index:3;top:83px;left:20px;width:270px;padding:16px;border:1px solid var(--line);border-radius:15px;background:var(--panel);backdrop-filter:blur(18px);box-shadow:0 18px 55px #0005}.eyebrow{font:9px 'DM Mono',monospace;letter-spacing:.16em;color:var(--cyan)}h1{font-size:20px;letter-spacing:-.045em;margin:7px 0 5px}.desc{font-size:10px;line-height:1.65;color:var(--muted);margin:0}.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.stat{border:1px solid var(--line);background:#ffffff07;border-radius:9px;padding:9px}.stat label{display:block;font:8px 'DM Mono',monospace;color:var(--muted);letter-spacing:.09em}.stat strong{display:block;font:21px 'DM Mono',monospace;margin-top:4px}.stat small{font-size:8px;color:var(--muted)}.divider{height:1px;background:var(--line);margin:13px 0}.kv{display:flex;justify-content:space-between;gap:8px;margin:7px 0;font-size:9px;color:var(--muted)}.kv b{font:9px 'DM Mono',monospace;color:#d9edf5;text-align:right}.coverage{margin-top:12px;padding:9px;border-radius:9px;background:#6bdcf00c;border:1px solid #6bdcf022;color:#aac2ce;font-size:9px;line-height:1.55}.coverage b{color:var(--cyan)}
 .tools{position:fixed;z-index:4;right:20px;top:84px;display:flex;flex-direction:column;gap:7px}.tool{width:40px;height:40px;border:1px solid var(--line);border-radius:11px;background:#071925df;backdrop-filter:blur(15px);font-size:17px}.tool:active{border-color:var(--cyan);transform:scale(.96)}
@@ -43,22 +43,25 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
  const toast=s=>{const t=$('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);};
  const setStatus=(s,on=false)=>{$('status').textContent=s;$('dot').classList.toggle('on',on);};
  const world=new Globe($('#globe'))
-  .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
-  .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
-  .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
+  .globeImageUrl('https://cdn.jsdelivr.net/npm/three-globe@2.45.2/example/img/earth-blue-marble.jpg')
+  .bumpImageUrl('https://cdn.jsdelivr.net/npm/three-globe@2.45.2/example/img/earth-topology.png')
+  .backgroundImageUrl('https://cdn.jsdelivr.net/npm/three-globe@2.45.2/example/img/night-sky.png')
   .showAtmosphere(true).atmosphereColor('#76d7ee').atmosphereAltitude(.19)
   .showGraticules(false)
   .pointsData([]).pointLat(d=>d.lat).pointLng(d=>d.lon)
   .pointLabel(()=> '')
   .pointColor(d=>selected&&selected.mmsi===d.mmsi?'#fff0a6':(Number(d.sog)>18?'#ffbd76':'#64dff0'))
   .pointRadius(d => (selected && selected.mmsi === d.mmsi) ? 0.25 : 0.105)
-  .pointAltitude(.012).pointResolution(8).pointsMerge(false)
+  .pointAltitude(.012).pointResolution(4).pointsMerge(false)
   .onPointClick(v=>selectVessel(v))
   .onGlobeClick(({lat,lng})=>world.pointOfView({lat,lng,altitude:Math.max(.85,world.pointOfView().altitude*.78)},650))
   .pathsData([]).pathPoints(d=>d.points).pathPointLat(p=>p.lat).pathPointLng(p=>p.lon)
   .pathColor(d=>d.selected?'rgba(255,224,137,.95)':'rgba(83,213,235,.42)')
   .pathStroke(d=>d.selected?1.25:.55).pathResolution(3).pathTransitionDuration(0);
  world.width(window.innerWidth).height(window.innerHeight);
+ // Keep rendering responsive with large initial AIS snapshots: retain every vessel in memory,
+ // but draw only the most recently updated 5,000 contacts plus the selected contact.
+ world.renderer().setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
  // Keep the globe renderer independent of the optional tooltip layer. Vessel details open only on click.
  world.pointOfView({lat:12,lng:12,altitude:2.05},0);
  function resize(){world.width(window.innerWidth).height(window.innerHeight);}window.addEventListener('resize',resize);
@@ -79,7 +82,7 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
   if(selected&&selected.mmsi===v.mmsi){selected=s;updateDetail(s);if(!historyLoading)drawTracks();}
   scheduleRender();
  }
- let queued=false;function scheduleRender(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;const list=[...vessels.values()];$('vesselCount').textContent=list.length.toLocaleString();world.pointsData(list);if(showTracks)drawTracks();});}
+ let queued=false;function scheduleRender(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;const list=[...vessels.values()];$('vesselCount').textContent=list.length.toLocaleString();const visible=list.slice(-5000);if(selected&&!visible.some(v=>v.mmsi===selected.mmsi))visible.push(selected);world.pointsData(visible);if(showTracks)drawTracks();});}
  function drawTracks(){
   const paths=[];
   if(showTracks){for(const s of vessels.values()){if(s.points.length>1)paths.push({points:s.points.slice(-12),selected:false});}}
