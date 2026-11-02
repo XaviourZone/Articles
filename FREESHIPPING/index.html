@@ -3,12 +3,13 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#06121d"><meta name="description" content="OCEAN EYE — a live 3D globe of public AIS vessel traffic, routes and recent tracks.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='27' fill='none' stroke='%236bdcf0' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='8' fill='none' stroke='%236bdcf0' stroke-width='3'/%3E%3C/svg%3E">
 <title>OCEAN EYE — Live Maritime Globe</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:dark;--bg:#06121d;--panel:rgba(5,19,30,.88);--line:rgba(158,204,224,.17);--muted:#8ca8b8;--text:#eaf6fb;--cyan:#6bdcf0;--green:#64e2b3;--amber:#ffc878}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Manrope,system-ui,sans-serif}button{font:inherit;color:inherit;cursor:pointer}#globe{position:fixed;inset:0;z-index:0}#globe canvas{display:block;width:100%!important;height:100%!important;outline:none}.vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 36%,rgba(1,8,14,.18) 78%),linear-gradient(90deg,rgba(2,11,18,.62),transparent 35%,transparent 72%,rgba(2,11,18,.22)),linear-gradient(0deg,rgba(2,10,17,.68),transparent 33%,rgba(2,10,17,.22))}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Manrope,system-ui,sans-serif}button{font:inherit;color:inherit;cursor:pointer}#globe{position:fixed;inset:0;z-index:0}#globe canvas{display:block;width:100%!important;height:100%!important;outline:none}.vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 36%,rgba(1,8,14,.18) 78%),linear-gradient(90deg,rgba(2,11,18,.62),transparent 35%,transparent 72%,rgba(2,11,18,.22)),linear-gradient(0deg,rgba(2,10,17,.68),transparent 33%,rgba(2,10,17,.22)}
 header{position:fixed;z-index:4;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:17px 23px;pointer-events:none}.brand,.top{pointer-events:auto}.brand{display:flex;align-items:center;gap:11px}.logo{width:37px;height:37px;border:1px solid #65d9ed99;border-radius:50%;display:grid;place-items:center;color:var(--cyan);font-size:22px;box-shadow:0 0 22px #65d9ed20}.brand b{font-size:14px;letter-spacing:.2em}.brand small{display:block;color:var(--muted);font:9px 'DM Mono',monospace;letter-spacing:.14em;margin-top:3px}.top{display:flex;gap:8px;align-items:center}.chip{border:1px solid var(--line);background:#071925d9;backdrop-filter:blur(15px);border-radius:24px;padding:9px 12px;font:9px 'DM Mono',monospace;letter-spacing:.08em;color:#c7dce6}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);margin-right:7px}.dot.on{background:var(--green);box-shadow:0 0 9px #64e2b3}
 .left{position:fixed;z-index:3;top:83px;left:20px;width:270px;padding:16px;border:1px solid var(--line);border-radius:15px;background:var(--panel);backdrop-filter:blur(18px);box-shadow:0 18px 55px #0005}.eyebrow{font:9px 'DM Mono',monospace;letter-spacing:.16em;color:var(--cyan)}h1{font-size:20px;letter-spacing:-.045em;margin:7px 0 5px}.desc{font-size:10px;line-height:1.65;color:var(--muted);margin:0}.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.stat{border:1px solid var(--line);background:#ffffff07;border-radius:9px;padding:9px}.stat label{display:block;font:8px 'DM Mono',monospace;color:var(--muted);letter-spacing:.09em}.stat strong{display:block;font:21px 'DM Mono',monospace;margin-top:4px}.stat small{font-size:8px;color:var(--muted)}.divider{height:1px;background:var(--line);margin:13px 0}.kv{display:flex;justify-content:space-between;gap:8px;margin:7px 0;font-size:9px;color:var(--muted)}.kv b{font:9px 'DM Mono',monospace;color:#d9edf5;text-align:right}.coverage{margin-top:12px;padding:9px;border-radius:9px;background:#6bdcf00c;border:1px solid #6bdcf022;color:#aac2ce;font-size:9px;line-height:1.55}.coverage b{color:var(--cyan)}
 .tools{position:fixed;z-index:4;right:20px;top:84px;display:flex;flex-direction:column;gap:7px}.tool{width:40px;height:40px;border:1px solid var(--line);border-radius:11px;background:#071925df;backdrop-filter:blur(15px);font-size:17px}.tool:active{border-color:var(--cyan);transform:scale(.96)}
@@ -22,24 +23,21 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
 <body>
 <div id="globe" aria-label="Interactive 3D Earth with public AIS vessel traffic"></div><div class="vignette"></div>
 <header><div class="brand"><div class="logo">◎</div><div><b>OCEAN EYE</b><small>THE LIVING MARITIME GLOBE</small></div></div><div class="top"><div class="chip"><span id="dot" class="dot"></span><span id="status">CONNECTING</span></div><div class="chip hide-sm">OPEN AIS NETWORK · LIVE</div></div></header>
-<section class="left"><div class="eyebrow">GLOBAL EXPLORER / LIVE AIS</div><h1>Where the oceans move.</h1><p class="desc">Explore the Earth, select a vessel and follow its recent reported track. Position history is sourced from the open community AIS network.</p>
-<div class="stats"><div class="stat"><label>VESSELS SEEN</label><strong id="vesselCount">0</strong><small>unique MMSI</small></div><div class="stat"><label>LIVE REPORTS</label><strong id="messageCount">0</strong><small>this session</small></div></div>
-<div class="divider"></div><div class="kv"><span>LIVE COVERAGE</span><b id="coverageLabel">GLOBAL MID-LATITUDE BELT</b></div><div class="kv"><span>LATITUDE BAND</span><b>41.5°S — 41.5°N</b></div><div class="kv"><span>LAST AIS REPORT</span><b id="lastReport">WAITING</b></div><div class="coverage"><b>Track view:</b> select a ship marker to load its recent 48-hour history, then watch new AIS reports extend its trail. Free anonymous coverage is limited; high-latitude areas may not be included.</div></section>
+<section class="left"><div class="eyebrow">GLOBAL EXPLORER / LIVE AIS</div><h1>Where the oceans move.</h1><p class="desc">Explore the Earth, select a vessel and follow its recent reported track. Position history is sourced from the open community AIS network.</p><div class="stats"><div class="stat"><label>VESSELS SEEN</label><strong id="vesselCount">0</strong><small>unique MMSI</small></div><div class="stat"><label>LIVE REPORTS</label><strong id="messageCount">0</strong><small>this session</small></div></div><div class="divider"></div><div class="kv"><span>LIVE COVERAGE</span><b id="coverageLabel">GLOBAL MID-LATITUDE BELT</b></div><div class="kv"><span>LATITUDE BAND</span><b>41.5°S — 41.5°N</b></div><div class="kv"><span>LAST AIS REPORT</span><b id="lastReport">WAITING</b></div><div class="coverage"><b>Track view:</b> select a ship marker to load its recent 48-hour history, then watch new AIS reports extend its trail. Free anonymous coverage is limited; high-latitude areas may not be included.</div></section>
 <div class="tools"><button class="tool" id="zin" aria-label="Zoom in">＋</button><button class="tool" id="zout" aria-label="Zoom out">－</button><button class="tool" id="home" aria-label="Reset globe">⌂</button></div>
 <section id="detail"><div class="detailhead"><span class="eyebrow">VESSEL TRACK / AIS CONTACT</span><button id="close" class="close" aria-label="Close">×</button></div><div id="shipName" class="shipname">Unknown vessel</div><div id="shipMmsi" class="mmsi">MMSI —</div><div class="grid"><div><label>SPEED OVER GROUND</label><b id="sog">—</b></div><div><label>COURSE</label><b id="cog">—</b></div><div><label>VESSEL TYPE</label><b id="shipType">—</b></div><div><label>IMO</label><b id="imo">—</b></div><div><label>LATITUDE</label><b id="lat">—</b></div><div><label>LONGITUDE</label><b id="lon">—</b></div></div><div id="trackNote" class="tracknote">Loading recent vessel history…</div></section>
 <div class="bottom"><div class="meta"><label>DATA NETWORK</label><b>OPENSEAFEED</b></div><div class="meta"><label>TRACK POINTS</label><b id="trackPoints">—</b></div><button id="allTracks" class="btn active">TRACKS ON</button><button id="reconnect" class="btn">RECONNECT ↻</button></div>
 <footer>PUBLIC AIS · NOT FOR NAVIGATION · <a href="https://openseafeed.com/docs" target="_blank" rel="noopener">DATA API & LIMITS ↗</a> · <a href="https://github.com/BetterInc/openseafeed" target="_blank" rel="noopener">OPEN SOURCE ↗</a></footer><div id="toast" class="toast"></div>
 <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/globe.gl@2.46.2/dist/globe.gl.min.js"></script>
 <script>
-(()=> {
+(()=>{
  const $=id=>document.getElementById(id), WS='wss://stream.openseafeed.com/v1/stream', API='https://api.openseafeed.com/v1';
- window.addEventListener('error',ev=>{const status=document.getElementById('status'),note=document.getElementById('trackNote'),cov=document.getElementById('coverageLabel');if(status)status.textContent='SCRIPT ERROR';if(cov)cov.textContent='CHECK BROWSER CONSOLE';if(note)note.textContent='JavaScript startup error: '+(ev.message||'unknown error')+'. Open browser DevTools → Console for details.';console.error('OCEAN EYE runtime error:',ev.error||ev.message);});
- window.addEventListener('unhandledrejection',ev=>{const status=document.getElementById('status'),note=document.getElementById('trackNote');if(status)status.textContent='NETWORK / SCRIPT ERROR';if(note)note.textContent='An asynchronous operation failed: '+String(ev.reason||'unknown error');console.error('OCEAN EYE unhandled rejection:',ev.reason);});
+ window.addEventListener('error',ev=>{const status=$('status'),note=$('trackNote'),cov=$('coverageLabel');if(status)status.textContent='SCRIPT ERROR';if(cov)cov.textContent='CHECK BROWSER CONSOLE';if(note)note.textContent='JavaScript startup error: '+(ev.message||'unknown error')+'. Open browser DevTools → Console for details.';console.error('OCEAN EYE runtime error:',ev.error||ev.message);});
+ window.addEventListener('unhandledrejection',ev=>{const status=$('status'),note=$('trackNote');if(status)status.textContent='NETWORK / SCRIPT ERROR';if(note)note.textContent='An asynchronous operation failed: '+String(ev.reason||'unknown error');console.error('OCEAN EYE unhandled rejection:',ev.reason);});
  const LIMIT_LAT=41.5, MAX_POINTS=500, vessels=new Map(); let ws=null,selected=null,historyLoading=false,showTracks=true,received=0,retry=0,retryTimer=null,toastTimer=null,lastAt=0;
  const fmt=(v,n=1)=>Number.isFinite(Number(v))?Number(v).toFixed(n):'—';
- if(typeof Globe!=='function'){setStatus('GLOBE LIBRARY ERROR');$('coverageLabel').textContent='3D ENGINE NOT LOADED';$('trackNote').textContent='The Globe.gl library could not be loaded from the CDN. Check internet access or CDN filtering, then refresh.';return;}
- const valid=(v)=>Number.isFinite(v)&&Math.abs(v)<1e6;
- const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ if(typeof Globe!=='function'){$('status').textContent='GLOBE LIBRARY ERROR';$('coverageLabel').textContent='3D ENGINE NOT LOADED';$('trackNote').textContent='The Globe.gl library could not be loaded from the CDN. Check internet access or CDN filtering, then refresh.';return;}
+ const valid=v=>Number.isFinite(v)&&Math.abs(v)<1e6;
  const toast=s=>{const t=$('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);};
  const setStatus=(s,on=false)=>{$('status').textContent=s;$('dot').classList.toggle('on',on);};
  const world=new Globe($('#globe'),{waitForGlobeReady:false,animateIn:false})
@@ -51,7 +49,7 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
   .showGraticules(false)
   .pointsData([]).pointLat(d=>d.lat).pointLng(d=>d.lon)
   .pointColor(d=>selected&&selected.mmsi===d.mmsi?'#fff0a6':(Number(d.sog)>18?'#ffbd76':'#64dff0'))
-  .pointRadius(d => (selected && selected.mmsi === d.mmsi) ? 0.25 : 0.105)
+  .pointRadius(d=>(selected&&selected.mmsi===d.mmsi)?0.25:0.105)
   .pointAltitude(.012).pointResolution(4).pointsMerge(false)
   .onPointClick(v=>selectVessel(v))
   .onGlobeClick(({lat,lng})=>world.pointOfView({lat,lng,altitude:Math.max(.85,world.pointOfView().altitude*.78)},650))
@@ -59,10 +57,9 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
   .pathColor(d=>d.selected?'rgba(255,224,137,.95)':'rgba(83,213,235,.42)')
   .pathStroke(d=>d.selected?1.25:.55).pathResolution(3).pathTransitionDuration(0);
  world.width(window.innerWidth).height(window.innerHeight);
- // Keep the browser's default renderer pixel ratio; Globe.gl owns its WebGL renderer.
- // Keep the globe renderer independent of the optional tooltip layer. Vessel details open only on click.
+ // Do not access world.controls(): some Globe.gl builds do not expose OrbitControls at startup.
+ // The globe remains fully interactive through its built-in drag, zoom and point-of-view controls.
  world.pointOfView({lat:12,lng:12,altitude:2.05},0);
- world.controls().autoRotate=true;world.controls().autoRotateSpeed=0.22;
  world.onGlobeReady(()=>{console.info('OCEAN EYE: Earth texture and globe are ready.');});
  function resize(){world.width(window.innerWidth).height(window.innerHeight);}window.addEventListener('resize',resize);
  function decodeFrame(frame){
@@ -74,75 +71,25 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
   return {mmsi,lat,lon,name:String(meta.ShipName??meta.ship_name??frame.name??'').trim(),type:meta.ShipType??meta.ship_type??'',imo:meta.IMO??meta.imo??'',sog:Number(p.Sog??frame.sog),cog:Number(p.Cog??frame.cog),heading:Number(p.TrueHeading??frame.heading),time:meta.time_utc??meta.time??frame.time??new Date().toISOString()};
  }
  function addPosition(v){
-  let s=vessels.get(v.mmsi);
-  if(!s){s={...v,points:[],received:Date.now()};vessels.set(v.mmsi,s);}
-  else {Object.assign(s,{lat:v.lat,lon:v.lon,received:Date.now(),time:v.time});if(v.name)s.name=v.name;if(v.type!=='')s.type=v.type;if(v.imo)s.imo=v.imo;if(Number.isFinite(v.sog))s.sog=v.sog;if(Number.isFinite(v.cog))s.cog=v.cog;if(Number.isFinite(v.heading))s.heading=v.heading;}
+  let s=vessels.get(v.mmsi);if(!s){s={...v,points:[],received:Date.now()};vessels.set(v.mmsi,s);}
+  else{Object.assign(s,{lat:v.lat,lon:v.lon,received:Date.now(),time:v.time});if(v.name)s.name=v.name;if(v.type!=='')s.type=v.type;if(v.imo)s.imo=v.imo;if(Number.isFinite(v.sog))s.sog=v.sog;if(Number.isFinite(v.cog))s.cog=v.cog;if(Number.isFinite(v.heading))s.heading=v.heading;}
   const last=s.points[s.points.length-1];if(!last||last.lat!==v.lat||last.lon!==v.lon){s.points.push({lat:v.lat,lon:v.lon,time:v.time});if(s.points.length>MAX_POINTS)s.points.shift();}
   received++;lastAt=Date.now();$('messageCount').textContent=received.toLocaleString();$('lastReport').textContent='JUST NOW';
-  if(selected&&selected.mmsi===v.mmsi){selected=s;updateDetail(s);if(!historyLoading)drawTracks();}
-  scheduleRender();
+  if(selected&&selected.mmsi===v.mmsi){selected=s;updateDetail(s);if(!historyLoading)drawTracks();}scheduleRender();
  }
  let queued=false;function scheduleRender(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;const list=[...vessels.values()];$('vesselCount').textContent=list.length.toLocaleString();const visible=list.slice(-5000);if(selected&&!visible.some(v=>v.mmsi===selected.mmsi))visible.push(selected);world.pointsData(visible);if(showTracks)drawTracks();});}
- function drawTracks(){
-  const paths=[];
-  if(showTracks){for(const s of vessels.values()){if(s.points.length>1)paths.push({points:s.points.slice(-12),selected:false});}}
-  if(selected&&selected.points&&selected.points.length>1)paths.push({points:selected.points,selected:true});
-  world.pathsData(paths);$('trackPoints').textContent=selected&&selected.points?selected.points.length.toLocaleString():'—';
- }
+ function drawTracks(){const paths=[];if(showTracks){for(const s of vessels.values()){if(s.points.length>1)paths.push({points:s.points.slice(-12),selected:false});}}if(selected&&selected.points&&selected.points.length>1)paths.push({points:selected.points,selected:true});world.pathsData(paths);$('trackPoints').textContent=selected&&selected.points?selected.points.length.toLocaleString():'—';}
  function parseHistory(data){
-  const out=[];
-  function push(lat,lon,time){lat=Number(lat);lon=Number(lon);if(valid(lat)&&valid(lon)&&Math.abs(lat)<=90&&Math.abs(lon)<=180)out.push({lat,lon,time:time||''});}
-  function visit(x){
-   if(!x)return;
-   if(Array.isArray(x)){for(const a of x){if(Array.isArray(a)&&a.length>=2&&typeof a[0]==='number'){push(a[1],a[0]);}else if(a&&typeof a==='object')visit(a);}return;}
-   if(x.type==='FeatureCollection'&&Array.isArray(x.features)){x.features.forEach(visit);return;}
-   if(x.type==='Feature'&&x.geometry){visit(x.geometry);return;}
-   if(x.type==='LineString'&&Array.isArray(x.coordinates)){visit(x.coordinates);return;}
-   if(x.geometry){visit(x.geometry);return;}
-   const lat=x.lat??x.latitude??x.Latitude,lon=x.lon??x.lng??x.longitude??x.Longitude;
-   if(lat!==undefined&&lon!==undefined){push(lat,lon,x.time??x.time_utc??x.timestamp??x.timestamp_utc);return;}
-   for(const k of ['positions','history','track','points','data','results','coordinates'])if(x[k]){visit(x[k]);return;}
-  }
+  const out=[];function push(lat,lon,time){lat=Number(lat);lon=Number(lon);if(valid(lat)&&valid(lon)&&Math.abs(lat)<=90&&Math.abs(lon)<=180)out.push({lat,lon,time:time||''});}
+  function visit(x){if(!x)return;if(Array.isArray(x)){for(const a of x){if(Array.isArray(a)&&a.length>=2&&typeof a[0]==='number')push(a[1],a[0]);else if(a&&typeof a==='object')visit(a);}return;}if(x.type==='FeatureCollection'&&Array.isArray(x.features)){x.features.forEach(visit);return;}if(x.type==='Feature'&&x.geometry){visit(x.geometry);return;}if(x.type==='LineString'&&Array.isArray(x.coordinates)){visit(x.coordinates);return;}if(x.geometry){visit(x.geometry);return;}const lat=x.lat??x.latitude??x.Latitude,lon=x.lon??x.lng??x.longitude??x.Longitude;if(lat!==undefined&&lon!==undefined){push(lat,lon,x.time??x.time_utc??x.timestamp??x.timestamp_utc);return;}for(const k of ['positions','history','track','points','data','results','coordinates'])if(x[k]){visit(x[k]);return;}}
   visit(data);return out;
  }
- async function loadHistory(s){
-  historyLoading=true;$('trackNote').textContent='Loading recent public AIS history…';
-  try{
-   const res=await fetch(API+'/history/'+encodeURIComponent(s.mmsi),{headers:{Accept:'application/json'}});
-   if(!res.ok)throw new Error('History endpoint returned HTTP '+res.status);
-   const data=await res.json(),points=parseHistory(data);
-   if(selected&&selected.mmsi===s.mmsi){
-    const live=s.points||[];const merged=[...points,...live].filter((p,i,a)=>i===0||p.lat!==a[i-1].lat||p.lon!==a[i-1].lon);
-    s.points=merged.slice(-MAX_POINTS);selected=s;
-    $('trackNote').textContent=points.length?('Loaded '+points.length+' recent historical fixes. New live AIS reports will extend this track.'):('No historical fixes returned yet. The live trail will grow as new reports arrive.');
-    drawTracks();
-   }
-  }catch(err){if(selected&&selected.mmsi===s.mmsi)$('trackNote').textContent='Historical track unavailable right now ('+err.message+'). Live trail is still recording new positions.';}
-  finally{historyLoading=false;}
- }
- function updateDetail(s){
-  $('shipName').textContent=s.name||'Unknown vessel';$('shipMmsi').textContent='MMSI '+s.mmsi;
-  $('sog').textContent=Number.isFinite(s.sog)&&s.sog<102?' '+fmt(s.sog,1)+' kn':'—';
-  $('cog').textContent=Number.isFinite(s.cog)&&s.cog<=360?fmt(s.cog,0)+'°':'—';
-  $('shipType').textContent=s.type||'Unknown';$('imo').textContent=s.imo||'—';
-  $('lat').textContent=fmt(s.lat,4)+'°';$('lon').textContent=fmt(s.lon,4)+'°';
-  if(s.points&&s.points.length)$('trackPoints').textContent=s.points.length.toLocaleString();
- }
+ async function loadHistory(s){historyLoading=true;$('trackNote').textContent='Loading recent public AIS history…';try{const res=await fetch(API+'/history/'+encodeURIComponent(s.mmsi),{headers:{Accept:'application/json'}});if(!res.ok)throw new Error('History endpoint returned HTTP '+res.status);const data=await res.json(),points=parseHistory(data);if(selected&&selected.mmsi===s.mmsi){const live=s.points||[],merged=[...points,...live].filter((p,i,a)=>i===0||p.lat!==a[i-1].lat||p.lon!==a[i-1].lon);s.points=merged.slice(-MAX_POINTS);selected=s;$('trackNote').textContent=points.length?'Loaded '+points.length+' recent historical fixes. New live AIS reports will extend this track.':'No historical fixes returned yet. The live trail will grow as new reports arrive.';drawTracks();}}catch(err){if(selected&&selected.mmsi===s.mmsi)$('trackNote').textContent='Historical track unavailable right now ('+err.message+'). Live trail is still recording new positions.';}finally{historyLoading=false;}}
+ function updateDetail(s){$('shipName').textContent=s.name||'Unknown vessel';$('shipMmsi').textContent='MMSI '+s.mmsi;$('sog').textContent=Number.isFinite(s.sog)&&s.sog<102?' '+fmt(s.sog,1)+' kn':'—';$('cog').textContent=Number.isFinite(s.cog)&&s.cog<=360?fmt(s.cog,0)+'°':'—';$('shipType').textContent=s.type||'Unknown';$('imo').textContent=s.imo||'—';$('lat').textContent=fmt(s.lat,4)+'°';$('lon').textContent=fmt(s.lon,4)+'°';if(s.points&&s.points.length)$('trackPoints').textContent=s.points.length.toLocaleString();}
  function selectVessel(v){const s=vessels.get(v.mmsi)||v;selected=s;$('detail').classList.add('show');updateDetail(s);world.pointOfView({lat:s.lat,lng:s.lon,altitude:.75},900);$('trackNote').textContent='Loading recent public AIS history…';loadHistory(s);drawTracks();}
  $('close').onclick=()=>{$('detail').classList.remove('show');selected=null;drawTracks();scheduleRender();};
- function connect(){
-  clearTimeout(retryTimer);if(ws){try{ws.onclose=null;ws.close();}catch(e){}}
-  setStatus('CONNECTING');ws=new WebSocket(WS);
-  ws.onopen=()=>{retry=0;setStatus('LIVE',true);const sub={BoundingBoxes:[[[-41.5,-180],[41.5,180]]],FilterMessageTypes:['PositionReport','StandardClassBPositionReport','ExtendedClassBPositionReport','LongRangeAisBroadcastMessage'],InitialState:true};ws.send(JSON.stringify(sub));$('coverageLabel').textContent='GLOBAL BELT · ±41.5°';toast('Connected to OpenSeaFeed — warming vessel state');};
-  ws.onmessage=ev=>{try{const raw=typeof ev.data==='string'?ev.data:new TextDecoder().decode(ev.data);const frame=JSON.parse(raw);if(frame.MessageType==='PositionReport'||frame.MessageType==='StandardClassBPositionReport'||frame.MessageType==='ExtendedClassBPositionReport'||frame.MessageType==='LongRangeAisBroadcastMessage'){const v=decodeFrame(frame);if(v)addPosition(v);}else if(frame.type==='error'||frame.error){setStatus('FEED NOTICE');toast(frame.error||'Provider notice');}}catch(e){}};
-  ws.onerror=()=>setStatus('RETRYING');
-  ws.onclose=()=>{setStatus('OFFLINE');const wait=Math.min(30000,1200*Math.pow(2,retry++));retryTimer=setTimeout(connect,wait);};
- }
- $('reconnect').onclick=()=>{retry=0;connect();};
- $('zin').onclick=()=>{const p=world.pointOfView();world.pointOfView({altitude:Math.max(.55,p.altitude*.78)},450);};
- $('zout').onclick=()=>{const p=world.pointOfView();world.pointOfView({altitude:Math.min(5,p.altitude*1.25)},450);};
- $('home').onclick=()=>world.pointOfView({lat:12,lng:12,altitude:2.05},850);
- $('allTracks').onclick=()=>{showTracks=!showTracks;$('allTracks').textContent=showTracks?'TRACKS ON':'TRACKS OFF';$('allTracks').classList.toggle('active',showTracks);drawTracks();};
+ function connect(){clearTimeout(retryTimer);if(ws){try{ws.onclose=null;ws.close();}catch(e){}}setStatus('CONNECTING');ws=new WebSocket(WS);ws.onopen=()=>{retry=0;setStatus('LIVE',true);const sub={BoundingBoxes:[[[-41.5,-180],[41.5,180]]],FilterMessageTypes:['PositionReport','StandardClassBPositionReport','ExtendedClassBPositionReport','LongRangeAisBroadcastMessage'],InitialState:true};ws.send(JSON.stringify(sub));$('coverageLabel').textContent='GLOBAL BELT · ±41.5°';toast('Connected to OpenSeaFeed — warming vessel state');};ws.onmessage=ev=>{try{const raw=typeof ev.data==='string'?ev.data:new TextDecoder().decode(ev.data),frame=JSON.parse(raw);if(['PositionReport','StandardClassBPositionReport','ExtendedClassBPositionReport','LongRangeAisBroadcastMessage'].includes(frame.MessageType)){const v=decodeFrame(frame);if(v)addPosition(v);}else if(frame.type==='error'||frame.error){setStatus('FEED NOTICE');toast(frame.error||'Provider notice');}}catch(e){}};ws.onerror=()=>setStatus('RETRYING');ws.onclose=()=>{setStatus('OFFLINE');const wait=Math.min(30000,1200*Math.pow(2,retry++));retryTimer=setTimeout(connect,wait);};}
+ $('reconnect').onclick=()=>{retry=0;connect();};$('zin').onclick=()=>{const p=world.pointOfView();world.pointOfView({altitude:Math.max(.55,p.altitude*.78)},450);};$('zout').onclick=()=>{const p=world.pointOfView();world.pointOfView({altitude:Math.min(5,p.altitude*1.25)},450);};$('home').onclick=()=>world.pointOfView({lat:12,lng:12,altitude:2.05},850);$('allTracks').onclick=()=>{showTracks=!showTracks;$('allTracks').textContent=showTracks?'TRACKS ON':'TRACKS OFF';$('allTracks').classList.toggle('active',showTracks);drawTracks();};
  setInterval(()=>{if(lastAt){const sec=Math.floor((Date.now()-lastAt)/1000);$('lastReport').textContent=sec<60?sec+'s AGO':Math.floor(sec/60)+'m AGO';}},1000);
  try{connect();}catch(err){setStatus('STARTUP ERROR');$('coverageLabel').textContent='INITIALIZATION FAILED';$('trackNote').textContent='Startup error: '+(err&&err.message?err.message:String(err));console.error('OCEAN EYE startup error:',err);}
 })();
