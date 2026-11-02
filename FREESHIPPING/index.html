@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06111b">
+<meta name="description" content="OCEAN EYE — explore the living Earth and public AIS vessel traffic in real time.">
+<title>OCEAN EYE — Living Maritime Globe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#06111b;--panel:rgba(8,22,34,.82);--line:rgba(160,205,225,.15);--muted:#8ba4b4;--text:#eaf5fa;--cyan:#65d9ed;--green:#63e0b0;--amber:#ffc979}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Manrope,system-ui,sans-serif}button{font:inherit;color:inherit}#globeViz{position:fixed;inset:0;z-index:0}#globeViz canvas{outline:none}.shade{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(3,12,20,.72),transparent 33%,transparent 68%,rgba(3,12,20,.3)),linear-gradient(0deg,rgba(3,12,20,.8),transparent 30%,rgba(3,12,20,.3))}
+header{position:fixed;z-index:4;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:20px 26px;pointer-events:none}.brand,.topright{pointer-events:auto}.brand{display:flex;align-items:center;gap:12px}.mark{width:36px;height:36px;border:1px solid rgba(101,217,237,.55);border-radius:50%;display:grid;place-items:center;color:var(--cyan);font-size:19px;box-shadow:0 0 24px rgba(101,217,237,.13)}.brand strong{font-size:15px;letter-spacing:.19em;font-weight:800}.brand small{display:block;color:var(--muted);font:9px 'DM Mono',monospace;letter-spacing:.16em;margin-top:3px}.topright{display:flex;gap:9px;align-items:center}.pill{border:1px solid var(--line);background:rgba(6,18,28,.72);backdrop-filter:blur(16px);border-radius:30px;padding:9px 13px;font:10px 'DM Mono',monospace;letter-spacing:.08em;color:#c8dce5}.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);margin-right:7px;box-shadow:0 0 10px currentColor}.live-dot.on{background:var(--green)}
+.panel{position:fixed;z-index:3;top:92px;left:22px;width:260px;border:1px solid var(--line);border-radius:16px;background:var(--panel);backdrop-filter:blur(18px);box-shadow:0 18px 60px #0005;padding:17px}.eyebrow{font:9px 'DM Mono',monospace;letter-spacing:.16em;color:var(--cyan);text-transform:uppercase}.panel h1{font-size:19px;letter-spacing:-.04em;margin:8px 0 5px}.sub{font-size:11px;line-height:1.6;color:var(--muted);margin:0}.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:17px}.stat{border:1px solid var(--line);background:#ffffff06;border-radius:10px;padding:11px}.stat label{display:block;color:var(--muted);font:9px 'DM Mono',monospace;letter-spacing:.08em}.stat strong{display:block;font:22px 'DM Mono',monospace;margin-top:5px}.stat span{font-size:9px;color:var(--muted)}.rule{height:1px;background:var(--line);margin:15px 0}.rowline{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:var(--muted);margin:8px 0}.rowline b{color:#d8e9f0;font:10px 'DM Mono',monospace;text-align:right}.hint{font-size:10px;line-height:1.6;color:#a9bdc8;background:#ffffff08;border-radius:9px;padding:10px;margin-top:13px}.hint b{color:var(--cyan)}
+.controls{position:fixed;z-index:4;right:22px;top:92px;display:flex;flex-direction:column;gap:8px}.control{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(14px);font-size:17px;cursor:pointer}.control:active{transform:scale(.96);border-color:var(--cyan)}
+.bottom{position:fixed;z-index:4;left:50%;bottom:20px;transform:translateX(-50%);width:min(650px,calc(100% - 36px));display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid var(--line);background:rgba(5,17,27,.84);backdrop-filter:blur(20px);border-radius:15px;padding:12px 15px;box-shadow:0 15px 55px #0006}.bottom .group{min-width:0}.bottom label{display:block;color:var(--muted);font:9px 'DM Mono',monospace;letter-spacing:.1em}.bottom strong{display:block;font:11px 'DM Mono',monospace;margin-top:5px;white-space:nowrap}.action{border:1px solid rgba(101,217,237,.35);background:rgba(101,217,237,.1);border-radius:10px;padding:11px 14px;color:var(--cyan);font-size:10px;font-weight:800;letter-spacing:.08em;cursor:pointer;white-space:nowrap}
+#detail{position:fixed;z-index:5;right:22px;bottom:95px;width:280px;border:1px solid var(--line);border-radius:15px;background:rgba(7,20,31,.94);backdrop-filter:blur(20px);padding:16px;display:none;box-shadow:0 18px 60px #0007}#detail.show{display:block}.detailtop{display:flex;justify-content:space-between;align-items:center}.close{border:0;background:none;color:var(--muted);font-size:20px;cursor:pointer}.shipname{font-size:16px;font-weight:800;margin:10px 0 2px}.mmsi{font:10px 'DM Mono',monospace;color:var(--muted)}.detailgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.detailgrid div{background:#ffffff08;border-radius:9px;padding:9px}.detailgrid label{display:block;font:9px 'DM Mono',monospace;color:var(--muted)}.detailgrid b{display:block;font:13px 'DM Mono',monospace;margin-top:5px}
+footer{position:fixed;z-index:3;left:22px;bottom:23px;color:#8ba4b4;font:9px 'DM Mono',monospace;letter-spacing:.05em}footer a{color:#a9cbd7;text-decoration:none}
+.toast{position:fixed;z-index:8;left:50%;top:76px;transform:translate(-50%,-8px);opacity:0;transition:.25s;border:1px solid var(--line);background:#0a1c2a;padding:9px 13px;border-radius:30px;font:10px 'DM Mono',monospace;color:var(--cyan);pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:700px){header{padding:13px 14px}.brand{gap:8px}.mark{width:31px;height:31px}.brand strong{font-size:12px}.brand small{font-size:8px}.topright .pill{padding:8px 10px;font-size:9px}.topright .hide-mobile{display:none}.panel{top:auto;left:12px;right:12px;bottom:84px;width:auto;padding:12px 13px;border-radius:14px}.panel h1{font-size:15px;margin:4px 0}.panel .sub{font-size:10px}.stats{margin-top:10px;gap:7px}.stat{padding:8px}.stat strong{font-size:17px}.stat label{font-size:8px}.rule,.rowline,.hint{display:none}.controls{top:65px;right:12px;gap:6px}.control{width:37px;height:37px;border-radius:11px}.bottom{bottom:10px;width:calc(100% - 24px);padding:9px 10px;gap:8px}.bottom label{font-size:8px}.bottom strong{font-size:10px}.action{padding:10px 11px;font-size:9px}footer{display:none}#detail{left:12px;right:12px;bottom:75px;width:auto}.shade{background:linear-gradient(0deg,rgba(3,12,20,.7),transparent 35%,rgba(3,12,20,.15))}}
+@media(max-height:650px) and (max-width:700px){.panel{bottom:76px}.panel .stats{grid-template-columns:repeat(4,1fr)}.stat strong{font-size:14px}.bottom{bottom:7px}}
+</style>
+</head>
+<body>
+<div id="globeViz" aria-label="Interactive 3D Earth globe"></div><div class="shade"></div>
+<header>
+ <div class="brand"><div class="mark">◎</div><div><strong>OCEAN EYE</strong><small>THE LIVING MARITIME GLOBE</small></div></div>
+ <div class="topright"><div class="pill"><span id="liveDot" class="live-dot"></span><span id="connection">CONNECTING</span></div><div class="pill hide-mobile">PUBLIC AIS · OPEN WATERS</div></div>
+</header>
+<section class="panel">
+ <div class="eyebrow">GLOBAL EXPLORER / 001</div>
+ <h1>Where the oceans move.</h1>
+ <p class="sub">Explore Earth in 3D and follow public AIS vessel reports. Select any ocean area on the globe to tune the live view.</p>
+ <div class="stats">
+  <div class="stat"><label>VESSELS IN VIEW</label><strong id="count">0</strong><span>unique MMSI</span></div>
+  <div class="stat"><label>MESSAGES</label><strong id="messages">0</strong><span>this session</span></div>
+ </div>
+ <div class="rule"></div>
+ <div class="rowline"><span>LIVE RECEIVING AREA</span><b id="area">10° × 10°</b></div>
+ <div class="rowline"><span>AREA CENTRE</span><b id="centre">0.0°, 0.0°</b></div>
+ <div class="rowline"><span>LAST REPORT</span><b id="last">—</b></div>
+ <div class="hint"><b>Explore:</b> drag to rotate · scroll or pinch to zoom · tap an ocean to move the live AIS window. Live reception is limited by the free provider's coverage and anonymous-area allowance.</div>
+</section>
+<div class="controls">
+ <button class="control" id="zoomIn" aria-label="Zoom in">＋</button>
+ <button class="control" id="zoomOut" aria-label="Zoom out">－</button>
+ <button class="control" id="home" aria-label="Reset globe view">⌂</button>
+</div>
+<section id="detail">
+ <div class="detailtop"><span class="eyebrow">VESSEL CONTACT</span><button class="close" id="closeDetail" aria-label="Close">×</button></div>
+ <div class="shipname" id="shipname">Unknown vessel</div><div class="mmsi" id="shipmmsi">MMSI —</div>
+ <div class="detailgrid">
+  <div><label>SPEED</label><b id="shipsog">—</b></div><div><label>COURSE</label><b id="shipcog">—</b></div>
+  <div><label>HEADING</label><b id="shipheading">—</b></div><div><label>VESSEL TYPE</label><b id="shiptype">—</b></div>
+  <div><label>LATITUDE</label><b id="shiplat">—</b></div><div><label>LONGITUDE</label><b id="shiplon">—</b></div>
+ </div>
+ <div class="rowline" style="margin-top:12px"><span>REPORT AGE</span><b id="shipage">—</b></div>
+</section>
+<div class="bottom">
+ <div class="group"><label>DATA SOURCE</label><strong>OPEN WATERS AIS</strong></div>
+ <div class="group"><label>STREAM</label><strong id="streamState">WAITING</strong></div>
+ <button class="action" id="reconnect">RECONNECT ↗</button>
+</div>
+<footer>PUBLIC AIS DATA · NOT FOR NAVIGATION · <a href="https://openwaters.io/api/ais/" target="_blank" rel="noopener">DATA & LIMITS ↗</a></footer>
+<div id="toast" class="toast"></div>
+<script src="https://unpkg.com/globe.gl"></script>
+<script>
+(() => {
+ const $ = id => document.getElementById(id);
+ const WS_URL = 'wss://ais.openwaters.io/v1/stream';
+ const AREA_DEGREES = 10;
+ const vessels = new Map();
+ let socket = null, messageCount = 0, selected = null, reconnectTimer = null, retry = 0, centre = {lat:0,lng:0}, lastMessageAt = 0, toastTimer;
+ const fmt = (v,n=1) => Number.isFinite(Number(v)) ? Number(v).toFixed(n) : '—';
+ const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
+ const normLon = v => ((v+540)%360)-180;
+ const world = Globe()(document.getElementById('globeViz'))
+  .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+  .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
+  .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
+  .showAtmosphere(true).atmosphereColor('#74cde8').atmosphereAltitude(.19)
+  .showGraticules(false)
+  .pointsData([]).pointLat(d=>d.lat).pointLng(d=>d.lon)
+  .pointColor(d=>selected && selected.mmsi===d.mmsi?'#fff1a8':(d.sog>15?'#ffbd72':'#6be5f0'))
+  .pointAltitude(.012).pointRadius(d=>selected&&selected.mmsi===d.mmsi?.28:.17)
+  .pointResolution(8).pointsMerge(false)
+  .pointLabel(d=>'<div style="background:#081b28;border:1px solid #4dc8dc;border-radius:7px;padding:7px 9px;color:#eafaff;font:11px Manrope,sans-serif"><b>'+(safe(d.name)||'UNKNOWN VESSEL')+'</b><br><span style="color:#91adbb">MMSI '+d.mmsi+'</span></div>')
+  .onPointClick(d=>showDetails(d))
+  .onGlobeClick(({lat,lng})=>selectArea(lat,lng));
+ world.width([window.innerWidth]); world.height([window.innerHeight]);
+ world.pointOfView({lat:15,lng:12,altitude:2.15},0);
+ function safe(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+ function notify(s){const el=$('toast');el.textContent=s;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2500);}
+ function setStatus(s,on=false){$('connection').textContent=s;$('streamState').textContent=s;$('liveDot').classList.toggle('on',on);}
+ function updateArea(){ $('centre').textContent=fmt(centre.lat,1)+'°, '+fmt(centre.lng,1)+'°'; $('area').textContent=AREA_DEGREES+'° × '+AREA_DEGREES+'°';}
+ function makeBox(lat,lng){const half=AREA_DEGREES/2;const a=clamp(lat-half,-80,80),b=clamp(lat+half,-80,80),c=normLon(lng-half),d=normLon(lng+half);return [a,c,b,d];}
+ function subscribe(){if(!socket||socket.readyState!==WebSocket.OPEN)return;const box=makeBox(centre.lat,centre.lng);socket.send(JSON.stringify({type:'subscribe',bbox:[box]}));updateArea();notify('Live AIS window moved');}
+ function selectArea(lat,lng){centre={lat:clamp(lat,-75,75),lng:normLon(lng)};subscribe();world.pointOfView({lat:centre.lat,lng:centre.lng,altitude:1.8},900);}
+ function connect(){clearTimeout(reconnectTimer);if(socket){try{socket.onclose=null;socket.close()}catch(e){}}
+  setStatus('CONNECTING');socket=new WebSocket(WS_URL);
+  socket.onopen=()=>{retry=0;setStatus('CONNECTED',true);subscribe();};
+  socket.onmessage=e=>{try{const msg=JSON.parse(typeof e.data==='string'?e.data:'');if(msg.type==='event'){ingest(msg);return;}if(msg.type==='welcome'){$('streamState').textContent='READY';}if(msg.type==='error'){setStatus('FEED NOTICE');notify(msg.error||'Provider notice');}}catch(err){}};
+  socket.onerror=()=>setStatus('RETRYING');
+  socket.onclose=()=>{setStatus('OFFLINE');const wait=Math.min(30000,1500*Math.pow(2,retry++));reconnectTimer=setTimeout(connect,wait);};
+ }
+ function ingest(e){const lat=Number(e.lat),lon=Number(e.lon),mmsi=String(e.mmsi??'');if(!mmsi||!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180)return;
+  const old=vessels.get(mmsi)||{};const v={...old,mmsi,lat,lon,name:e.name||old.name||'',sog:Number.isFinite(Number(e.sog))?Number(e.sog):old.sog,cog:Number.isFinite(Number(e.cog))?Number(e.cog):old.cog,heading:Number.isFinite(Number(e.heading))?Number(e.heading):old.heading,type:e.ship_type??e.type??old.type,time:e.time||new Date().toISOString(),received:Date.now()};
+  vessels.set(mmsi,v);messageCount++;lastMessageAt=Date.now();$('messages').textContent=messageCount.toLocaleString();$('last').textContent='JUST NOW';if(selected&&selected.mmsi===mmsi)showDetails(v);render();
+ }
+ let renderQueued=false;function render(){if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;const data=[...vessels.values()];$('count').textContent=data.length.toLocaleString();world.pointsData(data);});}
+ function showDetails(v){selected=v; $('detail').classList.add('show');$('shipname').textContent=v.name||'Unknown vessel';$('shipmmsi').textContent='MMSI '+v.mmsi;$('shipsog').textContent=Number.isFinite(v.sog)?fmt(v.sog,1)+' kn':'—';$('shipcog').textContent=Number.isFinite(v.cog)?fmt(v.cog,0)+'°':'—';$('shipheading').textContent=Number.isFinite(v.heading)?fmt(v.heading,0)+'°':'—';$('shiptype').textContent=v.type??'Unknown';$('shiplat').textContent=fmt(v.lat,4)+'°';$('shiplon').textContent=fmt(v.lon,4)+'°';$('shipage').textContent=v.received?Math.max(0,Math.round((Date.now()-v.received)/1000))+' sec':'—';world.pointsData([...vessels.values()]);}
+ $('closeDetail').onclick=()=>{$('detail').classList.remove('show');selected=null;world.pointsData([...vessels.values()]);};
+ $('reconnect').onclick=()=>{retry=0;connect();notify('Reconnecting to public AIS');};
+ $('zoomIn').onclick=()=>{const p=world.pointOfView();world.pointOfView({altitude:Math.max(.65,p.altitude*.78)},500);};
+ $('zoomOut').onclick=()=>{const p=world.pointOfView();world.pointOfView({altitude:Math.min(5,p.altitude*1.28)},500);};
+ $('home').onclick=()=>world.pointOfView({lat:15,lng:12,altitude:2.15},900);
+ window.addEventListener('resize',()=>{world.width([window.innerWidth]);world.height([window.innerHeight]);});
+ setInterval(()=>{if(lastMessageAt){const age=Math.round((Date.now()-lastMessageAt)/1000);$('last').textContent=age<60?age+'s ago':Math.floor(age/60)+'m ago';}if(selected&&selected.received)$('shipage').textContent=Math.max(0,Math.round((Date.now()-selected.received)/1000))+' sec';},1000);
+ updateArea();connect();
+})();
+</script>
+</body>
+</html>
