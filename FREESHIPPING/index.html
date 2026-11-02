@@ -42,7 +42,7 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
  const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const toast=s=>{const t=$('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);};
  const setStatus=(s,on=false)=>{$('status').textContent=s;$('dot').classList.toggle('on',on);};
- const world=new Globe($('#globe'))
+ const world=new Globe($('#globe'),{waitForGlobeReady:false,animateIn:false})
   .globeImageUrl('https://cdn.jsdelivr.net/npm/three-globe@2.45.2/example/img/earth-blue-marble.jpg')
   .bumpImageUrl('https://cdn.jsdelivr.net/npm/three-globe@2.45.2/example/img/earth-topology.png')
   .backgroundImageUrl('https://cdn.jsdelivr.net/npm/three-globe@2.45.2/example/img/night-sky.png')
@@ -50,7 +50,6 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
   .showAtmosphere(true).atmosphereColor('#76d7ee').atmosphereAltitude(.19)
   .showGraticules(false)
   .pointsData([]).pointLat(d=>d.lat).pointLng(d=>d.lon)
-  .pointLabel(()=> '')
   .pointColor(d=>selected&&selected.mmsi===d.mmsi?'#fff0a6':(Number(d.sog)>18?'#ffbd76':'#64dff0'))
   .pointRadius(d => (selected && selected.mmsi === d.mmsi) ? 0.25 : 0.105)
   .pointAltitude(.012).pointResolution(4).pointsMerge(false)
@@ -64,6 +63,7 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
  // Keep the globe renderer independent of the optional tooltip layer. Vessel details open only on click.
  world.pointOfView({lat:12,lng:12,altitude:2.05},0);
  world.controls().autoRotate=true;world.controls().autoRotateSpeed=0.22;
+ world.onGlobeReady(()=>{console.info('OCEAN EYE: Earth texture and globe are ready.');});
  function resize(){world.width(window.innerWidth).height(window.innerHeight);}window.addEventListener('resize',resize);
  function decodeFrame(frame){
   const meta=frame.MetaData||frame.metadata||{},msg=frame.Message||frame.message||{};
