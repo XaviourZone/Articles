@@ -29,12 +29,13 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
 <section id="detail"><div class="detailhead"><span class="eyebrow">VESSEL TRACK / AIS CONTACT</span><button id="close" class="close" aria-label="Close">×</button></div><div id="shipName" class="shipname">Unknown vessel</div><div id="shipMmsi" class="mmsi">MMSI —</div><div class="grid"><div><label>SPEED OVER GROUND</label><b id="sog">—</b></div><div><label>COURSE</label><b id="cog">—</b></div><div><label>VESSEL TYPE</label><b id="shipType">—</b></div><div><label>IMO</label><b id="imo">—</b></div><div><label>LATITUDE</label><b id="lat">—</b></div><div><label>LONGITUDE</label><b id="lon">—</b></div></div><div id="trackNote" class="tracknote">Loading recent vessel history…</div></section>
 <div class="bottom"><div class="meta"><label>DATA NETWORK</label><b>OPENSEAFEED</b></div><div class="meta"><label>TRACK POINTS</label><b id="trackPoints">—</b></div><button id="allTracks" class="btn active">TRACKS ON</button><button id="reconnect" class="btn">RECONNECT ↻</button></div>
 <footer>PUBLIC AIS · NOT FOR NAVIGATION · <a href="https://openseafeed.com/docs" target="_blank" rel="noopener">DATA API & LIMITS ↗</a> · <a href="https://github.com/BetterInc/openseafeed" target="_blank" rel="noopener">OPEN SOURCE ↗</a></footer><div id="toast" class="toast"></div>
-<script src="https://unpkg.com/globe.gl"></script>
+<script src="https://cdn.jsdelivr.net/npm/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
 <script>
 (()=> {
  const $=id=>document.getElementById(id), WS='wss://stream.openseafeed.com/v1/stream', API='https://api.openseafeed.com/v1';
  const LIMIT_LAT=41.5, MAX_POINTS=500, vessels=new Map(); let ws=null,selected=null,historyLoading=false,showTracks=true,received=0,retry=0,retryTimer=null,toastTimer=null,lastAt=0;
  const fmt=(v,n=1)=>Number.isFinite(Number(v))?Number(v).toFixed(n):'—';
+ if(typeof Globe!=='function'){setStatus('GLOBE LIBRARY ERROR');$('coverageLabel').textContent='3D ENGINE NOT LOADED';$('trackNote').textContent='The Globe.gl library could not be loaded from the CDN. Check internet access or CDN filtering, then refresh.';return;}
  const valid=(v)=>Number.isFinite(v)&&Math.abs(v)<1e6;
  const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const toast=s=>{const t=$('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);};
@@ -137,7 +138,7 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
  $('home').onclick=()=>world.pointOfView({lat:12,lng:12,altitude:2.05},850);
  $('allTracks').onclick=()=>{showTracks=!showTracks;$('allTracks').textContent=showTracks?'TRACKS ON':'TRACKS OFF';$('allTracks').classList.toggle('active',showTracks);drawTracks();};
  setInterval(()=>{if(lastAt){const sec=Math.floor((Date.now()-lastAt)/1000);$('lastReport').textContent=sec<60?sec+'s AGO':Math.floor(sec/60)+'m AGO';}},1000);
- connect();
+ try{connect();}catch(err){setStatus('STARTUP ERROR');$('coverageLabel').textContent='INITIALIZATION FAILED';$('trackNote').textContent='Startup error: '+(err&&err.message?err.message:String(err));console.error('OCEAN EYE startup error:',err);}
 })();
 </script>
 </body></html>
