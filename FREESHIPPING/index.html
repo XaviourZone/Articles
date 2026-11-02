@@ -59,9 +59,7 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
   .pathColor(d=>d.selected?'rgba(255,224,137,.95)':'rgba(83,213,235,.42)')
   .pathStroke(d=>d.selected?1.25:.55).pathResolution(3).pathTransitionDuration(0);
  world.width(window.innerWidth).height(window.innerHeight);
- // Keep rendering responsive with large initial AIS snapshots: retain every vessel in memory,
- // but draw only the most recently updated 5,000 contacts plus the selected contact.
- world.renderer().setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
+ // Keep the browser's default renderer pixel ratio; Globe.gl owns its WebGL renderer.
  // Keep the globe renderer independent of the optional tooltip layer. Vessel details open only on click.
  world.pointOfView({lat:12,lng:12,altitude:2.05},0);
  function resize(){world.width(window.innerWidth).height(window.innerHeight);}window.addEventListener('resize',resize);
