@@ -81,11 +81,11 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
  globeSet('pointRadius',d=>{
   const altitude=world.pointOfView().altitude;
   const scale=Math.max(.35,Math.min(1.35,altitude/1.6));
-  return (selected&&selected.mmsi===d.mmsi?.042:.018)*scale;
+  return ((selected&&selected.mmsi===d.mmsi)?0.042:0.018)*scale;
  });
  globeSet('pointAltitude',.001);
  globeSet('pointResolution',10);
- globeSet('pointLabel',d=>'<div style="padding:7px 9px;background:#071722;border:1px solid #3b7180;border-radius:7px;color:#e8f7fb;font:12px system-ui"><b>'+(d.name||'Unknown vessel')+'</b><br>MMSI '+d.mmsi+(Number.isFinite(d.sog)?'<br>SOG '+d.sog+' kn':'')+(Number.isFinite(d.cog)?'<br>COG '+d.cog+'°':'')+'</div>');
+ globeSet('pointLabel',d=>(d.name||'Unknown vessel')+' · MMSI '+d.mmsi+(Number.isFinite(d.sog)?' · SOG '+d.sog+' kn':'')+(Number.isFinite(d.cog)?' · COG '+d.cog+'°':''));
  globeSet('pointsMerge',false);
  globeSet('onPointClick',v=>selectVessel(v));
  globeSet('onGlobeClick',({lat,lng})=>world.pointOfView({lat,lng,altitude:Math.max(.85,world.pointOfView().altitude*.78)},650));
