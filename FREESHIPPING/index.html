@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#06121d"><meta name="description" content="OCEAN EYE — a live 2D maritime map of public AIS vessel traffic and recent tracks.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='27' fill='none' stroke='%236bdcf0' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='8' fill='none' stroke='%236bdcf0' stroke-width='3'/%3E%3C/svg%3E">
 <title>OCEAN EYE — Live Maritime Map</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:dark;--bg:#06121d;--panel:rgba(5,19,30,.88);--line:rgba(158,204,224,.17);--muted:#8ca8b8;--text:#eaf6fb;--cyan:#6bdcf0;--green:#64e2b3;--amber:#ffc878}
@@ -38,12 +38,17 @@ header{height:66px;padding:0 25px;background:linear-gradient(180deg,rgba(5,17,28
 @media(max-width:900px){.searchPanel{width:360px;min-width:0;left:auto;right:20px;transform:none}.left{width:270px}#detail{width:350px}}
 @media(max-width:700px){header{height:56px;padding:0 11px}.logo{width:30px;height:30px}.brand b{font-size:10px}.brand small{font-size:6px}.top{gap:5px}.chip{padding:7px 8px;font-size:7px}.chip:first-child{min-width:84px}.left{top:67px;left:10px;right:auto;width:calc(100% - 20px)}.statsOnly .stats{gap:6px}.stat{min-height:62px;padding:8px 10px;border-radius:9px}.stat label{font-size:7px}.stat strong{font-size:18px}.stat small{font-size:8px}.searchPanel{top:141px;left:10px;right:10px;width:auto;padding:7px 9px}.searchPanel .eyebrow{display:none}.searchPanel .searchbar{margin:0}.searchPanel .searchhint{display:none}#detail{top:auto;left:8px;right:8px;bottom:8px;width:auto;max-height:min(72vh,650px);padding:12px;border-radius:14px;transform:translateY(20px)}#detail.show{transform:translateY(0)}.shipphoto{min-height:130px;max-height:150px}.shipphoto img{height:150px;max-height:150px}.grid div{min-height:49px;padding:7px}.grid b{font-size:10px}.detailSectionTitle{margin:11px 0 7px}.mapFooter{left:10px;right:auto;bottom:10px}.mapFooter .meta{display:none}.mapFooter .btn{padding:8px 9px}footer{display:none}.shipChevronLegend{left:auto;right:10px;bottom:12px;padding:7px}.leaflet-control-zoom{margin-top:205px!important}}
 @media(max-height:680px) and (min-width:701px){#detail{top:70px;bottom:10px;padding:12px}.shipphoto{min-height:110px;max-height:130px}.shipphoto img{height:130px}.detailSectionTitle{margin:10px 0 6px}}
+
+/* React + Bootstrap operations shell */
+#oceanShell{position:fixed;inset:0;z-index:4;pointer-events:none}.appHeader{height:68px;position:absolute;inset:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 25px;pointer-events:none;background:linear-gradient(180deg,rgba(5,17,28,.98),rgba(5,17,28,.86));border-bottom:1px solid #274354;box-shadow:0 8px 28px #0003}.appHeader .brand,.appHeader .top{pointer-events:auto}.appHeader .logo{width:35px;height:35px;border-radius:10px;background:linear-gradient(145deg,#17445a,#0b2231);border:1px solid #4dd9ee88;color:#8beafa;display:grid;place-items:center;font-size:20px}.appHeader .brand b{font-size:13px;letter-spacing:.2em}.appHeader .brand small{display:block;font:8px 'DM Mono',monospace;letter-spacing:.16em;color:#8ca8b8;margin-top:4px}.appHeader .chip{border:1px solid #2a485a;background:#0b202e;border-radius:8px;padding:8px 11px;color:#d7e8ef;font:8px 'DM Mono',monospace;letter-spacing:.1em}.appHeader .utcChip b{color:#e9f8fc;font-weight:500}.statsOnly{position:absolute;top:85px;left:22px;width:286px;pointer-events:none}.statsOnly .stats{display:grid;grid-template-columns:1fr 1fr;gap:9px}.statsOnly .stat{min-height:78px;padding:11px 13px;border:1px solid #29495b;border-radius:11px;background:linear-gradient(145deg,rgba(12,34,49,.98),rgba(7,23,35,.97));box-shadow:0 10px 30px #0004}.statsOnly .stat label{font:8px 'DM Mono',monospace;letter-spacing:.13em;color:#9bb6c4}.statsOnly .stat strong{font:22px 'DM Mono',monospace;color:#f0fbff;margin-top:5px}.statsOnly .stat small{font:8px 'DM Mono',monospace;letter-spacing:.08em;color:#89a6b5}.searchPanel{top:82px;left:50%;transform:translateX(-50%);width:min(430px,calc(100vw - 660px));min-width:310px;background:rgba(8,27,40,.97);border:1px solid #2c4e61;border-radius:11px;box-shadow:0 12px 32px #0005}.searchPanel .searchbar{border:0;background:transparent}.searchPanel .searchbar input{font-size:11px}.searchPanel .searchbar button{background:#12394a;border-color:#2d657b}.searchPanel .eyebrow{font-size:7px;color:#91b4c3}.searchPanel .searchhint{font-size:7px}.suggestions{background:#0a1d2b;border-color:#2b4b5c}.suggestion:hover,.suggestion.active{background:#14394a}
+#map2d{top:0;bottom:0}.leaflet-control-zoom{margin-top:82px!important;margin-right:18px!important;border:1px solid #315064!important;border-radius:9px!important;overflow:hidden;box-shadow:0 8px 24px #0005!important}.leaflet-control-zoom a{width:34px!important;height:34px!important;line-height:34px!important;background:#0b2231!important;color:#e4f5fa!important;border-color:#294657!important}.leaflet-control-attribution{font:8px 'DM Mono',monospace!important;background:#061724dd!important;color:#9eb8c5!important}
+@media(max-width:700px){.appHeader{height:57px;padding:0 10px}.appHeader .logo{width:29px;height:29px}.appHeader .brand{gap:7px}.appHeader .brand b{font-size:10px}.appHeader .brand small{font-size:6px}.appHeader .chip{padding:7px 8px;font-size:7px}.networkChip{display:none}.statsOnly{top:67px;left:10px;width:calc(100% - 20px)}.statsOnly .stat{min-height:62px;padding:8px 10px}.statsOnly .stat strong{font-size:18px}.searchPanel{top:140px;left:10px;right:10px;width:auto;min-width:0;transform:none;padding:7px 9px}.searchPanel .eyebrow,.searchPanel .searchhint{display:none}.searchPanel .searchbar{margin:0}.leaflet-control-zoom{margin-top:205px!important;margin-right:9px!important}#detail{top:auto;left:8px;right:8px;bottom:8px;width:auto;max-height:72vh}}
 </style>
 </head>
 <body>
 <div id="map2d" class="active" aria-label="Live 2D maritime AIS map"></div>
-<header><div class="brand"><div class="logo">◎</div><div><b>OCEAN EYE</b><small>LIVE MARITIME TRAFFIC</small></div></div><div class="top"><div class="chip"><span id="dot" class="dot"></span><span id="status">CONNECTING</span></div><div class="chip"><span>UTC</span> <b id="utcClock">--:--:--</b></div><div class="chip hide-sm">OPEN AIS NETWORK · LIVE</div></div></header>
-<section class="left statsOnly"><div class="stats"><div class="stat"><label>VESSELS SEEN</label><strong id="vesselCount">0</strong><small>unique MMSI</small></div><div class="stat"><label>LIVE REPORTS</label><strong id="messageCount">0</strong><small>this session</small></div></div></section>
+<div id="oceanShell"></div>
+
 <section id="searchPanel" class="searchPanel"><div class="eyebrow">VESSEL FINDER</div><div class="searchbar"><span class="searchicon">⌕</span><input id="vesselSearch" type="search" placeholder="MMSI, IMO or vessel name…" autocomplete="off" aria-label="Search loaded vessels"><button id="searchGo" aria-label="Search vessel">›</button></div><div id="searchHint" class="searchhint">Type 2+ characters for live suggestions</div><div id="suggestions" class="suggestions" role="listbox"></div></section>
 
 <section id="detail" aria-label="Selected vessel details">
@@ -64,6 +69,27 @@ header{height:66px;padding:0 25px;background:linear-gradient(180deg,rgba(5,17,28
 <div class="bottom mapFooter"><div class="meta"><label>DATA NETWORK</label><b id="sourceNote">OPENSEAFEED + OPEN WATERS</b></div><button id="reconnect" class="btn">RECONNECT ↻</button></div>
 <footer>PUBLIC AIS · NOT FOR NAVIGATION · <span id="sourceCredits">Source attribution loads with AIS records.</span> · <a href="https://openseafeed.com/docs" target="_blank" rel="noopener">DATA API & LIMITS ↗</a> · <a href="https://github.com/BetterInc/openseafeed" target="_blank" rel="noopener">OPEN SOURCE ↗</a> · EARTH TEXTURE: <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noopener">SOLAR SYSTEM SCOPE (CC BY 4.0)</a></footer><div id="toast" class="toast"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script>
+(()=>{if(!window.React||!window.ReactDOM)return;const h=React.createElement;
+ function OceanShell(){const [status,setStatus]=React.useState('CONNECTING'),[live,setLive]=React.useState(false),[utc,setUtc]=React.useState('--:--:--'),[vessels,setVessels]=React.useState('0'),[reports,setReports]=React.useState('0');
+ React.useEffect(()=>{window.oceanUI={setStatus:(s,on)=>{setStatus(s);setLive(!!on)},setUtc,setCounts:(v,r)=>{setVessels(v);setReports(r)}};const tick=()=>setUtc(new Date().toISOString().slice(11,19));tick();const timer=setInterval(tick,1000);return()=>clearInterval(timer)},[]);
+ return h(React.Fragment,null,
+  h('header',{className:'appHeader'},
+   h('div',{className:'brand'},h('div',{className:'logo'},'◈'),h('div',null,h('b',null,'OCEAN EYE'),h('small',null,'MARITIME SITUATIONAL AWARENESS'))),
+   h('div',{className:'top d-flex align-items-center gap-2'},
+    h('div',{className:'chip liveChip'},h('span',{className:'dot '+(live?'on':'')}),h('span',null,status)),
+    h('div',{className:'chip utcChip'},h('span',null,'UTC'),h('b',{className:'ms-2',id:'utcClock'},utc)),
+    h('div',{className:'chip networkChip'},'PUBLIC AIS NETWORK'))),
+  h('section',{className:'statsOnly'},
+   h('div',{className:'stats'},
+    h('div',{className:'stat card'},h('label',null,'VESSELS SEEN'),h('strong',{id:'vesselCount'},vessels),h('small',null,'UNIQUE MMSI')),
+    h('div',{className:'stat card'},h('label',null,'LIVE REPORTS'),h('strong',{id:'messageCount'},reports),h('small',null,'THIS SESSION')))));
+ }
+ ReactDOM.createRoot(document.getElementById('oceanShell')).render(h(OceanShell));
+})();
+</script>
 <script>
 (()=>{
  requestAnimationFrame(()=>{
@@ -74,7 +100,7 @@ header{height:66px;padding:0 25px;background:linear-gradient(180deg,rgba(5,17,28
  const fmt=(v,n=1)=>Number.isFinite(Number(v))?Number(v).toFixed(n):'—';
  const valid=v=>Number.isFinite(v)&&Math.abs(v)<1e6;
  const toast=s=>{const t=$('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);};
- const setStatus=(s,on=false)=>{$('status').textContent=s;$('dot').classList.toggle('on',on);};
+ const setStatus=(s,on=false)=>{if(window.oceanUI)window.oceanUI.setStatus(s,on);else{const el=$('status'),dot=$('dot');if(el)el.textContent=s;if(dot)dot.classList.toggle('on',on);}};
  let leafletMap=null,leafletLayer=null,leafletCanvas=null,last2DRender=0,mapReady=false;
  function initMap(){
   if(leafletMap)return;
@@ -149,7 +175,7 @@ header{height:66px;padding:0 25px;background:linear-gradient(180deg,rgba(5,17,28
    if(Number.isFinite(v.sog))s.sog=v.sog;if(Number.isFinite(v.cog))s.cog=v.cog;if(Number.isFinite(v.heading))s.heading=v.heading;
   }
   if(!fromSnapshot){const last=s.points[s.points.length-1];if(!last||last.lat!==v.lat||last.lon!==v.lon){s.points.push({lat:v.lat,lon:v.lon,time:v.time});if(s.points.length>MAX_POINTS)s.points.shift();}
-   received++;lastAt=Date.now();const eventMs=Date.parse(v.time);if(Number.isFinite(eventMs)){lastEventAt=eventMs;$('lastReport').textContent=new Date(eventMs).toISOString().slice(11,19);$('feedDelay').textContent=ageLabel(Math.max(0,lastAt-eventMs));}else{$('lastReport').textContent='TIME UNKNOWN';$('feedDelay').textContent='—';}$('messageCount').textContent=received.toLocaleString();
+   received++;lastAt=Date.now();const eventMs=Date.parse(v.time);if(Number.isFinite(eventMs)){lastEventAt=eventMs;}else{}if(window.oceanUI)window.oceanUI.setCounts(vessels.size.toLocaleString(),received.toLocaleString());
   }
   if(selected&&selected.mmsi===v.mmsi){selected=s;updateDetail(s);if(!historyLoading)drawTracks();}scheduleRender();
  }
@@ -182,10 +208,10 @@ header{height:66px;padding:0 25px;background:linear-gradient(180deg,rgba(5,17,28
    const res=await fetch(API+'/snapshot',{headers:{Accept:'application/json'}});
    if(!res.ok)throw new Error('Snapshot HTTP '+res.status);
    const payload=await res.json();ingestSnapshot(payload);
-  }catch(err){console.warn('OCEAN EYE: fleet snapshot unavailable; live stream continues.',err);$('coverageLabel').textContent='LIVE STREAM · SNAPSHOT UNAVAILABLE';}
+  }catch(err){console.warn('OCEAN EYE: fleet snapshot unavailable; live stream continues.',err);}
  }
  let queued=false,lastRender=0;
- function scheduleRender(){if(queued)return;queued=true;setTimeout(()=>requestAnimationFrame(()=>{queued=false;lastRender=Date.now();$('vesselCount').textContent=vessels.size.toLocaleString();sync2DMarkers(true);}),850);}
+ function scheduleRender(){if(queued)return;queued=true;setTimeout(()=>requestAnimationFrame(()=>{queued=false;lastRender=Date.now();if(window.oceanUI)window.oceanUI.setCounts(vessels.size.toLocaleString(),received.toLocaleString());sync2DMarkers(true);}),850);}
  function drawTracks(){sync2DMarkers(true);$('trackPoints').textContent=selected&&selected.points?selected.points.length.toLocaleString():'—';}
  function parseHistory(data){
   const out=[];function push(lat,lon,time){lat=Number(lat);lon=Number(lon);if(valid(lat)&&valid(lon)&&Math.abs(lat)<=90&&Math.abs(lon)<=180)out.push({lat,lon,time:time||''});}
@@ -270,10 +296,10 @@ header{height:66px;padding:0 25px;background:linear-gradient(180deg,rgba(5,17,28
   }catch(err){panel.innerHTML='<div class="photoempty">NO IMAGE AVAILABLE<br><span>No open-licensed photo found for this MMSI</span></div>';credit.textContent='Image library: Open Vessel Photos';}
  }
  function ageLabel(ms){const sec=Math.floor(ms/1000);if(sec<60)return sec+'s';const min=Math.floor(sec/60);if(min<60)return min+'m '+(sec%60)+'s';return Math.floor(min/60)+'h '+(min%60)+'m';}
- function tickClock(){const now=new Date();$('utcClock').textContent=now.toISOString().slice(11,19);if(lastAt){$('feedDelay').textContent=ageLabel(Math.max(0,Date.now()-lastEventAt));}}
+ function tickClock(){const now=new Date();if(window.oceanUI)window.oceanUI.setUtc(now.toISOString().slice(11,19));}
  tickClock();setInterval(tickClock,250);
  loadFleetSnapshot();setInterval(loadFleetSnapshot,10*60*1000);loadOpenWaters();setInterval(loadOpenWaters,10*1000);
- try{connect();}catch(err){setStatus('STARTUP ERROR');$('coverageLabel').textContent='INITIALIZATION FAILED';$('trackNote').textContent='Startup error: '+(err&&err.message?err.message:String(err));console.error('OCEAN EYE startup error:',err);}
+ try{connect();}catch(err){setStatus('STARTUP ERROR');$('trackNote').textContent='Startup error: '+(err&&err.message?err.message:String(err));console.error('OCEAN EYE startup error:',err);}
  });
 })();
 </script>
