@@ -33,6 +33,8 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
 <script>
 (()=> {
  const $=id=>document.getElementById(id), WS='wss://stream.openseafeed.com/v1/stream', API='https://api.openseafeed.com/v1';
+ window.addEventListener('error',ev=>{const status=document.getElementById('status'),note=document.getElementById('trackNote'),cov=document.getElementById('coverageLabel');if(status)status.textContent='SCRIPT ERROR';if(cov)cov.textContent='CHECK BROWSER CONSOLE';if(note)note.textContent='JavaScript startup error: '+(ev.message||'unknown error')+'. Open browser DevTools → Console for details.';console.error('OCEAN EYE runtime error:',ev.error||ev.message);});
+ window.addEventListener('unhandledrejection',ev=>{const status=document.getElementById('status'),note=document.getElementById('trackNote');if(status)status.textContent='NETWORK / SCRIPT ERROR';if(note)note.textContent='An asynchronous operation failed: '+String(ev.reason||'unknown error');console.error('OCEAN EYE unhandled rejection:',ev.reason);});
  const LIMIT_LAT=41.5, MAX_POINTS=500, vessels=new Map(); let ws=null,selected=null,historyLoading=false,showTracks=true,received=0,retry=0,retryTimer=null,toastTimer=null,lastAt=0;
  const fmt=(v,n=1)=>Number.isFinite(Number(v))?Number(v).toFixed(n):'—';
  if(typeof Globe!=='function'){setStatus('GLOBE LIBRARY ERROR');$('coverageLabel').textContent='3D ENGINE NOT LOADED';$('trackNote').textContent='The Globe.gl library could not be loaded from the CDN. Check internet access or CDN filtering, then refresh.';return;}
