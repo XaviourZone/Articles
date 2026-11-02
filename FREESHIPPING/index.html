@@ -149,11 +149,11 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
    const payload=await res.json();ingestSnapshot(payload);
   }catch(err){console.warn('OCEAN EYE: fleet snapshot unavailable; live stream continues.',err);$('coverageLabel').textContent='LIVE STREAM · SNAPSHOT UNAVAILABLE';}
  }
- let queued=false,lastRender=0,smoothMode=true,viewMode='3d',leafletMap=null,leafletLayer=null,last2DRender=0;
+ let queued=false,lastRender=0,smoothMode=true,viewMode='3d',leafletMap=null,leafletLayer=null,leafletCanvas=null,last2DRender=0;
  function init2D(){if(leafletMap)return;if(typeof L==='undefined'){toast('2D map library unavailable');return;}
   leafletMap=L.map('map2d',{worldCopyJump:true,preferCanvas:true,zoomControl:false,attributionControl:true}).setView([12,12],2);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'}).addTo(leafletMap);
-  leafletLayer=L.layerGroup().addTo(leafletMap);
+  leafletLayer=L.layerGroup().addTo(leafletMap);leafletCanvas=L.canvas({padding:0.5});
   leafletMap.on('click',e=>{if(viewMode==='2d')$('searchHint').textContent='Map centre: '+e.latlng.lat.toFixed(3)+', '+e.latlng.lng.toFixed(3);});
  }
  function setView(mode){viewMode=mode;$('view3d').classList.toggle('active',mode==='3d');$('view2d').classList.toggle('active',mode==='2d');
@@ -162,7 +162,7 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
   else{world.width(window.innerWidth).height(window.innerHeight);}
  }
  function sync2DMarkers(force=false){if(viewMode!=='2d'||!leafletLayer||(!force&&Date.now()-last2DRender<1200))return;last2DRender=Date.now();leafletLayer.clearLayers();
-  const list=[...vessels.values()].slice(-2200);for(const v of list){const marker=L.circleMarker([v.lat,v.lon],{renderer:L.canvas(),radius:3.2,color:'#062b3a',weight:1,fillColor:Number(v.sog)>18?'#ffc878':'#55d8ee',fillOpacity:.95});
+  const list=[...vessels.values()].slice(-2200);for(const v of list){const marker=L.circleMarker([v.lat,v.lon],{renderer:leafletCanvas,radius:3.2,color:'#062b3a',weight:1,fillColor:Number(v.sog)>18?'#ffc878':'#55d8ee',fillOpacity:.95});
    marker.bindTooltip((v.name||'Unknown vessel')+' · '+v.mmsi,{direction:'top'});marker.on('click',()=>selectVessel(v));marker.addTo(leafletLayer);}
  }
  function scheduleRender(){if(queued)return;queued=true;const wait=Math.max(0,(smoothMode?260:180)-(Date.now()-lastRender));setTimeout(()=>requestAnimationFrame(()=>{queued=false;lastRender=Date.now();const list=[...vessels.values()];$('vesselCount').textContent=list.length.toLocaleString();const visible=list.slice(- (smoothMode?1500:3000));if(selected&&!visible.some(v=>v.mmsi===selected.mmsi))visible.push(selected);if(viewMode==='3d')world.pointsData(visible);else sync2DMarkers();if(showTracks&&viewMode==='3d')drawTracks();}),wait);}
