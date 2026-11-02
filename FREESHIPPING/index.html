@@ -118,7 +118,7 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
   const lat=Number(p.latitude??p.lat??p.Latitude??(coords&&coords.length>1?coords[1]:undefined));
   const lon=Number(p.longitude??p.lon??p.lng??p.Longitude??(coords&&coords.length>1?coords[0]:undefined));
   const mmsi=String(p.mmsi??p.MMSI??p.Mmsi??item.mmsi??'');
-  if(!/^\\d{9}$/.test(mmsi)||!valid(lat)||!valid(lon)||Math.abs(lat)>90||Math.abs(lon)>180)return null;
+  if(!/^\d{9}$/.test(mmsi)||!valid(lat)||!valid(lon)||Math.abs(lat)>90||Math.abs(lon)>180)return null;
   return {mmsi,lat,lon,name:String(p.name??p.ShipName??p.ship_name??'').trim(),type:p.type??p.ShipType??'',imo:p.imo??p.IMO??'',sog:Number(p.sog??p.Sog),cog:Number(p.cog??p.Cog),heading:Number(p.heading??p.TrueHeading),time:p.time_utc??p.time??p.timestamp??new Date().toISOString()};
  }
  function ingestSnapshot(payload){
@@ -158,7 +158,8 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
  function ageLabel(ms){const sec=Math.floor(ms/1000);if(sec<60)return sec+'s';const min=Math.floor(sec/60);if(min<60)return min+'m '+(sec%60)+'s';return Math.floor(min/60)+'h '+(min%60)+'m';}
  function tickClock(){const now=new Date();$('utcClock').textContent=now.toISOString().slice(11,19);if(lastAt){$('feedDelay').textContent=ageLabel(Math.max(0,Date.now()-lastEventAt));}}
  tickClock();setInterval(tickClock,250);
- loadFleetSnapshot();setInterval(loadFleetSnapshot,10*60*1000);\n try{connect();}catch(err){setStatus('STARTUP ERROR');$('coverageLabel').textContent='INITIALIZATION FAILED';$('trackNote').textContent='Startup error: '+(err&&err.message?err.message:String(err));console.error('OCEAN EYE startup error:',err);}
+ loadFleetSnapshot();setInterval(loadFleetSnapshot,10*60*1000);
+ try{connect();}catch(err){setStatus('STARTUP ERROR');$('coverageLabel').textContent='INITIALIZATION FAILED';$('trackNote').textContent='Startup error: '+(err&&err.message?err.message:String(err));console.error('OCEAN EYE startup error:',err);}
  });
 })();
 </script>
