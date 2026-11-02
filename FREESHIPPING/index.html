@@ -41,7 +41,7 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
  const $=id=>document.getElementById(id), WS='wss://stream.openseafeed.com/v1/stream', API='https://api.openseafeed.com/v1';
  window.addEventListener('error',ev=>{const status=$('status'),note=$('trackNote'),cov=$('coverageLabel');if(status)status.textContent='SCRIPT ERROR';if(cov)cov.textContent='CHECK BROWSER CONSOLE';if(note)note.textContent='JavaScript startup error: '+(ev.message||'unknown error')+'. Open browser DevTools → Console for details.';console.error('OCEAN EYE runtime error:',ev.error||ev.message);});
  window.addEventListener('unhandledrejection',ev=>{const status=$('status'),note=$('trackNote');if(status)status.textContent='NETWORK / SCRIPT ERROR';if(note)note.textContent='An asynchronous operation failed: '+String(ev.reason||'unknown error');console.error('OCEAN EYE unhandled rejection:',ev.reason);});
- const LIMIT_LAT=41.5, MAX_POINTS=500, vessels=new Map(); let ws=null,selected=null,historyLoading=false,showTracks=true,received=0,retry=0,retryTimer=null,toastTimer=null,lastAt=0,lastEventAt=0;
+ const LIMIT_LAT=41.5, MAX_POINTS=500, vessels=new Map(); let ws=null,selected=null,historyLoading=false,received=0,retry=0,retryTimer=null,toastTimer=null,lastAt=0,lastEventAt=0;
  const fmt=(v,n=1)=>Number.isFinite(Number(v))?Number(v).toFixed(n):'—';
  const valid=v=>Number.isFinite(v)&&Math.abs(v)<1e6;
  const toast=s=>{const t=$('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);};
@@ -135,7 +135,7 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
    const payload=await res.json();ingestSnapshot(payload);
   }catch(err){console.warn('OCEAN EYE: fleet snapshot unavailable; live stream continues.',err);$('coverageLabel').textContent='LIVE STREAM · SNAPSHOT UNAVAILABLE';}
  }
- let queued=false,lastRender=0,smoothMode=true;
+ let queued=false,lastRender=0;
  function scheduleRender(){if(queued)return;queued=true;setTimeout(()=>requestAnimationFrame(()=>{queued=false;lastRender=Date.now();$('vesselCount').textContent=vessels.size.toLocaleString();sync2DMarkers(true);}),850);}
  function drawTracks(){sync2DMarkers(true);$('trackPoints').textContent=selected&&selected.points?selected.points.length.toLocaleString():'—';}
  function parseHistory(data){
