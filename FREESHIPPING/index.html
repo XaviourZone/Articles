@@ -44,10 +44,10 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
  let world;
  try {
   // Create the renderer first. Configure features only after the canvas exists.
-  const globeElement = $('globe');
-  if (!globeElement) throw new Error('The #globe container was not found.');
+  const globeElement = document.getElementById('globe');
+  if (!globeElement) throw new Error('The #globe container was not found in the document.');
   world = new Globe(globeElement, {waitForGlobeReady:false, animateIn:false});
-  console.info('OCEAN EYE: Globe renderer created.', !!globeElement.querySelector('canvas'));
+  console.info('OCEAN EYE: Globe constructor returned.', typeof world === 'function');
  } catch (err) {
   setStatus('GLOBE STARTUP ERROR');
   $('coverageLabel').textContent='3D RENDERER FAILED';
