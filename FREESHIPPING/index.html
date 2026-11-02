@@ -47,15 +47,15 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
   .showGraticules(false)
   .pointsData([]).pointLat(d=>d.lat).pointLng(d=>d.lon)
   .pointColor(d=>selected&&selected.mmsi===d.mmsi?'#fff0a6':(Number(d.sog)>18?'#ffbd76':'#64dff0'))
-  .pointRadius(d=>selected&&selected.mmsi===d.mmsi?.25:.105)
+  .pointRadius(d => (selected && selected.mmsi === d.mmsi) ? 0.25 : 0.105)
   .pointAltitude(.012).pointResolution(8).pointsMerge(false)
-  .pointLabel(d=>'<div style="padding:7px 9px;background:#061b29;border:1px solid #62d7e8;border-radius:7px;color:#eafaff;font:11px Manrope,sans-serif"><b>'+safe(d.name||'UNKNOWN VESSEL')+'</b><br><span style="color:#91adbb">MMSI '+safe(d.mmsi)+'</span></div>')
   .onPointClick(v=>selectVessel(v))
   .onGlobeClick(({lat,lng})=>world.pointOfView({lat,lng,altitude:Math.max(.85,world.pointOfView().altitude*.78)},650))
   .pathsData([]).pathPoints(d=>d.points).pathPointLat(p=>p.lat).pathPointLng(p=>p.lon)
   .pathColor(d=>d.selected?'rgba(255,224,137,.95)':'rgba(83,213,235,.42)')
   .pathStroke(d=>d.selected?1.25:.55).pathResolution(3).pathTransitionDuration(0);
  world.width(window.innerWidth).height(window.innerHeight);
+ // Keep the globe renderer independent of the optional tooltip layer. Vessel details open only on click.
  world.pointOfView({lat:12,lng:12,altitude:2.05},0);
  function resize(){world.width(window.innerWidth).height(window.innerHeight);}window.addEventListener('resize',resize);
  function decodeFrame(frame){
