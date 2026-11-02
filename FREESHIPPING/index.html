@@ -41,27 +41,57 @@ footer{position:fixed;z-index:3;left:20px;bottom:22px;color:#8ba4b4;font:8px 'DM
  const valid=v=>Number.isFinite(v)&&Math.abs(v)<1e6;
  const toast=s=>{const t=$('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);};
  const setStatus=(s,on=false)=>{$('status').textContent=s;$('dot').classList.toggle('on',on);};
- const world=new Globe($('#globe'),{waitForGlobeReady:false,animateIn:false})
-  .globeImageUrl('https://cdn.jsdelivr.net/npm/three-globe@2.45.2/example/img/earth-blue-marble.jpg')
-  .bumpImageUrl('https://cdn.jsdelivr.net/npm/three-globe@2.45.2/example/img/earth-topology.png')
-  .backgroundImageUrl('https://cdn.jsdelivr.net/npm/three-globe@2.45.2/example/img/night-sky.png')
-  .showGlobe(true).backgroundColor('rgba(0,0,0,0)')
-  .showAtmosphere(true).atmosphereColor('#76d7ee').atmosphereAltitude(.19)
-  .showGraticules(false)
-  .pointsData([]).pointLat(d=>d.lat).pointLng(d=>d.lon)
-  .pointColor(d=>selected&&selected.mmsi===d.mmsi?'#fff0a6':(Number(d.sog)>18?'#ffbd76':'#64dff0'))
-  .pointRadius(d=>(selected&&selected.mmsi===d.mmsi)?0.25:0.105)
-  .pointAltitude(.012).pointResolution(4).pointsMerge(false)
-  .onPointClick(v=>selectVessel(v))
-  .onGlobeClick(({lat,lng})=>world.pointOfView({lat,lng,altitude:Math.max(.85,world.pointOfView().altitude*.78)},650))
-  .pathsData([]).pathPoints(d=>d.points).pathPointLat(p=>p.lat).pathPointLng(p=>p.lon)
-  .pathColor(d=>d.selected?'rgba(255,224,137,.95)':'rgba(83,213,235,.42)')
-  .pathStroke(d=>d.selected?1.25:.55).pathResolution(3).pathTransitionDuration(0);
- world.width(window.innerWidth).height(window.innerHeight);
- // Do not access world.controls(): some Globe.gl builds do not expose OrbitControls at startup.
- // The globe remains fully interactive through its built-in drag, zoom and point-of-view controls.
- world.pointOfView({lat:12,lng:12,altitude:2.05},0);
- world.onGlobeReady(()=>{console.info('OCEAN EYE: Earth texture and globe are ready.');});
+ let world;
+ try {
+  // Create the renderer first. Configure features only after the canvas exists.
+  world = new Globe($('#globe'), {waitForGlobeReady:false, animateIn:false});
+  console.info('OCEAN EYE: Globe renderer created.', !!$('#globe').querySelector('canvas'));
+ } catch (err) {
+  setStatus('GLOBE STARTUP ERROR');
+  $('coverageLabel').textContent='3D RENDERER FAILED';
+  $('trackNote').textContent='Could not create the 3D globe: '+(err.message||String(err));
+  console.error('OCEAN EYE renderer error:', err);
+  return;
+ }
+ function globeSet(method, ...args) {
+  try {
+   if (typeof world[method] === 'function') world[method](...args);
+   else console.warn('OCEAN EYE: Globe method unavailable:', method);
+  } catch (err) {
+   console.warn('OCEAN EYE: Globe setting failed:', method, err);
+  }
+ }
+ globeSet('globeImageUrl','https://cdn.jsdelivr.net/npm/three-globe@2.45.2/example/img/earth-blue-marble.jpg');
+ globeSet('bumpImageUrl','https://cdn.jsdelivr.net/npm/three-globe@2.45.2/example/img/earth-topology.png');
+ globeSet('backgroundImageUrl','https://cdn.jsdelivr.net/npm/three-globe@2.45.2/example/img/night-sky.png');
+ globeSet('showGlobe',true);
+ globeSet('backgroundColor','rgba(0,0,0,0)');
+ globeSet('showAtmosphere',true);
+ globeSet('atmosphereColor','#76d7ee');
+ globeSet('atmosphereAltitude',.19);
+ globeSet('showGraticules',false);
+ globeSet('pointsData',[]);
+ globeSet('pointLat',d=>d.lat);
+ globeSet('pointLng',d=>d.lon);
+ globeSet('pointColor',d=>selected&&selected.mmsi===d.mmsi?'#fff0a6':(Number(d.sog)>18?'#ffbd76':'#64dff0'));
+ globeSet('pointRadius',d=>(selected&&selected.mmsi===d.mmsi)?0.25:0.105);
+ globeSet('pointAltitude',.012);
+ globeSet('pointResolution',4);
+ globeSet('pointsMerge',false);
+ globeSet('onPointClick',v=>selectVessel(v));
+ globeSet('onGlobeClick',({lat,lng})=>world.pointOfView({lat,lng,altitude:Math.max(.85,world.pointOfView().altitude*.78)},650));
+ globeSet('pathsData',[]);
+ globeSet('pathPoints',d=>d.points);
+ globeSet('pathPointLat',p=>p.lat);
+ globeSet('pathPointLng',p=>p.lon);
+ globeSet('pathColor',d=>d.selected?'rgba(255,224,137,.95)':'rgba(83,213,235,.42)');
+ globeSet('pathStroke',d=>d.selected?1.25:.55);
+ globeSet('pathResolution',3);
+ globeSet('pathTransitionDuration',0);
+ globeSet('width',window.innerWidth);
+ globeSet('height',window.innerHeight);
+ globeSet('pointOfView',{lat:12,lng:12,altitude:2.05},0);
+ globeSet('onGlobeReady',()=>{console.info('OCEAN EYE: Earth texture and globe are ready.');});
  function resize(){world.width(window.innerWidth).height(window.innerHeight);}window.addEventListener('resize',resize);
  function decodeFrame(frame){
   const meta=frame.MetaData||frame.metadata||{},msg=frame.Message||frame.message||{};
