@@ -1,23 +1,18 @@
-# FLIGHT 271 — Pilot-Controlled Scenario
+# FLIGHT 271 — Survival Run
 
-Play: https://xaviourzone.github.io/Articles/FLIGHT-271/
+Mobile-first, full-screen 30-second 3D browser game. Three.js scene with a procedural Learjet-style aircraft, Florida coastal environment, ocean, volumetric-style cloud clusters, atmospheric lighting, precipitation, cockpit overlay and touch-first controls.
 
-A single-screen, responsive browser simulation. The aircraft begins in stable cruise. Weather builds during the flight, followed by turbulence and modelled ice accretion. The player can take manual control and manage aircraft attitude, thrust, anti-ice and autopilot.
+## Play
+https://xaviourzone.github.io/Articles/FLIGHT-271/
 
 ## Controls
-- Drag the yoke: pitch and roll (the yoke springs back to centre).
-- Throttle slider: engine thrust command.
-- Wing / engine anti-ice: toggle to reduce modelled ice accumulation; it carries a small thrust penalty.
-- Autopilot: toggle on/off.
-- Keyboard: arrows or WASD for pitch and roll; Shift / Ctrl adjust throttle.
-- External / cockpit buttons change camera presentation.
+- Drag the virtual yoke for pitch and roll (touch or mouse).
+- Throttle slider for engine power.
+- Autopilot and anti-ice system buttons.
+- Camera button switches external chase and cockpit views.
+- On Windows, mouse drag and keyboard WASD / arrow keys work.
 
-## Important model disclaimer
-This is an educational, fictionalised control scenario inspired by the reported sequence, not an official accident reconstruction, flight-data-recorder playback, flight-training device, or claim about the actual cause or recoverability. Public ADS-B does not provide pilot inputs, indicated airspeed, control-surface positions, bank angle, icing rate or engine health. The flight dynamics and systems degradation in this game are illustrative model variables, not recovered aircraft data or validated Learjet 60 performance. The scenario should not be used for real-world pilot training.
+## Accuracy note
+This is an educational, illustrative simulation. The procedural aircraft is not a photogrammetric Learjet 60 asset; the landscape and clouds are generated game scenery, not a surveyed Florida terrain mesh or historical weather radar. The aerodynamic model is not validated Learjet performance data. IAS, ice accumulation and recovery outcomes are game-model values, not flight-recorder measurements. It must not be used for flight training or as a claim about the real accident's cause or recoverability.
 
-The page is designed to fit a single viewport on desktop and mobile; no page scrolling is intended. The 3D dependency has been replaced with a lightweight rendered flight scene for reliable responsive operation.
-
-## Source references
-- NTSB investigation: https://www.ntsb.gov/investigations/Pages/ERA27MA026.aspx
-- Flightradar24 incident report: https://www.flightradar24.com/blog/flight-tracking-news/major-incident/learjet-60-crashes-near-west-palm-beach-florida/
-- ADS-B analysis: https://map.flights/news/2434-crash-of-learjet-60-n722bd-near-west-palm-beach-on-11-1-2026-ads-b-data
+Three.js is loaded from jsDelivr and Google Fonts from Google Fonts; network access is required. For production deployment, pin and self-host these dependencies and replace the procedural aircraft with a properly licensed high-detail 3D asset.
