@@ -34,8 +34,8 @@ function startAudio(){try{audioCtx=audioCtx||new AudioContext();audioCtx.resume(
 function physics(dt,p){const rho=1.225*Math.exp(-s.alt/8500),q=.5*rho*s.v*s.v,A=28.8,m=10500,g=9.80665;let turbulence=p>=1?Math.sin(t*7.2)*.09+Math.sin(t*12.8)*.045:Math.sin(t*1.8)*.006;
 const iceRate=ctl.anti?-.025:(p>=2?.036:p>=1?.012:0);s.ice=THREE.MathUtils.clamp(s.ice+iceRate*dt,0,.85);
 const control=ctl.ap&&t<16?{pitch:0,roll:0}:ctl;const authority=1-s.ice*.62;s.authority=authority;
-let cl=THREE.MathUtils.clamp(.88+control.pitch*.55*authority-s.ice*.22,.18,1.35),cd=.025+s.ice*.09+.045*cl*cl;
-s.drag=q*A*cd;let lift=q*A*cl,thrust=ctl.throttle*38000;
+let cl=THREE.MathUtils.clamp(1.2+control.pitch*.25*authority-s.ice*.22,.45,1.4),cd=.018+s.ice*.09+.025*cl*cl;
+s.drag=q*A*cd;let lift=q*A*cl,thrust=ctl.throttle*7000;
 s.bank=THREE.MathUtils.clamp(s.bank+control.roll*dt*.9*authority,-.95,.95);
 let load=1/Math.max(.3,Math.cos(s.bank));let ax=(thrust-s.drag)/m-g*Math.sin(s.pitch),az=(lift*Math.cos(s.bank)-m*g)/m+turbulence*9+control.pitch*2.0;
 if(p>=3&&ctl.ap){az-=1.5;}
@@ -45,7 +45,7 @@ function loop(now){if(!running)return;raf=requestAnimationFrame(loop);if(paused)
 if(t>=16&&ctl.ap){ctl.ap=false;$('apBtn').classList.remove('active');$('apState').textContent='OFF';}
 if(t>=10&&t<16&&Math.random()<.04){$('warningText').textContent='ICE DETECTED · ANTI-ICE REQUIRED';}
 physics(dt,phases.indexOf(p));
-plane.position.set(s.x*1000,s.alt-10668+10668,s.z*1000);plane.rotation.set(-s.pitch,D(s.heading),-s.bank,'YXZ');
+plane.position.set(s.x*1000,s.alt-9800,s.z*1000);plane.rotation.set(-s.pitch,D(s.heading),-s.bank,'YXZ');
 clouds.forEach((c,i)=>{c.position.x+=Math.sin(t*.08+i)*.4;c.position.y+=Math.sin(t*.35+i)*.15;});
 let pos=rain.geometry.attributes.position;for(let i=0;i<pos.count;i++){let y=pos.getY(i)-dt*480;if(y<0)y=1400;pos.setY(i,y);}pos.needsUpdate=true;rain.material.opacity=t>9&&t<29?.48:0;
 if(view==='chase'){let off=new THREE.Vector3(0,85,280).applyAxisAngle(new THREE.Vector3(0,1,0),D(s.heading));camera.position.copy(plane.position).add(off);camera.lookAt(plane.position.x,plane.position.y,plane.position.z-100);}
