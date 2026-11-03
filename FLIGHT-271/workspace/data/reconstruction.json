@@ -1,0 +1,61 @@
+{
+  "title": "FLIGHT 271 — N722BD",
+  "eventDate": "2026-11-01",
+  "aircraft": {
+    "type": "Learjet 60",
+    "registration": "N722BD",
+    "serial": "60-271"
+  },
+  "route": {
+    "origin": "Austin-Bergstrom International Airport (KAUS)",
+    "destination": "North Eleuthera Airport (MYEH)",
+    "incidentArea": "Lake Worth Beach / Greenacres, Palm Beach County, Florida",
+    "lastKnownArea": {
+      "latitude": 26.632889,
+      "longitude": -80.113111
+    }
+  },
+  "sequence": [
+    {
+      "utc": "15:37",
+      "event": "Departure from Austin"
+    },
+    {
+      "utc": "17:35",
+      "event": "Descent toward FL350 appears in flight tracking"
+    },
+    {
+      "utc": "17:48:20",
+      "event": "Start of final descent; ADS-B analysis reports altitude around 35,375 ft"
+    },
+    {
+      "utc": "17:49:23",
+      "event": "Last stable reported barometric altitude value; subsequent integrity limitations noted"
+    }
+  ],
+  "limitations": [
+    "ADS-B ground speed is not indicated airspeed.",
+    "ADS-B does not expose bank angle, control inputs, control-surface positions, or aerodynamic drag.",
+    "Some vertical-rate fields were saturated or unreliable in the final seconds.",
+    "Nearby ground weather observations do not prove exact conditions at aircraft altitude."
+  ],
+  "simulation": {
+    "durationSeconds": 40,
+    "compressedTimeline": true,
+    "model": "illustrative simplified point-mass educational model",
+    "notRecovered": [
+      "indicated airspeed",
+      "drag coefficient",
+      "lift coefficient",
+      "ice accretion rate",
+      "control authority",
+      "pilot control inputs",
+      "bank angle"
+    ]
+  },
+  "sources": [
+    "https://www.ntsb.gov/investigations/Pages/ERA27MA026.aspx",
+    "https://www.flightradar24.com/blog/flight-tracking-news/major-incident/learjet-60-crashes-near-west-palm-beach-florida/",
+    "https://map.flights/news/2434-crash-of-learjet-60-n722bd-near-west-palm-beach-on-11-1-2026-ads-b-data"
+  ]
+}
