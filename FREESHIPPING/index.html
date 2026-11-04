@@ -232,7 +232,7 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
  let queued=false,lastRender=0;
  function scheduleRender(){if(queued)return;queued=true;setTimeout(()=>requestAnimationFrame(()=>{queued=false;lastRender=Date.now();if(window.oceanUI)window.oceanUI.setCounts(vessels.size.toLocaleString(),received.toLocaleString());sync2DMarkers(true);}),1800);}
  let showHistory=false,trackTooltip=null;
- function formatTrackTime(value){if(!value)return '';const d=new Date(value);return Number.isNaN(d.getTime())?'':d.toISOString().replace('T',' ').slice(0,19);}
+ function formatTrackTime(value){if(value===null||value===undefined||value==='')return '';let raw=value;if(typeof raw==='number'||/^\\d{10,13}$/.test(String(raw))){raw=Number(raw);if(raw<1e12)raw*=1000;}const d=new Date(raw);return Number.isNaN(d.getTime())?'':d.toISOString().replace('T',' ').slice(0,19);}
  function nearestTrackPoint(point,points){let best=null,bestD=13*13;for(const p of points){const q=leafletMap.latLngToContainerPoint([p.lat,p.lon]);const dx=q.x-point.x,dy=q.y-point.y,d=dx*dx+dy*dy;if(d<bestD){bestD=d;best=p;}}return best;}
  function showTrackPoint(p){if(!p)return;const stamp=formatTrackTime(p.time);toast((stamp?stamp+' UTC · ':'')+p.lat.toFixed(4)+'°, '+p.lon.toFixed(4)+'°');}
  function drawTracks(){sync2DMarkers(true);const points=selected&&selected.points?selected.points:[];$('trackPoints').textContent=points.length.toLocaleString();$('showHistory').disabled=points.length<2;$('showHistory').classList.toggle('active',showHistory);$('showHistory').textContent=showHistory?'HIDE HISTORY':'SHOW HISTORY';const validTimes=points.map(p=>Date.parse(p.time||'')).filter(Number.isFinite);$('trackRange').textContent=validTimes.length?new Date(Math.min(...validTimes)).toISOString().slice(0,10)+' — '+new Date(Math.max(...validTimes)).toISOString().slice(0,10):'TIME UNAVAILABLE';}
@@ -327,19 +327,27 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
  async function loadVesselPhoto(s){
   const panel=$('shipPhoto'),credit=$('photoCredit');if(!panel||!credit)return;
   panel.innerHTML='<div class="photoempty">VESSEL IMAGE<br><span>Searching open photo libraries…</span></div>';credit.textContent='';
+  const showPhoto=(url,alt,sourceUrl,creditText)=>{const img=document.createElement('img');img.src=url;img.alt=alt;img.loading='lazy';img.referrerPolicy='no-referrer';img.onerror=()=>{panel.innerHTML='<div class="photoempty">NO IMAGE AVAILABLE<br><span>No matching vessel photograph found</span></div>';};panel.replaceChildren(img);const a=document.createElement('a');a.href=sourceUrl;a.target='_blank';a.rel='noopener';a.textContent=creditText;credit.replaceChildren(document.createTextNode('Photo: '),a);};
   try{
    const res=await fetch('https://openvesselphotos.org/v1/mmsi/'+encodeURIComponent(s.mmsi),{headers:{Accept:'application/json'}});
-   if(!res.ok)throw new Error('No photo record');
+   if(!res.ok)throw new Error('No Open Vessel Photos record');
    const data=await res.json(),photos=Array.isArray(data.photos)?data.photos:[];
-   if(!photos.length)throw new Error('No published image');
-   const photo=photos[0],img=document.createElement('img');
-   img.src=photo.thumb||photo.url||('https://openvesselphotos.org/v1/mmsi/'+encodeURIComponent(s.mmsi)+'.jpg?size=800');
-   img.alt='Photograph of '+(s.name||'vessel');img.loading='lazy';img.referrerPolicy='no-referrer';
-   img.onerror=()=>{panel.innerHTML='<div class="photoempty">NO IMAGE AVAILABLE<br><span>No licensed photograph found for this MMSI</span></div>';};
-   panel.replaceChildren(img);
-   const a=document.createElement('a');a.href=photo.page||'https://openvesselphotos.org/';a.target='_blank';a.rel='noopener';a.textContent=(photo.artist||'Photographer')+' · '+(photo.license||'Open licence');
-   credit.replaceChildren(document.createTextNode('Photo: '),a);
-  }catch(err){panel.innerHTML='<div class="photoempty">NO IMAGE AVAILABLE<br><span>No open-licensed photo found for this MMSI</span></div>';credit.textContent='Image library: Open Vessel Photos';}
+   if(!photos.length)throw new Error('No published photo');
+   const photo=photos[0];showPhoto(photo.thumb||photo.url||('https://openvesselphotos.org/v1/mmsi/'+encodeURIComponent(s.mmsi)+'.jpg?size=800'),'Photograph of '+(s.name||'vessel'),photo.page||'https://openvesselphotos.org/',(photo.artist||'Photographer')+' · '+(photo.license||'Open licence'));return;
+  }catch(err){console.info('Open Vessel Photos has no image; checking Wikimedia Commons.',err);}
+  try{
+   const query=(s.name&&s.name.trim()?s.name.trim()+' ship vessel':('MMSI '+s.mmsi+' ship'));
+   const params=new URLSearchParams({action:'query',format:'json',origin:'*',generator:'search',gsrsearch:query,gsrnamespace:'6',gsrlimit:'12',prop:'imageinfo',iiprop:'url|extmetadata',iiurlwidth:'1000',iiextmetadatafilter:'LicenseShortName|Artist|Credit|LicenseUrl'});
+   const res=await fetch('https://commons.wikimedia.org/w/api.php?'+params.toString(),{headers:{Accept:'application/json'}});
+   if(!res.ok)throw new Error('Wikimedia Commons HTTP '+res.status);
+   const data=await res.json(),pages=Object.values(data.query&&data.query.pages||{}).filter(p=>p.imageinfo&&p.imageinfo[0]&&p.imageinfo[0].thumburl);
+   const cleanName=(s.name||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+   const tokens=cleanName.split(/\\s+/).filter(x=>x.length>2);
+   const ranked=pages.map(p=>{const title=(p.title||'').toLowerCase();const score=tokens.filter(t=>title.includes(t)).length;return {p,score};}).sort((a,b)=>b.score-a.score);
+   const match=ranked.find(x=>x.score>0);if(!match)throw new Error('No plausible named-vessel image found');
+   const info=match.p.imageinfo[0],meta=info.extmetadata||{},artist=(meta.Artist&&meta.Artist.value||'Contributor').replace(/<[^>]*>/g,'').trim(),lic=(meta.LicenseShortName&&meta.LicenseShortName.value)||'See file licence';
+   showPhoto(info.thumburl,'Possible Wikimedia Commons photograph for '+(s.name||'vessel'),info.descriptionurl||('https://commons.wikimedia.org/wiki/'+encodeURIComponent(match.p.title)),artist+' · '+lic+' · Wikimedia Commons');
+  }catch(err){panel.innerHTML='<div class="photoempty">NO IMAGE AVAILABLE<br><span>No matching photo in open vessel libraries</span></div>';credit.textContent='Checked Open Vessel Photos and Wikimedia Commons';console.info('No vessel photo found.',err);}
  }
  function ageLabel(ms){const sec=Math.floor(ms/1000);if(sec<60)return sec+'s';const min=Math.floor(sec/60);if(min<60)return min+'m '+(sec%60)+'s';return Math.floor(min/60)+'h '+(min%60)+'m';}
  function tickClock(){const now=new Date();if(window.oceanUI)window.oceanUI.setUtc(now.toISOString().slice(11,19));}
