@@ -120,7 +120,7 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
  function initMap(){
   if(leafletMap)return;
   if(typeof L==='undefined'){setStatus('MAP LIBRARY ERROR');toast('Map library unavailable — check network');return;}
-  leafletMap=L.map('map2d',{worldCopyJump:true,preferCanvas:true,zoomControl:false,attributionControl:true,fadeAnimation:false,markerZoomAnimation:false,zoomAnimation:true,zoomSnap:.5,zoomDelta:.5,wheelPxPerZoomLevel:100,inertia:true,inertiaDeceleration:3200,easeLinearity:.22,updateWhenIdle:true,keepBuffer:4}).setView([12,75],3);
+  leafletMap=L.map('map2d',{worldCopyJump:true,preferCanvas:true,zoomControl:false,attributionControl:true,fadeAnimation:false,markerZoomAnimation:false,zoomAnimation:false,zoomSnap:.5,zoomDelta:.5,wheelPxPerZoomLevel:100,inertia:true,inertiaDeceleration:3200,easeLinearity:.22,updateWhenIdle:true,keepBuffer:4}).setView([12,75],3);
   const osmTiles='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
   L.tileLayer(osmTiles,{subdomains:'abc',maxZoom:19,updateWhenIdle:true,keepBuffer:4,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'}).addTo(leafletMap);
   L.control.zoom({position:'topright'}).addTo(leafletMap);
@@ -148,23 +148,25 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
    }
    if(selected&&!selectedContact){const v=selected;if(bounds.contains([v.lat,v.lon])){const p=leafletMap.latLngToContainerPoint([v.lat,v.lon]);selectedContact={v,x:p.x,y:p.y};}}
    function strokeGroup(items,color){
-    ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
-    for(const item of items){const v=item.v,hdg=Number.isFinite(v.cog)&&v.cog>=0&&v.cog<=360?v.cog:(Number.isFinite(v.heading)&&v.heading<=360?v.heading:0),a=(hdg-90)*Math.PI/180,cs=Math.cos(a),sn=Math.sin(a),px=item.x,py=item.y;
-     const tipX=px+r*1.25*cs,tipY=py+r*1.25*sn,rearX=px-r*.82*cs,rearY=py-r*.82*sn,wing=r*.78;
-     const lx=rearX+wing*sn,ly=rearY-wing*cs,rx=rearX-wing*sn,ry=rearY+wing*cs;
-     ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(tipX,tipY);ctx.lineTo(rx,ry);ctx.strokeStyle='rgba(2,12,22,.96)';ctx.lineWidth=2.8;ctx.stroke();
-     ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(tipX,tipY);ctx.lineTo(rx,ry);ctx.strokeStyle=color;ctx.lineWidth=1.7;ctx.stroke();
-     ctx.beginPath();ctx.arc(px,py,1.0,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
-    }ctx.restore();
+    ctx.save();ctx.lineJoin='round';ctx.lineCap='round';
+    for(const item of items){
+     const v=item.v,hdg=Number.isFinite(v.cog)&&v.cog>=0&&v.cog<=360?v.cog:(Number.isFinite(v.heading)&&v.heading<=360?v.heading:0);
+     ctx.save();ctx.translate(item.x,item.y);ctx.rotate((hdg-90)*Math.PI/180);
+     // Compact filled vessel silhouette: pointed bow, tapered hull and open stern notch.
+     ctx.beginPath();ctx.moveTo(r*1.55,0);ctx.lineTo(r*.48,-r*.58);ctx.lineTo(-r*.78,-r*.38);ctx.lineTo(-r*.48,0);ctx.lineTo(-r*.78,r*.38);ctx.lineTo(r*.48,r*.58);ctx.closePath();
+     ctx.fillStyle=color;ctx.fill();ctx.strokeStyle='rgba(12,35,48,.88)';ctx.lineWidth=1.05;ctx.stroke();
+     ctx.restore();
+    }
+    ctx.restore();
    }
-   strokeGroup(groups.normal,'#25e6ff');strokeGroup(groups.fast,'#ffb84d');
-   if(selectedContact){const v=selectedContact.v,hdg=Number.isFinite(v.cog)&&v.cog>=0&&v.cog<=360?v.cog:0,a=(hdg-90)*Math.PI/180,rr=r*2,x=selectedContact.x,y=selectedContact.y;ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.beginPath();ctx.moveTo(-rr,-rr*.8);ctx.lineTo(rr,0);ctx.lineTo(-rr,rr*.8);ctx.strokeStyle='rgba(3,12,20,.95)';ctx.lineWidth=4;ctx.stroke();ctx.strokeStyle='#ffffff';ctx.lineWidth=2.2;ctx.stroke();ctx.restore();}
+   strokeGroup(groups.normal,'#087f9b');strokeGroup(groups.fast,'#d88924');
+   if(selectedContact){const v=selectedContact.v,hdg=Number.isFinite(v.cog)&&v.cog>=0&&v.cog<=360?v.cog:0;ctx.save();ctx.translate(selectedContact.x,selectedContact.y);ctx.rotate((hdg-90)*Math.PI/180);ctx.beginPath();ctx.moveTo(r*1.8,0);ctx.lineTo(-r*.85,-r*.7);ctx.lineTo(-r*.48,0);ctx.lineTo(-r*.85,r*.7);ctx.closePath();ctx.strokeStyle='#ffffff';ctx.lineWidth=2.2;ctx.stroke();ctx.restore();}
    if(selected&&selected.points&&selected.points.length>1){ctx.save();ctx.beginPath();let started=false;for(const p of selected.points){const q=leafletMap.latLngToContainerPoint([p.lat,p.lon]);if(!started){ctx.moveTo(q.x,q.y);started=true;}else ctx.lineTo(q.x,q.y);}ctx.strokeStyle='rgba(255,220,139,.9)';ctx.lineWidth=2;ctx.setLineDash([6,5]);ctx.stroke();ctx.restore();}
   }
   function scheduleDraw(){if(drawQueued)return;drawQueued=true;requestAnimationFrame(drawChevrons);}
   function nearestContact(point){let best=null,bestD=14*14;for(const item of visibleContacts){const dx=item.x-point.x,dy=item.y-point.y,d=dx*dx+dy*dy;if(d<bestD){bestD=d;best=item.v;}}return best;}
   leafletMap.on('click',e=>{const hit=nearestContact(e.containerPoint);if(hit){selectVessel(hit);return;}if(!$('vesselSearch').value)$('searchHint').textContent='No vessel at this location';});
-  leafletMap.on('moveend zoomend resize',scheduleDraw);leafletLayer={redraw:scheduleDraw};leafletCanvas=null;mapReady=true;requestAnimationFrame(drawChevrons);
+  leafletMap.on('move zoom moveend zoomend resize',scheduleDraw);leafletLayer={redraw:scheduleDraw};leafletCanvas=null;mapReady=true;requestAnimationFrame(drawChevrons);
  }
  function sync2DMarkers(force=false){if(!leafletMap||!leafletLayer)return;if(!force&&Date.now()-last2DRender<180)return;last2DRender=Date.now();leafletLayer.redraw();}
  function resizeMap(){if(leafletMap){leafletMap.invalidateSize();sync2DMarkers(true);}}
