@@ -347,7 +347,7 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
    const match=ranked.find(x=>x.score>0);if(!match)throw new Error('No plausible named-vessel image found');
    const info=match.p.imageinfo[0],meta=info.extmetadata||{},artist=(meta.Artist&&meta.Artist.value||'Contributor').replace(/<[^>]*>/g,'').trim(),lic=(meta.LicenseShortName&&meta.LicenseShortName.value)||'See file licence';
    showPhoto(info.thumburl,'Possible Wikimedia Commons photograph for '+(s.name||'vessel'),info.descriptionurl||('https://commons.wikimedia.org/wiki/'+encodeURIComponent(match.p.title)),artist+' · '+lic+' · Wikimedia Commons');
-  }catch(err){panel.innerHTML='<div class="photoempty">NO IMAGE AVAILABLE<br><span>No matching photo in open vessel libraries</span></div>';credit.textContent='Checked Open Vessel Photos and Wikimedia Commons';console.info('No vessel photo found.',err);}
+  }catch(err){panel.innerHTML='<div class="photoempty">NO VERIFIED VESSEL IMAGE<br><span>No exact licensed match found in open photo libraries</span></div>';credit.replaceChildren();const link=document.createElement('a');link.href='https://search.brave.com/images?q='+encodeURIComponent((s.name||'ship')+' MMSI '+s.mmsi);link.target='_blank';link.rel='noopener';link.textContent='Search vessel images';credit.append(link);console.info('No vessel photo found.',err);}
  }
  function ageLabel(ms){const sec=Math.floor(ms/1000);if(sec<60)return sec+'s';const min=Math.floor(sec/60);if(min<60)return min+'m '+(sec%60)+'s';return Math.floor(min/60)+'h '+(min%60)+'m';}
  function tickClock(){const now=new Date();if(window.oceanUI)window.oceanUI.setUtc(now.toISOString().slice(11,19));}
