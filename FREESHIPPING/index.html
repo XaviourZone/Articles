@@ -260,6 +260,19 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
  $('vesselSearch').addEventListener('keydown',e=>{if(e.key==='ArrowDown'&&suggestionItems.length){e.preventDefault();suggestionIndex=Math.min(suggestionIndex+1,suggestionItems.length-1);suggestionBox.querySelectorAll('.suggestion').forEach((b,i)=>b.classList.toggle('active',i===suggestionIndex));}else if(e.key==='ArrowUp'&&suggestionItems.length){e.preventDefault();suggestionIndex=Math.max(0,suggestionIndex-1);suggestionBox.querySelectorAll('.suggestion').forEach((b,i)=>b.classList.toggle('active',i===suggestionIndex));}else if(e.key==='Enter'){e.preventDefault();if(suggestionIndex>=0&&suggestionItems[suggestionIndex])chooseSuggestion(suggestionItems[suggestionIndex]);else searchVessel();}else if(e.key==='Escape')closeSuggestions();});
  document.addEventListener('click',e=>{if(!$('searchPanel').contains(e.target))closeSuggestions();});
  $('reconnect').onclick=()=>{retry=0;connect();};
+ // Native anonymous Open Waters live stream. Open Waters aggregates partner feeds,
+ // including AISStream; AISHub positions are included in its periodic upstream snapshots.
+ let openWatersLive=null,openWatersLiveRetry=0,openWatersLiveTimer=null;
+ function connectOpenWatersLive(){
+  clearTimeout(openWatersLiveTimer);try{if(openWatersLive)openWatersLive.close();}catch(e){}
+  try{
+   openWatersLive=new WebSocket('wss://ais.openwaters.io/v1/stream');
+   openWatersLive.onopen=()=>{openWatersLiveRetry=0;openWatersLive.send(JSON.stringify({type:'subscribe',bbox:[[-5,70,5,80]],snapshot:true}));console.info('Open Waters live stream subscribed: Central Indian Ocean');};
+   openWatersLive.onmessage=ev=>{try{const event=JSON.parse(ev.data);if(event.type!=='event')return;const mmsi=String(event.mmsi||'');const lat=Number(event.lat),lon=Number(event.lon);if(!/^\\d{9}$/.test(mmsi)||!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180)return;addPosition({mmsi,lat,lon,name:String(event.name||event.ship_name||''),type:event.type_code??event.ship_type??'',imo:event.imo??'',sog:Number(event.sog),cog:Number(event.cog),heading:Number(event.heading),time:event.time||new Date().toISOString(),source:'Open Waters Live'},false);}catch(err){console.warn('Open Waters live event decode failed',err);}};
+   openWatersLive.onerror=()=>console.warn('Open Waters live stream connection error');
+   openWatersLive.onclose=()=>{openWatersLiveTimer=setTimeout(connectOpenWatersLive,Math.min(60000,2500*Math.pow(2,openWatersLiveRetry++)));};
+  }catch(err){console.warn('Open Waters live stream unavailable',err);}
+ }
  const OPEN_WATERS_AREAS=[
   {name:'Gulf of Aden',bbox:'5,45,15,55'},
   {name:'Red Sea',bbox:'15,35,25,45'},
@@ -324,6 +337,7 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
  function tickClock(){const now=new Date();if(window.oceanUI)window.oceanUI.setUtc(now.toISOString().slice(11,19));}
  tickClock();setInterval(tickClock,1000);
  loadFleetSnapshot();setInterval(loadFleetSnapshot,10*60*1000);loadOpenWaters();setInterval(loadOpenWaters,5*1000);
+ connectOpenWatersLive();
  try{connect();}catch(err){setStatus('STARTUP ERROR');$('trackNote').textContent='Startup error: '+(err&&err.message?err.message:String(err));console.error('FREESHIPPING TRACKER startup error:',err);}
  });
 })();
