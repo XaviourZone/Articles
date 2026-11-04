@@ -168,7 +168,7 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
   function scheduleDraw(){if(drawQueued)return;drawQueued=true;requestAnimationFrame(drawChevrons);}
   function nearestContact(point){let best=null,bestD=14*14;for(const item of visibleContacts){const dx=item.x-point.x,dy=item.y-point.y,d=dx*dx+dy*dy;if(d<bestD){bestD=d;best=item.v;}}return best;}
   leafletMap.on('click',e=>{if(showHistory&&selected&&selected.points){const p=nearestTrackPoint(e.containerPoint,selected.points);if(p){showTrackPoint(p);return;}}const hit=nearestContact(e.containerPoint);if(hit){selectVessel(hit);return;}if(!$('vesselSearch').value)$('searchHint').textContent='No vessel at this location';});
-  leafletMap.on('mousemove',e=>{if(!showHistory||!selected||!selected.points||!selected.points.length){if(trackTooltip){trackTooltip.remove();trackTooltip=null;}return;}const p=nearestTrackPoint(e.containerPoint,selected.points);if(p){const stamp=formatTrackTime(p.time);const content=(stamp?stamp+' UTC · ':'')+p.lat.toFixed(4)+'°, '+p.lon.toFixed(4)+'°';if(!trackTooltip)trackTooltip=L.tooltip({permanent:false,direction:'top',className:'trackHover',offset:[0,-7]}).setContent(content);else trackTooltip.setContent(content);trackTooltip.setLatLng([p.lat,p.lon]).addTo(leafletMap);}else if(trackTooltip){trackTooltip.remove();trackTooltip=null;}});
+  leafletMap.on('mousemove',e=>{if(!showHistory||!selected||!selected.points||!selected.points.length){if(trackTooltip){trackTooltip.remove();trackTooltip=null;}return;}const p=nearestTrackPoint(e.containerPoint,selected.points);if(p){const stamp=formatTrackTime(p.time);const content=(selected.name||'Unknown vessel')+' · MMSI '+selected.mmsi+'<br>'+(stamp?stamp+' UTC<br>':'')+'LAT '+p.lat.toFixed(4)+'° · LON '+p.lon.toFixed(4)+'°';if(!trackTooltip)trackTooltip=L.tooltip({permanent:false,direction:'top',className:'trackHover',offset:[0,-7]}).setContent(content);else trackTooltip.setContent(content);trackTooltip.setLatLng([p.lat,p.lon]).addTo(leafletMap);}else if(trackTooltip){trackTooltip.remove();trackTooltip=null;}});
   leafletMap.on('move zoom moveend zoomend resize',scheduleDraw);leafletLayer={redraw:scheduleDraw};leafletCanvas=null;mapReady=true;requestAnimationFrame(drawChevrons);
  }
  function sync2DMarkers(force=false){if(!leafletMap||!leafletLayer)return;if(!force&&Date.now()-last2DRender<180)return;last2DRender=Date.now();leafletLayer.redraw();}
@@ -282,22 +282,22 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
   }catch(err){console.warn('Open Waters live stream unavailable',err);}
  }
  const OPEN_WATERS_AREAS=[
-  {name:'Gulf of Aden',bbox:'45,5,55,15'},
-  {name:'Red Sea',bbox:'35,15,45,25'},
-  {name:'Arabian Gulf',bbox:'45,20,55,30'},
-  {name:'Arabian Sea',bbox:'60,5,70,15'},
-  {name:'Central Indian Ocean',bbox:'70,-5,80,5'},
-  {name:'Bay of Bengal',bbox:'80,5,90,15'},
-  {name:'Sri Lanka approaches',bbox:'75,0,85,10'},
-  {name:'Andaman Sea',bbox:'90,5,100,15'},
-  {name:'Malacca Strait',bbox:'95,0,105,10'},
-  {name:'South China Sea',bbox:'110,5,120,15'},
-  {name:'East China Sea',bbox:'120,20,130,30'},
-  {name:'Japan approaches',bbox:'130,30,140,40'},
-  {name:'North Sea',bbox:'0,50,10,60'},
-  {name:'English Channel',bbox:'-5,45,5,55'},
-  {name:'Western Mediterranean',bbox:'-5,35,5,45'},
-  {name:'Caribbean Sea',bbox:'-80,10,-70,20'}
+  {name:'Gulf of Aden',bbox:'5,45,14,54'},
+  {name:'Red Sea',bbox:'15,35,24,44'},
+  {name:'Arabian Gulf',bbox:'20,45,29,54'},
+  {name:'Arabian Sea',bbox:'5,60,14,69'},
+  {name:'Central Indian Ocean',bbox:'-5,70,4,79'},
+  {name:'Bay of Bengal',bbox:'5,80,14,89'},
+  {name:'Sri Lanka approaches',bbox:'0,75,9,84'},
+  {name:'Andaman Sea',bbox:'5,90,14,99'},
+  {name:'Malacca Strait',bbox:'0,95,9,104'},
+  {name:'South China Sea',bbox:'5,110,14,119'},
+  {name:'East China Sea',bbox:'20,120,29,129'},
+  {name:'Japan approaches',bbox:'30,130,39,139'},
+  {name:'North Sea',bbox:'50,0,59,9'},
+  {name:'English Channel',bbox:'45,-5,54,4'},
+  {name:'Western Mediterranean',bbox:'35,-5,44,4'},
+  {name:'Caribbean Sea',bbox:'10,-80,19,-71'}
  ];
  let openWatersAreaIndex=0;
  async function loadOpenWaters(){
