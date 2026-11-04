@@ -54,6 +54,8 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
 #shipChevronCanvas{z-index:450;pointer-events:none}.mapFooter{border:1px solid #294a5b;border-radius:10px;background:rgba(8,26,39,.96);box-shadow:0 8px 24px rgba(0,0,0,.24);padding:9px 11px}.mapFooter .meta label{font:700 7px 'DM Mono',monospace;letter-spacing:.15em;color:#8ca8b7}.mapFooter .meta b{font:600 8px 'DM Mono',monospace;color:#dcecf1}.mapFooter .btn{border-radius:7px;background:#123b4d;border-color:#2d6175;color:#9cebf1;font:700 8px 'Inter',sans-serif;letter-spacing:.08em}.mapFooter .btn:hover{background:#1a4b5e}#detail{font-family:'Inter',sans-serif}#detail .detailSectionTitle{font:700 8px 'DM Mono',monospace;letter-spacing:.16em}#detail .shipname{font:700 20px 'Inter',sans-serif;letter-spacing:-.04em}#detail .grid b{font:600 11px 'DM Mono',monospace}#detail .tracknote{font:400 9px 'Inter',sans-serif;line-height:1.6}
 @media(max-width:900px){.searchPanel{width:370px;min-width:0;left:auto;right:20px;transform:none}.statsOnly{width:270px}}
 @media(max-width:700px){.appHeader{height:58px;padding:0 11px}.appHeader .brand{gap:8px}.appHeader .logo{width:30px;height:30px;border-radius:9px}.appHeader .brand b{font-size:10px}.appHeader .brand small{font-size:6px}.appHeader .top{gap:5px}.appHeader .chip{padding:7px 8px;font-size:7px}.statsOnly{top:69px;left:10px;width:calc(100% - 20px)}.statsOnly .stats{gap:7px}.statsOnly .stat{min-height:64px;padding:8px 10px;border-radius:10px}.statsOnly .stat strong{font-size:19px;margin-top:4px}.searchPanel{top:143px;left:10px;right:10px;width:auto;padding:7px 10px;border-radius:10px}.searchPanel .searchbar{margin:0}.searchPanel .eyebrow,.searchPanel .searchhint{display:none}#map2d .leaflet-control-zoom{margin-top:207px!important;margin-right:10px!important}.mapFooter{bottom:10px;right:10px}.mapFooter .btn{padding:8px 10px}}
+
+#map2d,#map2d .leaflet-container{background:#061725}#map2d .leaflet-tile{filter:brightness(1.12) saturate(.9) contrast(1.12)}#map2d .leaflet-control-attribution{background:rgba(3,13,22,.9)!important;color:#9bb4c2!important;border-top:1px solid #294454}#map2d .leaflet-control-attribution a{color:#69ddeb!important}#shipChevronCanvas{z-index:450;pointer-events:none}
 </style>
 </head>
 <body>
@@ -116,11 +118,9 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
  function initMap(){
   if(leafletMap)return;
   if(typeof L==='undefined'){setStatus('MAP LIBRARY ERROR');toast('Map library unavailable — check network');return;}
-  leafletMap=L.map('map2d',{worldCopyJump:true,preferCanvas:true,zoomControl:false,attributionControl:true,fadeAnimation:false,markerZoomAnimation:false,zoomAnimation:true,updateWhenIdle:true,keepBuffer:3}).setView([12,75],3);
-  const oceanBase='https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}';
-  const oceanLabels='https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Reference/MapServer/tile/{z}/{y}/{x}';
-  L.tileLayer(oceanBase,{maxZoom:13,updateWhenIdle:true,keepBuffer:3,attribution:'Sources: Esri, Garmin, GEBCO, NOAA NGDC, and other contributors'}).addTo(leafletMap);
-  L.tileLayer(oceanLabels,{maxZoom:13,opacity:.9,updateWhenIdle:true,keepBuffer:3,attribution:'Ocean labels: Esri, GEBCO, NOAA and contributors'}).addTo(leafletMap);
+  leafletMap=L.map('map2d',{worldCopyJump:true,preferCanvas:true,zoomControl:false,attributionControl:true,fadeAnimation:false,markerZoomAnimation:false,zoomAnimation:true,zoomSnap:.5,zoomDelta:.5,wheelPxPerZoomLevel:100,inertia:true,inertiaDeceleration:3200,easeLinearity:.22,updateWhenIdle:true,keepBuffer:4}).setView([12,75],3);
+  const darkOcean='https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+  L.tileLayer(darkOcean,{subdomains:'abcd',maxZoom:19,updateWhenIdle:true,keepBuffer:4,detectRetina:true,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors · © <a href="https://carto.com/attributions">CARTO</a>'}).addTo(leafletMap);
   L.control.zoom({position:'topright'}).addTo(leafletMap);
   const canvas=document.createElement('canvas');canvas.id='shipChevronCanvas';canvas.setAttribute('aria-hidden','true');
   leafletMap.getContainer().appendChild(canvas);const ctx=canvas.getContext('2d',{alpha:true,desynchronized:true});
@@ -129,7 +129,7 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
    drawQueued=false;const size=leafletMap.getSize(),dpr=Math.min(window.devicePixelRatio||1,1.5);
    if(canvas.width!==Math.round(size.x*dpr)||canvas.height!==Math.round(size.y*dpr)){canvas.width=Math.round(size.x*dpr);canvas.height=Math.round(size.y*dpr);canvas.style.width=size.x+'px';canvas.style.height=size.y+'px';}
    ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,size.x,size.y);
-   const bounds=leafletMap.getBounds(),zoom=leafletMap.getZoom(),scale=zoom>=9?1.2:zoom>=6?1.05:zoom>=4?.92:.82,r=4.1*scale;
+   const bounds=leafletMap.getBounds(),zoom=leafletMap.getZoom(),scale=zoom>=9?1.55:zoom>=6?1.38:zoom>=4?1.2:1.08,r=6.1*scale;
    visibleContacts=[];const groups={normal:[],fast:[]};let selectedContact=null;
    for(const v of vessels.values()){
     if(!Number.isFinite(v.lat)||!Number.isFinite(v.lon)||!bounds.contains([v.lat,v.lon]))continue;
@@ -138,13 +138,18 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
     if(selected&&selected.mmsi===v.mmsi){selectedContact=contact;continue;}
     groups[Number(v.sog)>18?'fast':'normal'].push(contact);
    }
-   function strokeGroup(items,color){ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=1.25;ctx.lineCap='round';ctx.lineJoin='round';
-    for(const item of items){const v=item.v,hdg=Number.isFinite(v.cog)&&v.cog>=0&&v.cog<=360?v.cog:(Number.isFinite(v.heading)&&v.heading<=360?v.heading:0),a=(hdg-90)*Math.PI/180,cs=Math.cos(a),sn=Math.sin(a),x=item.x,y=item.y;
-     ctx.moveTo(x-r*cs+r*.78*sn,y-r*sn-r*.78*cs);ctx.lineTo(x+r*cs,y+r*sn);ctx.lineTo(x-r*cs-r*.78*sn,y-r*sn+r*.78*cs);
-    }ctx.stroke();
+   function strokeGroup(items,color){
+    ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+    for(const item of items){const v=item.v,hdg=Number.isFinite(v.cog)&&v.cog>=0&&v.cog<=360?v.cog:(Number.isFinite(v.heading)&&v.heading<=360?v.heading:0),a=(hdg-90)*Math.PI/180,cs=Math.cos(a),sn=Math.sin(a),px=item.x,py=item.y;
+     const tipX=px+r*1.25*cs,tipY=py+r*1.25*sn,rearX=px-r*.82*cs,rearY=py-r*.82*sn,wing=r*.78;
+     const lx=rearX+wing*sn,ly=rearY-wing*cs,rx=rearX-wing*sn,ry=rearY+wing*cs;
+     ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(tipX,tipY);ctx.lineTo(rx,ry);ctx.strokeStyle='rgba(2,12,22,.96)';ctx.lineWidth=4.4;ctx.stroke();
+     ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(tipX,tipY);ctx.lineTo(rx,ry);ctx.strokeStyle=color;ctx.lineWidth=2.4;ctx.shadowColor=color;ctx.shadowBlur=5;ctx.stroke();ctx.shadowBlur=0;
+     ctx.beginPath();ctx.arc(px,py,1.5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+    }ctx.restore();
    }
-   strokeGroup(groups.normal,'#6fe5f1');strokeGroup(groups.fast,'#ffc979');
-   if(selectedContact){const v=selectedContact.v,hdg=Number.isFinite(v.cog)&&v.cog>=0&&v.cog<=360?v.cog:0,a=(hdg-90)*Math.PI/180,rr=r*2,x=selectedContact.x,y=selectedContact.y;ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.beginPath();ctx.moveTo(-rr,-rr*.8);ctx.lineTo(rr,0);ctx.lineTo(-rr,rr*.8);ctx.strokeStyle='#fff0a4';ctx.lineWidth=2.4;ctx.shadowColor='#fff0a4';ctx.shadowBlur=10;ctx.stroke();ctx.restore();}
+   strokeGroup(groups.normal,'#25e6ff');strokeGroup(groups.fast,'#ffb84d');
+   if(selectedContact){const v=selectedContact.v,hdg=Number.isFinite(v.cog)&&v.cog>=0&&v.cog<=360?v.cog:0,a=(hdg-90)*Math.PI/180,rr=r*2,x=selectedContact.x,y=selectedContact.y;ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.beginPath();ctx.moveTo(-rr,-rr*.8);ctx.lineTo(rr,0);ctx.lineTo(-rr,rr*.8);ctx.strokeStyle='rgba(3,12,20,.95)';ctx.lineWidth=6;ctx.stroke();ctx.strokeStyle='#ffffff';ctx.lineWidth=3.2;ctx.shadowColor='#ffffff';ctx.shadowBlur=14;ctx.stroke();ctx.restore();}
    if(selected&&selected.points&&selected.points.length>1){ctx.save();ctx.beginPath();let started=false;for(const p of selected.points){const q=leafletMap.latLngToContainerPoint([p.lat,p.lon]);if(!started){ctx.moveTo(q.x,q.y);started=true;}else ctx.lineTo(q.x,q.y);}ctx.strokeStyle='rgba(255,220,139,.9)';ctx.lineWidth=2;ctx.setLineDash([6,5]);ctx.stroke();ctx.restore();}
   }
   function scheduleDraw(){if(drawQueued)return;drawQueued=true;requestAnimationFrame(drawChevrons);}
