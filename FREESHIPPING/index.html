@@ -110,7 +110,7 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
 <script>
 (()=>{
  requestAnimationFrame(()=>{
- const $=id=>document.getElementById(id), WS='wss://stream.openseafeed.com/v1/stream', API='https://api.openseafeed.com/v1';
+ const $=id=>document.getElementById(id), WS='wss://stream.openseafeed.com/v1/stream', API='https://api.openseafeed.com/v1', AISSTREAM_PROXY_URL=''; // Set to the deployed secure Worker wss:// URL; never put the API key here.
  window.addEventListener('error',ev=>{const note=$('trackNote');if(note)note.textContent='JavaScript startup error: '+(ev.message||'unknown error')+'. Open browser DevTools → Console for details.';console.error('FREESHIPPING TRACKER runtime error:',ev.error||ev.message);});
  window.addEventListener('unhandledrejection',ev=>{const note=$('trackNote');if(note)note.textContent='An asynchronous operation failed: '+String(ev.reason||'unknown error');console.error('FREESHIPPING TRACKER unhandled rejection:',ev.reason);});
  const LIMIT_LAT=41.5, MAX_POINTS=500, vessels=new Map(); let ws=null,selected=null,historyLoading=false,received=0,retry=0,retryTimer=null,toastTimer=null,lastAt=0,lastEventAt=0;
@@ -354,6 +354,28 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
  tickClock();setInterval(tickClock,1000);
  loadFleetSnapshot();setInterval(loadFleetSnapshot,10*60*1000);loadOpenWaters();setInterval(loadOpenWaters,5*1000);
  connectOpenWatersLive();
+ // Optional AISStream relay. The API key is held only as a Cloudflare Worker secret.
+ let aisStreamSocket=null,aisStreamRetry=0,aisStreamTimer=null;
+ function connectAISStreamProxy(){
+  if(!AISSTREAM_PROXY_URL){console.info('AISStream relay not activated: deploy the secure Worker and set AISSTREAM_PROXY_URL.');return;}
+  clearTimeout(aisStreamTimer);
+  try{if(aisStreamSocket)aisStreamSocket.close();}catch(e){}
+  try{
+   aisStreamSocket=new WebSocket(AISSTREAM_PROXY_URL);
+   aisStreamSocket.onopen=()=>{aisStreamRetry=0;console.info('AISStream secure relay connected.');toast('AISStream relay connected');};
+   aisStreamSocket.onmessage=ev=>{
+    try{
+     const frame=JSON.parse(typeof ev.data==='string'?ev.data:new TextDecoder().decode(ev.data));
+     if(frame.type==='proxy_status'){if(frame.status==='connected')console.info('AISStream upstream authenticated by secure relay');return;}
+     const v=decodeFrame(frame);
+     if(v){v.source='AISStream';addPosition(v);}
+    }catch(err){console.warn('AISStream frame decode failed',err);}
+   };
+   aisStreamSocket.onerror=()=>console.warn('AISStream secure relay connection error');
+   aisStreamSocket.onclose=()=>{aisStreamTimer=setTimeout(connectAISStreamProxy,Math.min(60000,2500*Math.pow(2,aisStreamRetry++)));};
+  }catch(err){console.warn('AISStream relay unavailable',err);aisStreamTimer=setTimeout(connectAISStreamProxy,15000);}
+ }
+ connectAISStreamProxy();
  try{connect();}catch(err){setStatus('STARTUP ERROR');$('trackNote').textContent='Startup error: '+(err&&err.message?err.message:String(err));console.error('FREESHIPPING TRACKER startup error:',err);}
  });
 })();
