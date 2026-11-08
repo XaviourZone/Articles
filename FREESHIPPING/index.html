@@ -58,7 +58,7 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
 #map2d,#map2d .leaflet-container{background:#061725}#map2d .leaflet-tile{filter:brightness(1.12) saturate(.9) contrast(1.12)}#map2d .leaflet-control-attribution{background:rgba(3,13,22,.9)!important;color:#9bb4c2!important;border-top:1px solid #294454}#map2d .leaflet-control-attribution a{color:#69ddeb!important}#shipChevronCanvas{z-index:450;pointer-events:none}
 
 #map2d,#map2d .leaflet-container{background:#e8eef1}#map2d .leaflet-tile{filter:none}#map2d .leaflet-control-attribution{background:rgba(3,13,22,.9)!important;color:#a9c2ce!important;border-top:1px solid #294454}#map2d .leaflet-control-attribution a{color:#69ddeb!important}#shipChevronCanvas{z-index:450;pointer-events:none}
-</style>
+\n/* Free OSM raster tiles, styled dark locally; no provider API key required. */\n#map2d .leaflet-tile{filter:invert(1) hue-rotate(180deg) brightness(.72) saturate(.78) contrast(1.08)!important}\n</style>
 </head>
 <body>
 <div id="map2d" class="active" aria-label="Live 2D maritime AIS map"></div>
@@ -123,8 +123,8 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
   if(leafletMap)return;
   if(typeof L==='undefined'){setStatus('MAP LIBRARY ERROR');toast('Map library unavailable — check network');return;}
   leafletMap=L.map('map2d',{worldCopyJump:true,preferCanvas:true,zoomControl:false,attributionControl:true,fadeAnimation:false,markerZoomAnimation:false,zoomAnimation:false,zoomSnap:.5,zoomDelta:.5,wheelPxPerZoomLevel:100,inertia:true,inertiaDeceleration:3200,easeLinearity:.22,updateWhenIdle:true,keepBuffer:4}).setView([12,75],3);
-  const osmTiles='https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-  L.tileLayer(osmTiles,{subdomains:'abcd',maxZoom:19,updateWhenIdle:true,keepBuffer:4,attribution:'© OpenStreetMap · © CARTO'}).addTo(leafletMap);
+  const osmTiles='https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  L.tileLayer(osmTiles,{maxZoom:19,updateWhenIdle:true,keepBuffer:4,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a>'}).addTo(leafletMap);
   L.control.zoom({position:'topright'}).addTo(leafletMap);
   const canvas=document.createElement('canvas');canvas.id='shipChevronCanvas';canvas.setAttribute('aria-hidden','true');
   leafletMap.getContainer().appendChild(canvas);const ctx=canvas.getContext('2d',{alpha:true,desynchronized:true});
