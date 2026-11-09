@@ -99,6 +99,10 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
 }
 @media(max-width:390px){.statsOnly{width:145px}.searchPanel{right:158px}.appHeader .utcChip{display:none}}
 
+
+/* Fleet counters remain pinned to the upper-right on desktop and mobile. */
+.statsOnly{position:fixed;z-index:5;top:78px;right:18px;left:auto;width:286px;pointer-events:none}
+.statsOnly .stats{grid-template-columns:1fr 1fr}
 /* Per-style tile treatment: user selection overrides the default dark rendering. */
 #map2d .leaflet-tile{filter:var(--tile-filter,none)!important}
 </style>
