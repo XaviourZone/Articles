@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#06121d"><meta name="description" content="FREESHIPPING TRACKER — a live 2D maritime map of public AIS vessel traffic and recent tracks.">
+<meta name="theme-color" content="#06121d"><meta name="description" content="OPEN OCEANS — a live 2D maritime map of public AIS vessel traffic and recent tracks.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='27' fill='none' stroke='%236bdcf0' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='8' fill='none' stroke='%236bdcf0' stroke-width='3'/%3E%3C/svg%3E">
 <title>FREESHIPPING TRACKER — Live Maritime Map</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,12 +58,54 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
 #map2d,#map2d .leaflet-container{background:#061725}#map2d .leaflet-tile{filter:brightness(1.12) saturate(.9) contrast(1.12)}#map2d .leaflet-control-attribution{background:rgba(3,13,22,.9)!important;color:#9bb4c2!important;border-top:1px solid #294454}#map2d .leaflet-control-attribution a{color:#69ddeb!important}#shipChevronCanvas{z-index:450;pointer-events:none}
 
 #map2d,#map2d .leaflet-container{background:#e8eef1}#map2d .leaflet-tile{filter:none}#map2d .leaflet-control-attribution{background:rgba(3,13,22,.9)!important;color:#a9c2ce!important;border-top:1px solid #294454}#map2d .leaflet-control-attribution a{color:#69ddeb!important}#shipChevronCanvas{z-index:450;pointer-events:none}
-\n/* Free OSM raster tiles, styled dark locally; no provider API key required. */\n#map2d .leaflet-tile{filter:invert(1) hue-rotate(180deg) brightness(.72) saturate(.78) contrast(1.08)!important}\n</style>
+\n/* Free OSM raster tiles, styled dark locally; no provider API key required. */\n#map2d .leaflet-tile{filter:invert(1) hue-rotate(180deg) brightness(.72) saturate(.78) contrast(1.08)!important}\n
+/* OPEN OCEANS — restrained cyber-maritime visual system */
+:root{--neon:#55e7ff;--violet:#a78bfa;--signal:#ff4056}
+.appHeader .brand b{color:#f1fbff;text-shadow:0 0 12px #55e7ff2b}.appHeader .logo{border-color:#55e7ff88;box-shadow:0 0 18px #55e7ff25,inset 0 0 12px #55e7ff12}
+.chip,.stat,.searchPanel,#detail,.mapFooter,.mapStylePicker{border-color:#34566a;box-shadow:0 0 0 1px #55e7ff08,0 12px 34px #0005}
+.stat{position:relative;overflow:hidden}.stat:before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--neon),var(--violet))}
+.eyebrow,.detailSectionTitle{color:#69e5f7;text-shadow:0 0 10px #55e7ff30}
+.mapStylePicker{position:fixed;z-index:5;top:137px;right:20px;min-width:142px;padding:9px 28px 9px 10px;border:1px solid #3b6478;border-radius:8px;background:#081d2b;color:#dff8ff;font:8px 'DM Mono',monospace;letter-spacing:.08em;outline:none}
+#detail{width:340px;right:14px;top:78px;bottom:auto;max-height:calc(100dvh - 96px);padding:13px;border-color:#3c6175}
+#detail .shipphoto{min-height:120px;max-height:150px;margin:0}#detail .shipphoto img{height:150px;max-height:150px;object-fit:contain;background:#071521}
+#detail .vesselIdentity{padding:9px 0 10px}.shipname{font-size:17px}
+#detail .detailSectionTitle{margin:11px 0 6px}#detail .grid{gap:5px}#detail .grid div{min-height:46px;padding:7px 8px}#detail .grid div.wide{min-height:38px}
+#detail .trackTitle{margin-top:11px}#detail .tracknote{min-height:0;padding:8px;font-size:8px}
+#detail .trackActions{justify-content:flex-start;gap:8px;margin-top:7px}#detail .trackButton{padding:7px 9px;font-size:8px}#detail .trackMetric{margin-top:6px;padding:7px 9px}
+.trackHover{border-color:#ff5368!important;box-shadow:0 0 15px #ff405633!important}
+.mapFooter{bottom:13px;right:14px;min-height:35px;padding:8px 10px}
+@media(max-width:700px){
+ .appHeader{height:55px;padding:0 10px}.appHeader .brand b{font-size:10px;letter-spacing:.15em}.appHeader .brand small{font-size:6px}
+ .appHeader .top{gap:4px}.appHeader .chip{padding:6px 7px;font-size:6px}.appHeader .networkChip{display:none}
+ .statsOnly{position:fixed;z-index:5;top:65px;right:9px;left:auto;width:158px}
+ .statsOnly .stats{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+ .statsOnly .stat{min-height:55px;padding:6px 7px;border-radius:7px;background:rgba(7,24,36,.94)}
+ .statsOnly .stat label{font-size:6px;letter-spacing:.06em}.statsOnly .stat strong{font-size:14px;margin-top:2px}.statsOnly .stat small{font-size:6px}
+ .searchPanel{top:66px;left:9px;right:175px;width:auto;min-width:0;padding:7px;border-radius:9px}
+ .searchPanel .searchbar{gap:4px}.searchPanel input{font-size:9px}.searchPanel .searchbar button{width:25px;height:25px}
+ .mapStylePicker{top:119px;right:9px;min-width:149px;padding:7px 8px;font-size:7px}
+ #detail{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:min(67dvh,560px);padding:10px;border-radius:12px;overflow-y:auto}
+ #detail .drawerTop{margin-bottom:7px}.drawerSub{font-size:6px}
+ #detail .shipphoto{min-height:90px;max-height:112px}#detail .shipphoto img{height:112px;max-height:112px}
+ #detail .photocredit{margin:4px 2px 7px;font-size:7px}
+ #detail .vesselIdentity{padding:7px 0}.shipname{font-size:15px}.contactTag{top:10px}
+ #detail .detailSectionTitle{margin:8px 0 5px;font-size:7px}
+ #detail .grid{gap:4px}#detail .grid div{min-height:39px;padding:6px 7px}#detail .grid label{font-size:6px}#detail .grid b{font-size:9px;margin-top:3px}
+ #detail .tracknote{padding:7px;font-size:7px;line-height:1.35}
+ #detail .trackActions{margin-top:5px;align-items:center}#detail .trackButton{padding:6px 8px;font-size:7px}#detail .trackActions span{font-size:6px}
+ #detail .trackMetric{margin-top:5px;padding:6px 8px;font-size:7px}
+ .mapFooter{left:8px;right:8px;bottom:7px;min-height:30px;padding:6px 8px}.mapFooter .meta label{font-size:6px}.mapFooter .meta b{font-size:7px}
+ footer,.shipChevronLegend{display:none}
+}
+@media(max-width:390px){.statsOnly{width:145px}.searchPanel{right:158px}.appHeader .utcChip{display:none}}
+
+</style>
 </head>
 <body>
 <div id="map2d" class="active" aria-label="Live 2D maritime AIS map"></div>
 <div id="oceanShell"></div>
 
+<select id="mapStyle" class="mapStylePicker" aria-label="Change map style"><option value="dark">DARK OCEAN</option><option value="standard">STANDARD</option><option value="humanitarian">HUMANITARIAN</option><option value="topo">TOPOGRAPHIC</option></select>
 <section id="searchPanel" class="searchPanel"><div class="eyebrow">VESSEL FINDER</div><div class="searchbar"><span class="searchicon">⌕</span><input id="vesselSearch" type="search" placeholder="MMSI, IMO or vessel name…" autocomplete="off" aria-label="Search loaded vessels"><button id="searchGo" aria-label="Search vessel">›</button></div><div id="searchHint" class="searchhint">Type 2+ characters for live suggestions</div><div id="suggestions" class="suggestions" role="listbox"></div></section>
 
 <section id="detail" aria-label="Selected vessel details">
@@ -83,7 +125,7 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
  <div class="trackActions"><button id="showHistory" class="trackButton" type="button" disabled>SHOW HISTORY</button><span id="trackRange">—</span></div>
  <div class="trackMetric"><span>TRACK POINTS</span><b id="trackPoints">—</b></div>
 </section>
-<div class="bottom mapFooter"><div class="meta"><label>DATA NETWORK</label><b id="sourceNote">OPENSEAFEED + OPEN WATERS</b></div><button id="reconnect" class="btn">RECONNECT ↻</button></div>
+<div class="bottom mapFooter" aria-label="Data source"><div class="meta"><label>PUBLIC AIS SOURCES</label><b id="sourceNote">OPENSEAFEED + OPEN WATERS</b></div></div>
 <footer>PUBLIC AIS · NOT FOR NAVIGATION · <span id="sourceCredits">Source attribution loads with AIS records.</span> · <a href="https://openseafeed.com/docs" target="_blank" rel="noopener">DATA API & LIMITS ↗</a> · <a href="https://github.com/BetterInc/openseafeed" target="_blank" rel="noopener">OPEN SOURCE ↗</a> · EARTH TEXTURE: <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noopener">SOLAR SYSTEM SCOPE (CC BY 4.0)</a></footer><div id="toast" class="toast"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -118,13 +160,20 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
  const valid=v=>Number.isFinite(v)&&Math.abs(v)<1e6;
  const toast=s=>{const t=$('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);};
  const setStatus=(s,on=false)=>{if(window.oceanUI)window.oceanUI.setStatus(s,on);else{const el=$('status'),dot=$('dot');if(el)el.textContent=s;if(dot)dot.classList.toggle('on',on);}};
- let leafletMap=null,leafletLayer=null,leafletCanvas=null,last2DRender=0,mapReady=false;
+ let leafletMap=null,leafletLayer=null,baseMapLayer=null,leafletCanvas=null,last2DRender=0,mapReady=false;
  function initMap(){
   if(leafletMap)return;
   if(typeof L==='undefined'){setStatus('MAP LIBRARY ERROR');toast('Map library unavailable — check network');return;}
   leafletMap=L.map('map2d',{worldCopyJump:true,preferCanvas:true,zoomControl:false,attributionControl:true,fadeAnimation:false,markerZoomAnimation:false,zoomAnimation:false,zoomSnap:.5,zoomDelta:.5,wheelPxPerZoomLevel:100,inertia:true,inertiaDeceleration:3200,easeLinearity:.22,updateWhenIdle:true,keepBuffer:4}).setView([12,75],3);
-  const osmTiles='https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-  L.tileLayer(osmTiles,{maxZoom:19,updateWhenIdle:true,keepBuffer:4,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a>'}).addTo(leafletMap);
+  const MAP_STYLES={
+   dark:{url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',filter:'invert(1) hue-rotate(180deg) brightness(.72) saturate(.78) contrast(1.08)',attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a>'},
+   standard:{url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',filter:'none',attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a>'},
+   humanitarian:{url:'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',filter:'none',attribution:'© OpenStreetMap contributors · HOT'},
+   topo:{url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',filter:'none',attribution:'© OpenStreetMap contributors · OpenTopoMap'}
+  };
+  let activeMapStyle='dark';
+  function setMapStyle(name){const cfg=MAP_STYLES[name]||MAP_STYLES.dark;if(baseMapLayer)leafletMap.removeLayer(baseMapLayer);baseMapLayer=L.tileLayer(cfg.url,{subdomains:'abc',maxZoom:name==='topo'?17:19,updateWhenIdle:true,keepBuffer:4,attribution:cfg.attribution});baseMapLayer.addTo(leafletMap);activeMapStyle=name;document.getElementById('mapStyle').value=name;document.getElementById('map2d').dataset.mapStyle=name;toast(name.toUpperCase()+' MAP');}
+  setMapStyle('dark');
   L.control.zoom({position:'topright'}).addTo(leafletMap);
   const canvas=document.createElement('canvas');canvas.id='shipChevronCanvas';canvas.setAttribute('aria-hidden','true');
   leafletMap.getContainer().appendChild(canvas);const ctx=canvas.getContext('2d',{alpha:true,desynchronized:true});
@@ -163,7 +212,7 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
    }
    strokeGroup(groups.normal,'#087f9b');strokeGroup(groups.fast,'#d88924');
    if(selectedContact){const v=selectedContact.v,hdg=Number.isFinite(v.cog)&&v.cog>=0&&v.cog<=360?v.cog:0;ctx.save();ctx.translate(selectedContact.x,selectedContact.y);ctx.rotate((hdg-90)*Math.PI/180);ctx.beginPath();ctx.moveTo(r*1.8,0);ctx.lineTo(-r*.85,-r*.7);ctx.lineTo(-r*.48,0);ctx.lineTo(-r*.85,r*.7);ctx.closePath();ctx.strokeStyle='#ffffff';ctx.lineWidth=2.2;ctx.stroke();ctx.restore();}
-   if(showHistory&&selected&&selected.points&&selected.points.length>1){const pts=selected.points.filter(p=>bounds.contains([p.lat,p.lon])).map(p=>({...p,...leafletMap.latLngToContainerPoint([p.lat,p.lon])}));if(pts.length){ctx.save();ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.strokeStyle='rgba(255,220,139,.95)';ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.stroke();ctx.setLineDash([]);for(let i=0;i<pts.length;i++){const p=pts[i];ctx.beginPath();ctx.arc(p.x,p.y,i===pts.length-1?4:3,0,Math.PI*2);ctx.fillStyle=i===pts.length-1?'#fff0bd':'#f3b94f';ctx.fill();ctx.strokeStyle='#102534';ctx.lineWidth=1.2;ctx.stroke();}ctx.restore();}}
+   if(showHistory&&selected&&selected.points&&selected.points.length>1){const pts=selected.points.filter(p=>bounds.contains([p.lat,p.lon])).map(p=>({...p,...leafletMap.latLngToContainerPoint([p.lat,p.lon])}));if(pts.length){ctx.save();ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.strokeStyle='rgba(255,67,82,.96)';ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.stroke();ctx.setLineDash([]);for(let i=0;i<pts.length;i++){const p=pts[i];ctx.beginPath();ctx.arc(p.x,p.y,i===pts.length-1?4:3,0,Math.PI*2);ctx.fillStyle=i===pts.length-1?'#ff8790':'#ef3348';ctx.fill();ctx.strokeStyle='#fff0f1';ctx.lineWidth=1.2;ctx.stroke();}ctx.restore();}}
   }
   function scheduleDraw(){if(drawQueued)return;drawQueued=true;requestAnimationFrame(drawChevrons);}
   function nearestContact(point){let best=null,bestD=14*14;for(const item of visibleContacts){const dx=item.x-point.x,dy=item.y-point.y,d=dx*dx+dy*dy;if(d<bestD){bestD=d;best=item.v;}}return best;}
@@ -175,6 +224,7 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
  function resizeMap(){if(leafletMap){leafletMap.invalidateSize();sync2DMarkers(true);}}
  window.addEventListener('resize',resizeMap);
  initMap();
+ $('mapStyle').addEventListener('change',e=>setMapStyle(e.target.value));
  function decodeFrame(frame){
   const meta=frame.MetaData||frame.metadata||{},msg=frame.Message||frame.message||{};
   const p=msg.PositionReport||msg.StandardClassBPositionReport||msg.ExtendedClassBPositionReport||msg.LongRangeAisBroadcastMessage||{};
@@ -234,7 +284,7 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
  let showHistory=false,trackTooltip=null;
  function formatTrackTime(value){if(value===null||value===undefined||value==='')return '';let raw=value;if(typeof raw==='number'||/^\d{10,13}$/.test(String(raw))){raw=Number(raw);if(raw<1e12)raw*=1000;}const d=new Date(raw);return Number.isNaN(d.getTime())?'':d.toISOString().replace('T',' ').slice(0,19);}
  function nearestTrackPoint(point,points){let best=null,bestD=13*13;for(const p of points){const q=leafletMap.latLngToContainerPoint([p.lat,p.lon]);const dx=q.x-point.x,dy=q.y-point.y,d=dx*dx+dy*dy;if(d<bestD){bestD=d;best=p;}}return best;}
- function showTrackPoint(p){if(!p)return;const stamp=formatTrackTime(p.time);toast((stamp?stamp+' UTC · ':'')+p.lat.toFixed(4)+'°, '+p.lon.toFixed(4)+'°');}
+ function showTrackPoint(p){if(!p)return;const stamp=formatTrackTime(p.time);toast('MMSI '+(selected?selected.mmsi:'—')+' · '+(stamp?stamp+' UTC · ':'')+'LAT '+p.lat.toFixed(4)+'° · LON '+p.lon.toFixed(4)+'°);}
  function drawTracks(){sync2DMarkers(true);const points=selected&&selected.points?selected.points:[];$('trackPoints').textContent=points.length.toLocaleString();$('showHistory').disabled=points.length<2;$('showHistory').classList.toggle('active',showHistory);$('showHistory').textContent=showHistory?'HIDE HISTORY':'SHOW HISTORY';const validTimes=points.map(p=>{const t=formatTrackTime(p.time);return t?Date.parse(t+'Z'):NaN;}).filter(Number.isFinite);$('trackRange').textContent=validTimes.length?new Date(Math.min(...validTimes)).toISOString().slice(0,10)+' — '+new Date(Math.max(...validTimes)).toISOString().slice(0,10):'TIME UNAVAILABLE';}
  function parseHistory(data){
   const out=[];function push(lat,lon,time){lat=Number(lat);lon=Number(lon);if(valid(lat)&&valid(lon)&&Math.abs(lat)<=90&&Math.abs(lon)<=180)out.push({lat,lon,time:time||''});}
@@ -267,7 +317,7 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
  $('searchGo').onclick=searchVessel;$('vesselSearch').addEventListener('input',renderSuggestions);$('vesselSearch').addEventListener('focus',renderSuggestions);
  $('vesselSearch').addEventListener('keydown',e=>{if(e.key==='ArrowDown'&&suggestionItems.length){e.preventDefault();suggestionIndex=Math.min(suggestionIndex+1,suggestionItems.length-1);suggestionBox.querySelectorAll('.suggestion').forEach((b,i)=>b.classList.toggle('active',i===suggestionIndex));}else if(e.key==='ArrowUp'&&suggestionItems.length){e.preventDefault();suggestionIndex=Math.max(0,suggestionIndex-1);suggestionBox.querySelectorAll('.suggestion').forEach((b,i)=>b.classList.toggle('active',i===suggestionIndex));}else if(e.key==='Enter'){e.preventDefault();if(suggestionIndex>=0&&suggestionItems[suggestionIndex])chooseSuggestion(suggestionItems[suggestionIndex]);else searchVessel();}else if(e.key==='Escape')closeSuggestions();});
  document.addEventListener('click',e=>{if(!$('searchPanel').contains(e.target))closeSuggestions();});
- $('reconnect').onclick=()=>{retry=0;connect();};
+ // Automatic reconnect is handled by the feed connection manager.
  // Native anonymous Open Waters live stream. Open Waters aggregates partner feeds,
  // including AISStream; AISHub positions are included in its periodic upstream snapshots.
  let openWatersLive=null,openWatersLiveRetry=0,openWatersLiveTimer=null;
