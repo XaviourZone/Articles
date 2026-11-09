@@ -402,18 +402,30 @@ footer,.mapFooter{display:none!important}
  const toast=s=>{const t=$('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);};
  const setStatus=(s,on=false)=>{if(window.oceanUI)window.oceanUI.setStatus(s,on);else{const el=$('status'),dot=$('dot');if(el)el.textContent=s;if(dot)dot.classList.toggle('on',on);}};
  let leafletMap=null,leafletLayer=null,baseMapLayer=null,leafletCanvas=null,last2DRender=0,mapReady=false;
+ const MAP_STYLES={
+  dark:{url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',filter:'invert(1) hue-rotate(180deg) brightness(.72) saturate(.78) contrast(1.08)',attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a>'},
+  standard:{url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',filter:'none',attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a>'},
+  humanitarian:{url:'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',filter:'none',attribution:'© OpenStreetMap contributors · HOT'},
+  topo:{url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',filter:'none',attribution:'© OpenStreetMap contributors · OpenTopoMap'}
+ };
+ let activeMapStyle='dark';
+ function setMapStyle(name){
+  const cfg=MAP_STYLES[name]||MAP_STYLES.dark;
+  if(!leafletMap||typeof L==='undefined')return;
+  if(baseMapLayer)leafletMap.removeLayer(baseMapLayer);
+  baseMapLayer=L.tileLayer(cfg.url,{subdomains:'abc',maxZoom:name==='topo'?17:19,updateWhenIdle:true,keepBuffer:4,attribution:cfg.attribution});
+  baseMapLayer.addTo(leafletMap);
+  activeMapStyle=name;
+  const control=document.getElementById('mapStyle');
+  if(control)control.value=name;
+  const map=document.getElementById('map2d');
+  if(map){map.dataset.mapStyle=name;map.style.setProperty('--tile-filter',cfg.filter);}
+  toast(name.toUpperCase()+' MAP');
+ }
  function initMap(){
   if(leafletMap)return;
   if(typeof L==='undefined'){setStatus('MAP LIBRARY ERROR');toast('Map library unavailable — check network');return;}
   leafletMap=L.map('map2d',{worldCopyJump:true,preferCanvas:true,zoomControl:false,attributionControl:true,fadeAnimation:false,markerZoomAnimation:false,zoomAnimation:false,zoomSnap:.5,zoomDelta:.5,wheelPxPerZoomLevel:100,inertia:true,inertiaDeceleration:3200,easeLinearity:.22,updateWhenIdle:true,keepBuffer:4}).setView([12,75],3);
-  const MAP_STYLES={
-   dark:{url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',filter:'invert(1) hue-rotate(180deg) brightness(.72) saturate(.78) contrast(1.08)',attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a>'},
-   standard:{url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',filter:'none',attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a>'},
-   humanitarian:{url:'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',filter:'none',attribution:'© OpenStreetMap contributors · HOT'},
-   topo:{url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',filter:'none',attribution:'© OpenStreetMap contributors · OpenTopoMap'}
-  };
-  let activeMapStyle='dark';
-  function setMapStyle(name){const cfg=MAP_STYLES[name]||MAP_STYLES.dark;if(baseMapLayer)leafletMap.removeLayer(baseMapLayer);baseMapLayer=L.tileLayer(cfg.url,{subdomains:name==='dark'?'abcd':'abc',maxZoom:name==='topo'?17:19,updateWhenIdle:true,keepBuffer:4,attribution:cfg.attribution});baseMapLayer.addTo(leafletMap);activeMapStyle=name;document.getElementById('mapStyle').value=name;document.getElementById('map2d').dataset.mapStyle=name;document.getElementById('map2d').style.setProperty('--tile-filter',cfg.filter);toast(name.toUpperCase()+' MAP');}
   setMapStyle('dark');
   L.control.zoom({position:'topright'}).addTo(leafletMap);
   const canvas=document.createElement('canvas');canvas.id='shipChevronCanvas';canvas.setAttribute('aria-hidden','true');
