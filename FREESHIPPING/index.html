@@ -212,8 +212,18 @@ footer,.mapFooter{display:none!important}
 (()=>{
  requestAnimationFrame(()=>{
  const $=id=>document.getElementById(id), WS='wss://stream.openseafeed.com/v1/stream', API='https://api.openseafeed.com/v1', AISSTREAM_PROXY_URL=''; // Set to the deployed secure Worker wss:// URL; never put the API key here.
- const headerSlot=document.getElementById('headerSearchSlot'),searchPanel=document.getElementById('searchPanel'),mapStyleControl=document.getElementById('mapStyle');
- if(headerSlot&&searchPanel&&mapStyleControl)headerSlot.append(searchPanel,mapStyleControl);
+ const searchPanel=document.getElementById('searchPanel'),mapStyleControl=document.getElementById('mapStyle');
+ function mountHeaderControls(){
+  const slot=document.getElementById('headerSearchSlot');
+  if(!slot||!searchPanel||!mapStyleControl)return false;
+  if(searchPanel.parentElement!==slot)slot.appendChild(searchPanel);
+  if(mapStyleControl.parentElement!==slot)slot.appendChild(mapStyleControl);
+  return true;
+ }
+ if(!mountHeaderControls()){
+  const shell=document.getElementById('oceanShell');
+  if(shell&&window.MutationObserver){const observer=new MutationObserver(()=>{if(mountHeaderControls())observer.disconnect();});observer.observe(shell,{childList:true,subtree:true});}
+ }
  window.addEventListener('error',ev=>{const note=$('trackNote');if(note)note.textContent='JavaScript startup error: '+(ev.message||'unknown error')+'. Open browser DevTools → Console for details.';console.error('OPEN OCEANS runtime error:',ev.error||ev.message);});
  window.addEventListener('unhandledrejection',ev=>{const note=$('trackNote');if(note)note.textContent='An asynchronous operation failed: '+String(ev.reason||'unknown error');console.error('OPEN OCEANS unhandled rejection:',ev.reason);});
  const LIMIT_LAT=41.5, MAX_POINTS=500, vessels=new Map(); let ws=null,selected=null,historyLoading=false,received=0,retry=0,retryTimer=null,toastTimer=null,lastAt=0,lastEventAt=0;
