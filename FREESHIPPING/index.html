@@ -325,6 +325,43 @@ footer,.mapFooter{display:none!important}
  #detail .trackMetric{padding:3px 4px!important}
 }
 
+
+/* OPEN OCEANS typography: condensed Impact display face with clear weight hierarchy. */
+html,body,button,input,select,textarea,.appHeader,.chip,.stat,.searchPanel,#detail,.mapFooter,.mapStylePicker,.suggestion,.trackButton,.toast{
+ font-family:Impact,Haettenschweiler,'Arial Narrow Bold',sans-serif!important;
+ letter-spacing:.025em;
+}
+b,strong,.shipname,.stat strong,.grid b,.headerCountStrip b{font-weight:normal!important;letter-spacing:.035em}
+em,i,.italic{font-style:italic!important}
+small,.mmsi,.eyebrow,.detailSectionTitle,.grid label,.headerCountStrip,.chip{letter-spacing:.07em}
+@media(max-width:700px){
+ #detail{
+  top:auto!important;left:auto!important;right:10px!important;bottom:10px!important;
+  width:min(310px,calc(100vw - 20px))!important;height:auto!important;
+  min-height:0!important;max-height:56dvh!important;overflow-y:auto!important;overflow-x:hidden!important;
+  padding:9px!important;border-radius:12px!important;z-index:1200!important;
+ }
+ #detail .detailClose{position:absolute!important;top:7px!important;right:7px!important}
+ #detail .vesselIdentity{padding:2px 32px 6px 0!important;margin-bottom:5px!important}
+ #detail .shipname{font-size:14px!important;line-height:1.15!important}
+ #detail .contactTag{right:30px!important;top:2px!important}
+ #detail .shipphoto{min-height:70px!important;max-height:82px!important}
+ #detail .shipphoto img{height:82px!important;max-height:82px!important;object-fit:contain!important}
+ #detail .photoempty{padding:9px 5px!important;font-size:8px!important}
+ #detail .photoempty span{font-size:7px!important}
+ #detail .photocredit{font-size:7px!important;margin:3px 1px 5px!important}
+ #detail .detailSectionTitle{margin:6px 0 4px!important;font-size:8px!important}
+ #detail .grid{gap:4px!important}
+ #detail .grid div{min-height:31px!important;padding:4px 5px!important}
+ #detail .grid div.wide{min-height:26px!important}
+ #detail .grid label{font-size:6px!important}
+ #detail .grid b{font-size:9px!important}
+ #detail .tracknote{padding:5px!important;font-size:7px!important}
+ #detail .trackActions{margin-top:4px!important}
+ #detail .trackButton{padding:5px 7px!important;font-size:7px!important}
+ #detail .trackMetric{margin-top:4px!important;padding:5px!important;font-size:7px!important}
+}
+
 </style>
 </head>
 <body>
@@ -622,68 +659,59 @@ footer,.mapFooter{display:none!important}
     merged++;
    }
    // Provider attribution is retained in diagnostics only; no redundant source panel.
-   console.info('OPEN OCEANS: Open Waters corridor sync.',{area:area.name,features:features.length,merged,unique:vessels.size,attribution:data.attribution||null});
+   // Feed sync is intentionally quiet; status counters are updated in the header.
    
   }catch(err){console.warn('OPEN OCEANS: Open Waters '+area.name+' source unavailable.',err);}
  }
  async function loadVesselPhoto(s){
   const panel=$('shipPhoto'),credit=$('photoCredit');if(!panel||!credit)return;
   const mmsi=String(s.mmsi),name=(s.name||'').trim();
-  panel.innerHTML='<div class="photoempty">VESSEL IMAGE<br><span>Checking vessel photo catalogues…</span></div>';credit.textContent='';
+  panel.innerHTML='<div class="photoempty">VESSEL IMAGE<br><span>Looking for a verified vessel photograph…</span></div>';credit.textContent='';
   const showPhoto=(url,source,caption)=>new Promise(resolve=>{
-   if(!url||typeof url!=='string')return resolve(false);
-   const img=document.createElement('img');img.src=url;img.alt='Vessel photograph: '+(name||mmsi);img.loading='eager';img.referrerPolicy='no-referrer';
+   if(!url||typeof url!=='string'||!/^https:\/\//i.test(url))return resolve(false);
+   const img=document.createElement('img');img.src=url;img.alt='Verified vessel photograph: '+(name||mmsi);img.loading='eager';img.referrerPolicy='no-referrer';
    img.onload=()=>{if(!selected||selected.mmsi!==mmsi)return resolve(false);panel.replaceChildren(img);const link=document.createElement('a');link.href=source||url;link.target='_blank';link.rel='noopener';link.textContent=caption||'Photo source';credit.replaceChildren(document.createTextNode('Photo: '),link);resolve(true);};
    img.onerror=()=>resolve(false);
   });
   const strip=v=>String(v||'').replace(/<[^>]*>/g,'').replace(/&amp;/g,'&').trim();
-  const candidates=d=>{
-   if(!d)return [];
-   const arr=Array.isArray(d)?d:Array.isArray(d.photos)?d.photos:Array.isArray(d.results)?d.results:Array.isArray(d.images)?d.images:[d.photo||d];
-   return arr.map(p=>({url:p?.urls?.mmsi||p?.urls?.cfr||p?.thumb||p?.thumbnail||p?.thumbnail_url||p?.image||p?.image_url||p?.url||p?.src,
-    page:p?.page||p?.pageUrl||p?.descriptionurl||p?.foreign_landing_url||p?.url||'',
-    credit:p?.attribution||p?.credit||p?.artist||p?.creator||'Photographer',
-    licence:p?.licenceName||p?.license||p?.licence||'See source licence'})).filter(x=>x.url);
-  };
-  // 1. OpenSeaFeed free-licensed vessel-photo endpoint.
+  const norm=v=>String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
+  // MMSI-specific OpenSeaFeed catalogue only. No generic image-search results are embedded.
   try{
    const r=await fetch('https://api.openseafeed.com/v1/photos/'+encodeURIComponent(mmsi),{headers:{Accept:'application/json'}});
-   if(r.ok){const d=await r.json();for(const p of candidates(d)){if(await showPhoto(p.url,p.page||'https://openseafeed.com/',p.credit+' · '+p.licence+' · OpenSeaFeed'))return;}}
-  }catch(e){console.info('OpenSeaFeed photo lookup unavailable:',e);}
-  // 2. Open Vessel Photos JSON. Its documented schema uses photos[].urls.mmsi.
-  try{
-   const r=await fetch('https://openvesselphotos.org/v1/mmsi/'+encodeURIComponent(mmsi),{headers:{Accept:'application/json'}});
-   if(r.ok){const d=await r.json();for(const p of candidates(d)){if(await showPhoto(p.url,p.page||'https://openvesselphotos.org/',(p.credit||'Photographer')+' · '+(p.licence||'Open licence')+' · Open Vessel Photos'))return;}}
-   else if(r.status!==404)console.info('Open Vessel Photos HTTP',r.status);
-  }catch(e){console.info('Open Vessel Photos lookup unavailable:',e);}
-  // 3. Direct main-photo URL from the same open catalogue.
-  if(await showPhoto('https://openvesselphotos.org/v1/mmsi/'+encodeURIComponent(mmsi)+'.jpg?size=800','https://openvesselphotos.org/','Open Vessel Photos · vessel catalogue'))return;
-  // 4. Wikimedia Commons anonymous CORS search, retaining attribution and licence.
-  const normalized=name.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-  const queries=[name,name&&'"'+name+'" ship',name&&'"'+name+'" vessel',s.imo&&'IMO '+s.imo].filter(Boolean);
-  for(const q of queries){
-   try{
-    const p=new URLSearchParams({action:'query',format:'json',origin:'*',generator:'search',gsrsearch:q,gsrnamespace:'6',gsrlimit:'30',prop:'imageinfo',iiprop:'url|extmetadata',iiurlwidth:'1000',iiextmetadatafilter:'LicenseShortName|Artist|Credit'});
-    const r=await fetch('https://commons.wikimedia.org/w/api.php?'+p,{headers:{Accept:'application/json','Api-User-Agent':'OpenOceansTracker/1.0 (https://xaviourzone.github.io/Articles/FREESHIPPING/)'}});
-    if(!r.ok)continue;
-    const d=await r.json(),tokens=normalized.split(' ').filter(t=>t.length>2);
-    const ranked=Object.values(d.query?.pages||{}).map(x=>{
-     const title=(x.title||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-     const exact=normalized.length>3&&title.includes(normalized);
-     const score=tokens.filter(t=>title.includes(t)).length;
-     return {x,score:exact?100+score:score};
-    }).filter(x=>x.score>0&&x.x.imageinfo?.[0]?.thumburl&&(normalized.length<=3?x.score>=1:x.score>=Math.min(2,tokens.length))).sort((a,b)=>b.score-a.score);
-    for(const item of ranked.slice(0,5)){
-     const info=item.x.imageinfo[0],meta=info.extmetadata||{};
-     const author=strip(meta.Artist?.value||meta.Credit?.value)||'Wikimedia contributor',lic=strip(meta.LicenseShortName?.value)||'See file licence';
-     if(await showPhoto(info.thumburl,info.descriptionurl||'https://commons.wikimedia.org/',author+' · '+lic+' · Wikimedia Commons'))return;
+   if(r.ok){
+    const d=await r.json(),arr=Array.isArray(d)?d:Array.isArray(d.photos)?d.photos:Array.isArray(d.results)?d.results:Array.isArray(d.images)?d.images:[];
+    for(const p of arr){
+     const itemMmsi=String(p?.mmsi??p?.MMSI??p?.vessel?.mmsi??'');
+     const itemName=norm(p?.vessel_name??p?.ship_name??p?.name??p?.vessel?.name??'');
+     const identityOK=itemMmsi===mmsi||(itemName&&norm(name)&&itemName===norm(name));
+     if(!identityOK)continue;
+     const url=p?.urls?.mmsi||p?.thumbnail_url||p?.image_url||p?.url||p?.src;
+     if(await showPhoto(url,p?.page||p?.page_url||'https://openseafeed.com/','OpenSeaFeed vessel photo'))return;
     }
-   }catch(e){console.info('Wikimedia Commons lookup unavailable:',e);}
+   }
+  }catch(e){/* optional catalogue unavailable; continue without noisy console errors */}
+  // Wikimedia Commons is used only when the file title contains the complete vessel name.
+  const vesselName=norm(name);
+  if(vesselName.length>=5&&vesselName.split(' ').length>=2){
+   try{
+    const params=new URLSearchParams({action:'query',format:'json',origin:'*',generator:'search',gsrsearch:'"'+name+'"',gsrnamespace:'6',gsrlimit:'20',prop:'imageinfo',iiprop:'url|extmetadata',iiurlwidth:'900',iiextmetadatafilter:'LicenseShortName|Artist|Credit'});
+    const r=await fetch('https://commons.wikimedia.org/w/api.php?'+params,{headers:{Accept:'application/json','Api-User-Agent':'OpenOceansTracker/1.0 (https://xaviourzone.github.io/Articles/FREESHIPPING/)'}});
+    if(r.ok){
+     const d=await r.json();
+     for(const item of Object.values(d.query?.pages||{})){
+      const title=norm((item.title||'').replace(/^File:/i,''));
+      if(!title.includes(vesselName))continue;
+      const info=item.imageinfo?.[0];if(!info?.thumburl)continue;
+      const meta=info.extmetadata||{},author=strip(meta.Artist?.value||meta.Credit?.value)||'Wikimedia contributor',lic=strip(meta.LicenseShortName?.value)||'See file licence';
+      if(await showPhoto(info.thumburl,info.descriptionurl||'https://commons.wikimedia.org/',author+' · '+lic+' · Wikimedia Commons'))return;
+     }
+    }
+   }catch(e){/* no verified Commons result */}
   }
   if(!selected||selected.mmsi!==mmsi)return;
-  panel.innerHTML='<div class="photoempty">NO VERIFIED PHOTO FOUND<br><span>Try external vessel-image searches</span></div>';credit.replaceChildren();
+  panel.innerHTML='<div class="photoempty">NO VERIFIED VESSEL PHOTO<br><span>No exact MMSI or vessel-name match was found</span></div>';
   const q=encodeURIComponent([name,s.imo&&'IMO '+s.imo,'MMSI '+mmsi].filter(Boolean).join(' '));
-  [['Google Images','https://www.google.com/search?tbm=isch&q='+q],['Bing Images','https://www.bing.com/images/search?q='+q],['Brave Images','https://search.brave.com/images?q='+q]].forEach(([label,url],i)=>{if(i)credit.append(document.createTextNode(' · '));const link=document.createElement('a');link.href=url;link.target='_blank';link.rel='noopener';link.textContent=label;credit.append(link);});
+  [['Google Images','https://www.google.com/search?tbm=isch&q='+q],['Bing Images','https://www.bing.com/images/search?q='+q]].forEach(([label,url],i)=>{if(i)credit.append(document.createTextNode(' · '));const link=document.createElement('a');link.href=url;link.target='_blank';link.rel='noopener';link.textContent=label;credit.append(link);});
  }
 
  function ageLabel(ms){const sec=Math.floor(ms/1000);if(sec<60)return sec+'s';const min=Math.floor(sec/60);if(min<60)return min+'m '+(sec%60)+'s';return Math.floor(min/60)+'h '+(min%60)+'m';}
@@ -694,7 +722,7 @@ footer,.mapFooter{display:none!important}
  // Optional AISStream relay. The API key is held only as a Cloudflare Worker secret.
  let aisStreamSocket=null,aisStreamRetry=0,aisStreamTimer=null;
  function connectAISStreamProxy(){
-  if(!AISSTREAM_PROXY_URL){console.info('AISStream relay not activated: deploy the secure Worker and set AISSTREAM_PROXY_URL.');return;}
+  if(!AISSTREAM_PROXY_URL){return;}
   clearTimeout(aisStreamTimer);
   try{if(aisStreamSocket)aisStreamSocket.close();}catch(e){}
   try{
