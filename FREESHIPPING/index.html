@@ -295,6 +295,36 @@ footer,.mapFooter{display:none!important}
  #detail{width:min(244px,calc(100vw - 16px))!important;max-height:40dvh!important}
 }
 
+
+/* Remove the duplicate floating fleet counters; retain the header counters only. */
+.statsOnly{display:none!important}
+/* Vessel card hierarchy: vessel name, photograph, then navigation details. */
+#detail{position:fixed!important}
+#detail .detailClose{position:absolute!important;top:8px!important;right:8px!important;z-index:5!important;width:24px!important;height:24px!important}
+#detail .vesselIdentity{padding:3px 34px 8px 0!important;margin:0 0 7px!important}
+#detail .shipname{font-size:15px!important;line-height:1.25!important;margin:0 0 3px!important}
+#detail .contactTag{top:4px!important;right:34px!important}
+#detail .shipphoto{display:grid!important;min-height:76px!important;max-height:92px!important;margin:0!important}
+#detail .shipphoto img{height:92px!important;max-height:92px!important;object-fit:contain!important}
+#detail .photocredit{display:block!important;margin:3px 1px 6px!important;font-size:7px!important}
+@media(max-width:700px){
+ #detail{width:min(258px,calc(100vw - 16px))!important;max-height:48dvh!important;overflow:hidden!important;padding:7px!important}
+ #detail .vesselIdentity{padding:2px 28px 5px 0!important;margin-bottom:5px!important}
+ #detail .shipname{font-size:11px!important}
+ #detail .contactTag{right:28px!important;top:2px!important}
+ #detail .shipphoto{display:grid!important;min-height:52px!important;max-height:58px!important}
+ #detail .shipphoto img{height:58px!important;max-height:58px!important;object-fit:contain!important}
+ #detail .photoempty{padding:5px!important;font-size:6px!important}
+ #detail .photoempty span{font-size:6px!important}
+ #detail .photocredit{display:block!important;margin:2px 1px 4px!important;font-size:5px!important;line-height:1.15!important}
+ #detail .detailSectionTitle{margin:4px 0 3px!important}
+ #detail .grid div{min-height:25px!important;padding:3px 4px!important}
+ #detail .grid div.wide{min-height:21px!important}
+ #detail .trackTitle{margin-top:4px!important}
+ #detail .tracknote{padding:3px 4px!important}
+ #detail .trackMetric{padding:3px 4px!important}
+}
+
 </style>
 </head>
 <body>
@@ -305,10 +335,10 @@ footer,.mapFooter{display:none!important}
 <section id="searchPanel" class="searchPanel"><div class="eyebrow">VESSEL FINDER</div><div class="searchbar"><span class="searchicon">⌕</span><input id="vesselSearch" type="search" placeholder="MMSI, IMO or vessel name…" autocomplete="off" aria-label="Search loaded vessels"><button id="searchGo" aria-label="Search vessel">›</button></div><div id="searchHint" class="searchhint">Type 2+ characters for live suggestions</div><div id="suggestions" class="suggestions" role="listbox"></div></section>
 
 <section id="detail" aria-label="Selected vessel details">
- <div class="drawerTop"><div><div class="eyebrow">VESSEL INTELLIGENCE</div><div class="drawerSub">LIVE AIS CONTACT PROFILE</div></div><button id="close" class="close" aria-label="Close vessel details">×</button></div>
+ <button id="close" class="close detailClose" aria-label="Close vessel details">×</button>
+ <div class="vesselIdentity"><div id="shipName" class="shipname">Unknown vessel</div><div id="shipMmsi" class="mmsi">MMSI —</div><span class="contactTag"><i></i> AIS CONTACT</span></div>
  <div id="shipPhoto" class="shipphoto"><div class="photoempty">VESSEL IMAGE<br><span>Searching open photo libraries…</span></div></div>
  <div id="photoCredit" class="photocredit"></div>
- <div class="vesselIdentity"><div id="shipName" class="shipname">Unknown vessel</div><div id="shipMmsi" class="mmsi">MMSI —</div><span class="contactTag"><i></i> AIS CONTACT</span></div>
  <div class="detailSectionTitle">NAVIGATION DATA</div>
  <div class="grid">
   <div><label>SPEED OVER GROUND</label><b id="sog">—</b></div><div><label>COURSE OVER GROUND</label><b id="cog">—</b></div>
