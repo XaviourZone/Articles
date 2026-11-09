@@ -429,10 +429,8 @@ footer,.mapFooter{display:none!important}
     addPosition({mmsi,lat:Number(coords[1]),lon:Number(coords[0]),name:String(p.name||''),type:p.type??'',imo:p.imo??'',sog:Number(p.sog),cog:Number(p.cog),heading:Number(p.heading),time:seen,source:'Open Waters · '+String(p.source||'AIScast')},true);
     merged++;
    }
-   const credit=data.attribution;
-   if(credit){const values=typeof credit==='string'?[credit]:Object.values(credit);$('sourceCredits').textContent=values.join(' · ');}
-   // Source attribution remains in the footer; no floating network panel.
-   console.info('OPEN OCEANS: Open Waters corridor sync.',{area:area.name,features:features.length,merged,unique:vessels.size,attribution:credit});
+   // Provider attribution is retained in diagnostics only; no redundant source panel.
+   console.info('OPEN OCEANS: Open Waters corridor sync.',{area:area.name,features:features.length,merged,unique:vessels.size,attribution:data.attribution||null});
    
   }catch(err){console.warn('OPEN OCEANS: Open Waters '+area.name+' source unavailable.',err);}
  }
