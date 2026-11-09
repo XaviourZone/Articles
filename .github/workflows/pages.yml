@@ -56,11 +56,7 @@ jobs:
               });
               core.info('Canceled abandoned Pages deployment.');
             } catch (error) {
-              if (error.status === 404) {
-                core.info('Abandoned deployment was already cleared.');
-              } else {
-                throw error;
-              }
+              core.warning('Previous Pages deployment is no longer cancellable; continuing with the new deployment. ' + error.message);
             }
 
       - name: Deploy to GitHub Pages
