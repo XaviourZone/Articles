@@ -207,6 +207,48 @@ footer,.mapFooter{display:none!important}
  #detail{top:157px!important;width:min(270px,calc(100vw - 16px))!important}
 }
 
+
+/* Header count row, aligned search controls, reliable basemap rendering, and full-screen mobile vessel profile */
+.appHeader{height:142px!important;min-height:142px!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:42px 22px 54px!important;align-content:center!important;row-gap:3px!important;padding:8px 22px!important}
+.appHeader .brand{grid-column:1!important;grid-row:1!important;align-self:center!important}
+.appHeader .top{grid-column:2!important;grid-row:1!important;align-self:center!important}
+.headerCountStrip{grid-column:2!important;grid-row:2!important;justify-self:end;display:flex;align-items:center;gap:6px;color:#8eacbb;font:600 8px 'DM Mono',monospace;letter-spacing:.09em;white-space:nowrap}
+.headerCountStrip b{color:#e9faff;font-size:10px;font-weight:700;font-variant-numeric:tabular-nums}
+.headerCountStrip i{color:#527284;font-style:normal;margin:0 2px}
+.headerSearchSlot{grid-column:1/-1!important;grid-row:3!important;width:100%!important;max-width:none!important;justify-self:stretch!important;grid-template-columns:minmax(0,1fr) 154px!important;gap:10px!important}
+#searchPanel{width:100%!important;min-width:0!important}
+#mapStyle{display:block!important;pointer-events:auto!important;touch-action:manipulation!important}
+#map2d .leaflet-tile{filter:var(--tile-filter,none)!important}
+@media(max-width:700px){
+ .appHeader{height:132px!important;min-height:132px!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:36px 20px 48px!important;row-gap:3px!important;padding:6px 9px!important}
+ .appHeader .brand{grid-column:1!important;grid-row:1!important;align-self:center!important}
+ .appHeader .top{grid-column:2!important;grid-row:1!important;align-self:center!important}
+ .headerCountStrip{grid-column:2!important;grid-row:2!important;gap:4px;font-size:6px;letter-spacing:.04em}
+ .headerCountStrip b{font-size:8px}
+ .headerSearchSlot{grid-column:1/-1!important;grid-row:3!important;width:100%!important;grid-template-columns:minmax(0,1fr) 116px!important;gap:6px!important}
+ #searchPanel{padding:5px 7px!important}
+ #searchPanel .searchbar{min-height:32px!important}
+ #searchPanel input{font-size:10px!important}
+ #mapStyle{min-height:32px!important;padding:6px 5px!important;font-size:7px!important}
+ #detail{position:fixed!important;inset:0!important;left:0!important;right:0!important;top:0!important;bottom:0!important;width:100vw!important;height:100dvh!important;max-height:100dvh!important;min-height:100dvh!important;overflow-y:auto!important;overflow-x:hidden!important;z-index:3000!important;padding:calc(env(safe-area-inset-top,0px) + 12px) 14px calc(env(safe-area-inset-bottom,0px) + 14px)!important;border-radius:0!important;transform:translateY(14px)!important;background:linear-gradient(160deg,rgba(12,32,46,.99),rgba(4,17,28,.995))!important}
+ #detail.show{transform:translateY(0)!important}
+ #detail .shipphoto{height:clamp(150px,27vh,260px)!important;min-height:clamp(150px,27vh,260px)!important;max-height:clamp(150px,27vh,260px)!important}
+ #detail .shipphoto img{height:100%!important;max-height:100%!important;object-fit:contain!important}
+ #detail .shipname{font-size:19px!important}
+ #detail .grid div{min-height:48px!important;padding:8px!important}
+ #detail .grid label{font-size:7px!important}
+ #detail .grid b{font-size:11px!important}
+ #detail .detailSectionTitle{font-size:8px!important;margin:12px 0 7px!important}
+ #detail .tracknote{font-size:9px!important;padding:9px!important}
+ #detail .trackButton{font-size:9px!important;padding:8px 10px!important}
+}
+@media(max-width:390px){
+ .headerSearchSlot{grid-template-columns:minmax(0,1fr) 105px!important}
+ .appHeader .utcChip{display:flex!important}
+ .appHeader .chip{padding:5px 6px!important;font-size:6px!important}
+ .appHeader .liveChip{min-width:0!important}
+}
+
 </style>
 </head>
 <body>
@@ -241,7 +283,7 @@ footer,.mapFooter{display:none!important}
 <script>
 (()=>{if(!window.React||!window.ReactDOM)return;const h=React.createElement;
  function OceanShell(){const [status,setStatus]=React.useState('CONNECTING'),[live,setLive]=React.useState(false),[utc,setUtc]=React.useState('--:--:--'),[vessels,setVessels]=React.useState('0'),[reports,setReports]=React.useState('0');
- React.useEffect(()=>{window.oceanUI={setStatus:(s,on)=>{setStatus(s);setLive(!!on)},setUtc,setCounts:(v,r)=>{setVessels(v);setReports(r)}};const tick=()=>setUtc(new Date().toISOString().slice(11,19));tick();const timer=setInterval(tick,1000);return()=>clearInterval(timer)},[]);
+ React.useEffect(()=>{window.oceanUI={setStatus:(s,on)=>{setStatus(s);setLive(!!on)},setUtc,setCounts:(v,r)=>{setVessels(v);setReports(r);const a=document.getElementById('headerVesselCount'),b=document.getElementById('headerReportCount');if(a)a.textContent=v;if(b)b.textContent=r}};const tick=()=>setUtc(new Date().toISOString().slice(11,19));tick();const timer=setInterval(tick,1000);return()=>clearInterval(timer)},[]);
  return h(React.Fragment,null,
   h('header',{className:'appHeader'},
    h('div',{className:'brand'},
@@ -250,6 +292,7 @@ footer,.mapFooter{display:none!important}
    h('div',{className:'top d-flex align-items-center gap-2'},
     h('div',{className:'chip liveChip'},h('span',{className:'dot '+(live?'on':'')}),h('span',null,status)),
     h('div',{className:'chip utcChip'},h('span',null,'UTC'),h('b',{className:'ms-2',id:'utcClock'},utc))),
+   h('div',{className:'headerCountStrip','aria-live':'polite'},h('span',null,'VESSELS '),h('b',{id:'headerVesselCount'},vessels),h('i',null,'·'),h('span',null,'REPORTS '),h('b',{id:'headerReportCount'},reports)),
    h('div',{id:'headerSearchSlot',className:'headerSearchSlot'})),
   h('section',{className:'statsOnly'},
    h('div',{className:'stats'},
