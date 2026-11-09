@@ -237,7 +237,7 @@ footer,.mapFooter{display:none!important}
   if(typeof L==='undefined'){setStatus('MAP LIBRARY ERROR');toast('Map library unavailable — check network');return;}
   leafletMap=L.map('map2d',{worldCopyJump:true,preferCanvas:true,zoomControl:false,attributionControl:true,fadeAnimation:false,markerZoomAnimation:false,zoomAnimation:false,zoomSnap:.5,zoomDelta:.5,wheelPxPerZoomLevel:100,inertia:true,inertiaDeceleration:3200,easeLinearity:.22,updateWhenIdle:true,keepBuffer:4}).setView([12,75],3);
   const MAP_STYLES={
-   dark:{url:'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',filter:'none',attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a>'},
+   dark:{url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',filter:'invert(1) hue-rotate(180deg) brightness(.72) saturate(.78) contrast(1.08)',attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a>'},
    standard:{url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',filter:'none',attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a>'},
    humanitarian:{url:'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',filter:'none',attribution:'© OpenStreetMap contributors · HOT'},
    topo:{url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',filter:'none',attribution:'© OpenStreetMap contributors · OpenTopoMap'}
