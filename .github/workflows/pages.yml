@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -41,6 +41,27 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
+
+      # A prior canceled run left this Pages deployment marked in progress.
+      # Cancel that abandoned deployment so the current artifact can be published.
+      - name: Clear abandoned Pages deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.request('POST /repos/{owner}/{repo}/pages/deployments/{pages_deployment_id}/cancel', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pages_deployment_id: '73e366dc29f79f38e1cf7182e7de5f80dc02fce3'
+              });
+              core.info('Canceled abandoned Pages deployment.');
+            } catch (error) {
+              if (error.status === 404) {
+                core.info('Abandoned deployment was already cleared.');
+              } else {
+                throw error;
+              }
+            }
 
       - name: Deploy to GitHub Pages
         id: deployment
