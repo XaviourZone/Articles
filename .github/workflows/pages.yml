@@ -27,10 +27,20 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
+      # Publish the static web projects, not the Windows desktop release binary
+      # and its runtime DLLs under Smart-Copy/release. Those remain in GitHub.
+      - name: Stage static websites
+        run: |
+          mkdir -p _site
+          for path in Cyber-Game FLIGHT-271 FREESHIPPING Journey-of-your-prompt Ocean-Run even-today-night-it-may-happen the-algorithmic-front; do
+            if [ -d "$path" ]; then cp -R "$path" _site/; fi
+          done
+          if [ -f Readme.md ]; then cp Readme.md _site/; fi
+
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
