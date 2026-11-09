@@ -105,6 +105,24 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
 .statsOnly .stats{grid-template-columns:1fr 1fr}
 /* Per-style tile treatment: user selection overrides the default dark rendering. */
 #map2d .leaflet-tile{filter:var(--tile-filter,none)!important}
+
+/* Critical map fallback: never show a white blank ocean if tiles are delayed. */
+html,body,#map2d,#map2d .leaflet-container{background:#071724!important}
+#map2d[data-map-style="standard"],#map2d[data-map-style="standard"] .leaflet-container,
+#map2d[data-map-style="humanitarian"],#map2d[data-map-style="humanitarian"] .leaflet-container,
+#map2d[data-map-style="topo"],#map2d[data-map-style="topo"] .leaflet-container{background:#d6e0e7!important}
+.statsOnly{top:78px;right:18px;left:auto;width:286px}
+.mapStylePicker{top:183px;right:18px;min-width:145px}
+@media(max-width:700px){
+ .statsOnly{top:63px;right:8px;left:auto;width:156px}
+ .mapStylePicker{top:125px;right:8px;min-width:145px}
+ .searchPanel{top:64px;left:8px;right:173px;width:auto;transform:none}
+}
+@media(max-width:390px){
+ .statsOnly{width:143px}.searchPanel{right:158px}
+ .mapStylePicker{top:122px;right:8px;min-width:135px}
+}
+
 </style>
 </head>
 <body>
@@ -131,7 +149,7 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
  <div class="trackActions"><button id="showHistory" class="trackButton" type="button" disabled>SHOW HISTORY</button><span id="trackRange">—</span></div>
  <div class="trackMetric"><span>TRACK POINTS</span><b id="trackPoints">—</b></div>
 </section>
-<div class="bottom mapFooter" aria-label="Data source"><div class="meta"><label>PUBLIC AIS SOURCES</label><b id="sourceNote">OPENSEAFEED + OPEN WATERS</b></div></div>
+
 <footer>PUBLIC AIS · NOT FOR NAVIGATION · <span id="sourceCredits">Source attribution loads with AIS records.</span> · <a href="https://openseafeed.com/docs" target="_blank" rel="noopener">DATA API & LIMITS ↗</a> · <a href="https://github.com/BetterInc/openseafeed" target="_blank" rel="noopener">OPEN SOURCE ↗</a> · EARTH TEXTURE: <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noopener">SOLAR SYSTEM SCOPE (CC BY 4.0)</a></footer><div id="toast" class="toast"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -172,13 +190,13 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
   if(typeof L==='undefined'){setStatus('MAP LIBRARY ERROR');toast('Map library unavailable — check network');return;}
   leafletMap=L.map('map2d',{worldCopyJump:true,preferCanvas:true,zoomControl:false,attributionControl:true,fadeAnimation:false,markerZoomAnimation:false,zoomAnimation:false,zoomSnap:.5,zoomDelta:.5,wheelPxPerZoomLevel:100,inertia:true,inertiaDeceleration:3200,easeLinearity:.22,updateWhenIdle:true,keepBuffer:4}).setView([12,75],3);
   const MAP_STYLES={
-   dark:{url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',filter:'invert(1) hue-rotate(180deg) brightness(.72) saturate(.78) contrast(1.08)',attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a>'},
+   dark:{url:'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',filter:'none',attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a>'},
    standard:{url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',filter:'none',attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a>'},
    humanitarian:{url:'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',filter:'none',attribution:'© OpenStreetMap contributors · HOT'},
    topo:{url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',filter:'none',attribution:'© OpenStreetMap contributors · OpenTopoMap'}
   };
   let activeMapStyle='dark';
-  function setMapStyle(name){const cfg=MAP_STYLES[name]||MAP_STYLES.dark;if(baseMapLayer)leafletMap.removeLayer(baseMapLayer);baseMapLayer=L.tileLayer(cfg.url,{subdomains:'abc',maxZoom:name==='topo'?17:19,updateWhenIdle:true,keepBuffer:4,attribution:cfg.attribution});baseMapLayer.addTo(leafletMap);activeMapStyle=name;document.getElementById('mapStyle').value=name;document.getElementById('map2d').dataset.mapStyle=name;document.getElementById('map2d').style.setProperty('--tile-filter',cfg.filter);toast(name.toUpperCase()+' MAP');}
+  function setMapStyle(name){const cfg=MAP_STYLES[name]||MAP_STYLES.dark;if(baseMapLayer)leafletMap.removeLayer(baseMapLayer);baseMapLayer=L.tileLayer(cfg.url,{subdomains:name==='dark'?'abcd':'abc',maxZoom:name==='topo'?17:19,updateWhenIdle:true,keepBuffer:4,attribution:cfg.attribution});baseMapLayer.addTo(leafletMap);activeMapStyle=name;document.getElementById('mapStyle').value=name;document.getElementById('map2d').dataset.mapStyle=name;document.getElementById('map2d').style.setProperty('--tile-filter',cfg.filter);toast(name.toUpperCase()+' MAP');}
   setMapStyle('dark');
   L.control.zoom({position:'topright'}).addTo(leafletMap);
   const canvas=document.createElement('canvas');canvas.id='shipChevronCanvas';canvas.setAttribute('aria-hidden','true');
@@ -375,7 +393,7 @@ html,body{font-family:'Inter','DM Sans',system-ui,-apple-system,'Segoe UI',sans-
    }
    const credit=data.attribution;
    if(credit){const values=typeof credit==='string'?[credit]:Object.values(credit);$('sourceCredits').textContent=values.join(' · ');}
-   $('sourceNote').textContent='OPENSEAFEED + OPEN WATERS · '+area.name.toUpperCase();
+   // Source attribution remains in the footer; no floating network panel.
    console.info('OPEN OCEANS: Open Waters corridor sync.',{area:area.name,features:features.length,merged,unique:vessels.size,attribution:credit});
    
   }catch(err){console.warn('OPEN OCEANS: Open Waters '+area.name+' source unavailable.',err);}
